@@ -1,0 +1,37 @@
+{
+  "name": "nuxt-app",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "build": "nuxt build",
+    "dev": "nuxt dev",
+    "generate": "nuxt generate",
+    "preview": "nuxt preview",
+    "postinstall": "nuxt prepare"
+  },
+  "dependencies": {
+    "@nuxt/icon": "2.0.0",
+    "@nuxt/image": "1.11.0",
+    "@prisma/client": "^6.15.0",
+    "@tailwindcss/typography": "^0.5.16",
+    "@tailwindcss/vite": "^4.1.12",
+    "bcrypt": "^6.0.0",
+    "html2canvas": "^1.4.1",
+    "jsonwebtoken": "^9.0.2",
+    "jspdf": "^3.0.2",
+    "nuxt": "^4.0.3",
+    "puppeteer": "^24.19.0",
+    "vue": "^3.5.20",
+    "vue-router": "^4.5.1"
+  },
+  "packageManager": "yarn@1.22.19+sha1.4ba7fc5c6e704fce2066ecbfb0b0d8976fe62447",
+  "devDependencies": {
+    "@types/bcrypt": "^6.0.0",
+    "@types/jsonwebtoken": "^9.0.10",
+    "autoprefixer": "^10.4.21",
+    "daisyui": "^5.1.6",
+    "postcss": "^8.5.6",
+    "sass": "^1.92.0",
+    "tailwindcss": "^4.1.12"
+  }
+}

@@ -1,0 +1,91 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "../node_modules/.prisma/client"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// User 模型 ========================================================================
+
+model User {
+  id            Int       @id @default(autoincrement())
+  user_id       String    @unique @default(cuid())
+  email         String    @unique
+  mobile        String?   @unique
+  password      String
+  name          String?
+  avatar_url    String?   @map("avatar_url")
+  bio           String?
+  status        Int       @db.SmallInt
+  is_root       Boolean   @default(false) @map("is_root")
+  refresh_token String?  @map("refresh_token")
+  refresh_token_expires_at DateTime? @map("refresh_token_expires_at")
+  last_login_at DateTime? @map("last_login_at")
+  last_ip       String?   @map("last_ip")
+  version       Int       @default(1)
+  created_at    DateTime  @default(now()) @map("created_at")
+  updated_at    DateTime  @updatedAt @map("updated_at")
+  deleted     BigInt      @default(0)
+  
+
+  @@map("users")
+}
+
+model Role {
+  id          Int      @id @default(autoincrement())
+  name        String   @unique
+  description String?
+  version     Int      @default(1)
+  created_at  DateTime @default(now()) @map("created_at")
+  updated_at  DateTime @updatedAt @map("updated_at")
+  deleted     BigInt   @default(0)
+
+  @@map("roles")
+}
+
+// 显式定义 User-Role 连接表
+model UserRoleRelation {
+  id          Int      @id @default(autoincrement())
+  userId      Int      @map("user_id")
+  roleId      Int      @map("role_id")
+  assignedAt  DateTime @default(now()) @map("assigned_at")
+  version     Int       @default(1)
+  created_at  DateTime @default(now()) @map("created_at")
+  updated_at  DateTime @updatedAt @map("updated_at")
+  deleted     BigInt   @default(0)
+
+  @@map("user_role_relation")
+}
+
+model Permission {
+  id          Int      @id @default(autoincrement())
+  name        String   @unique // 权限名称/标识符，例如 'create_post', 'edit_user', 'view_dashboard'
+  description String?  // 可选的权限描述
+  group       String?  // 可选：权限分组，方便管理，例如 'posts', 'users'
+  version     Int      @default(1)
+  created_at  DateTime @default(now()) @map("created_at")
+  updated_at  DateTime @updatedAt @map("updated_at")
+  deleted     BigInt   @default(0)
+
+  @@map("permissions")
+}
+
+
+// Crochet Pattern 模型 ========================================================================
+
+model CrochetPattern {
+  id           Int      @id @default(autoincrement())
+  title        String   @unique
+  cover_image  String?
+  description  String?
+  pattern_json Json?
+  version      Int      @default(1)
+  created_at   DateTime @default(now()) @map("created_at")
+  updated_at   DateTime @updatedAt @map("updated_at")
+  deleted      BigInt   @default(0)
+
+  @@map("crochet_pattern")
+}

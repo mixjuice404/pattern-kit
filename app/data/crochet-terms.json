@@ -1,0 +1,13 @@
+{
+  "ch": { "full_text": "chain", "description": "Basic foundation stitch" },
+  "sc": { "full_text": "single crochet", "description": "Basic crochet stitch" },
+  "dc": { "full_text": "double crochet", "description": "Taller crochet stitch" },
+  "tc": { "full_text": "treble crochet", "description": "Tallest basic stitch" },
+  "sl st": { "full_text": "slip stitch", "description": "Joining/finishing stitch" },
+  "inc": { "full_text": "increase", "description": "2 sc in same stitch" },
+  "dec": { "full_text": "decrease", "description": "sc2tog (single crochet 2 together)" },
+  "BLO": { "full_text": "back loop only", "description": "Crochet through back loop only" },
+  "FLO": { "full_text": "front loop only", "description": "Crochet through front loop only" },
+  "rnd": { "full_text": "round", "description": "Working in continuous rounds" },
+  "st/sts": { "full_text": "stitch/stitches", "description": "Individual crochet units" }
+}

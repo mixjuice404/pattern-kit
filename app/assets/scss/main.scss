@@ -1,0 +1,36 @@
+// 使用@use替代@import
+@use './variables' as *;
+
+html {
+  font-size: $font-size-base;
+  line-height: 1.6;
+  background-color: $light-color;
+}
+
+body {
+  overscroll-behavior: none;
+  font-family: $font-family-base; 
+  font-weight: $font-weight-normal;
+  color: $dark-color;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.default-container {
+  min-height: 100vh;
+}
+
+
+/* 移动端特殊处理 */
+@media (max-width: 768px) {
+  html, body {
+    /* 强制应用，提高优先级 */
+    overscroll-behavior: contain !important;
+    overscroll-behavior-y: contain !important;
+  }
+  
+  /* 防止iOS Safari的回弹 */
+  body {
+    touch-action: pan-y;
+  }
+}
