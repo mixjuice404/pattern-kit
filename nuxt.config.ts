@@ -24,11 +24,9 @@ export default defineNuxtConfig({
       }
     }
   },
-  // 新增：确保 Prisma 被内联打包到 serverless 函数
+  // 关键：确保 Prisma 内联进 serverless 函数
   nitro: {
-    preset: 'vercel',
-    externals: {
-      inline: ['@prisma/client', 'prisma']
-    }
+    preset: 'vercel'
+    // 不要在这里 inline @prisma/client 或 prisma，也不要 alias .prisma
   }
 })
