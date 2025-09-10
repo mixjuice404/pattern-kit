@@ -165,7 +165,7 @@
                     </div>
                 </div>
                 <div style="width: 21%; display: flex; flex-direction: column; gap: 10px; padding-top: 5px">
-                    <img style="width: 100%; margin: 0; border-radius: 4px;" src="https://pub.qingheplus.cn/%E5%B0%8F%E9%B8%A1%E4%BB%94%E8%A1%A3%E6%9C%8D%E8%B5%B7%E9%92%88%E4%BD%8D%E7%BD%AE.jpg" />
+                    <img v-for="(url, index) in item.image" style="width: 100%; margin: 0; border-radius: 4px;" :key="index" :src="url" />
                 </div>
             </div>  
         </div>
