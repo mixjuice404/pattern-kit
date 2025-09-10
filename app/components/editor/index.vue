@@ -425,11 +425,9 @@ const handleUploadSuccess = (uploadId: string, result: any, file: File) => {
             }
         }
     }
-    console.log('Upload success', uploadId, result, file)
 }
 
 const handleRemove = (uploadId: string, file: File | null, index: number, isUrl?: boolean) => {
-  console.log('Upload remove', uploadId, file, 'isUrl:', isUrl)
   if (uploadId === 'cover-image') {
     // 无论是文件还是URL预览被移除，都清空cover_image
     props.patternInfo.cover_image = ''
