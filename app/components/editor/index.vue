@@ -1,8 +1,21 @@
 <template>
   <div>
     <div class="form-section" style="padding: 15px;">
+
         <div class="input-set">
             <legend class="form-title">Basic Info</legend>
+            <div class="input-item">
+                <div class="input-label" style="margin-bottom: 8px;">封面/主图</div>
+                <Upload 
+                    uploadId="cover-image"
+                    v-model="coverImage"
+                    :multiple="false" 
+                    :initial-url="patternInfo.cover_image"
+                    @remove="handleRemove"
+                    @upload-success="handleUploadSuccess"
+                    @upload-error="handleUploadError"
+                />
+            </div>
             <div class="input-item">
                 <div class="input-label" style="margin-bottom: 8px;">标题</div>
                 <input 
@@ -232,6 +245,15 @@
                             @input="updateInstructionListItem(stepIndex, listIndex, ($event.target as HTMLInputElement).value)"
                         />
                     </div>
+
+                    <Upload 
+                        :uploadId="`pattern-step:${stepIndex}`"
+                        v-model="imageMatrix[stepIndex]"
+                        :max-count="5"
+                        @upload-success="handleUploadSuccess"
+                        @upload-error="handleUploadError"
+                    />
+                    
                 </div>
             </div>
             
@@ -296,6 +318,7 @@ import { ref } from 'vue'
 import { PatternInfo } from '~/types/PatternInfo'
 import crochetTermsData from '~/data/crochet-terms.json'
 import TextListEditor from '~/components/editor/text-list/index.vue'
+import Upload from '~/components/upload/index.vue'
 
 interface Props {
   patternInfo: PatternInfo
@@ -377,6 +400,33 @@ const updateInstructionListItem = (stepIndex: number, listIndex: number, value: 
     instruction.list[listIndex] = value
   }
 }
+
+// 文件上传
+// 单文件存储
+const coverImage = ref<File[]>([])
+// 文件二维矩阵
+const imageMatrix = ref<File[][]>([])
+
+// 上传回调
+const handleUploadSuccess = (uploadId: string, result: any, file: File) => {
+    if (uploadId === 'cover-image') {
+        props.patternInfo.cover_image = result.url
+    }
+  console.log('Upload success', uploadId, result, file)
+}
+
+const handleRemove = (uploadId: string, file: File | null, index: number, isUrl?: boolean) => {
+  console.log('Upload remove', uploadId, file, 'isUrl:', isUrl)
+  if (uploadId === 'cover-image') {
+    // 无论是文件还是URL预览被移除，都清空cover_image
+    props.patternInfo.cover_image = ''
+  }
+}
+
+const handleUploadError = (uploadId: string, err: Error, file: File) => {
+  console.error('Upload error', uploadId, err, file)
+}
+
 </script>
 
 <style scoped lang="scss">

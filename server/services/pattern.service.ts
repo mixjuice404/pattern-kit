@@ -8,16 +8,24 @@ import prisma from '../utils/prisma';
 // 创建 or 更新 Crochet Pattern
 export async function createOrUpdateCrochetPattern(id: number | null, data: any) {
   try {
+
+    const patternInfo = {
+      title: data.title,
+      cover_image: data.pattern_json.cover_image || '', 
+      description: data.description,
+      pattern_json: data.pattern_json,
+    };
+
     if (id === null) {
       // 如果 id 为 null，直接创建新记录
-      const created = await prisma.crochetPattern.create({ data });
+      const created = await prisma.crochetPattern.create({ data: patternInfo });
       return created.id; // 仅返回 id
     }
 
     const result = await prisma.crochetPattern.upsert({
       where: { id },
-      update: data,
-      create: data,
+      update: patternInfo,
+      create: patternInfo,
     });
     return result.id; // 仅返回 id
   } catch (error) {

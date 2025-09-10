@@ -28,5 +28,12 @@ export default defineNuxtConfig({
   nitro: {
     preset: 'vercel'
     // 不要在这里 inline @prisma/client 或 prisma，也不要 alias .prisma
+  },
+  runtimeConfig: {
+    imagekitPrivateKey: process.env.IMAGEKIT_PRIVATE_KEY,
+    public: {
+      imagekitPublicKey: process.env.IMAGEKIT_PUBLIC_KEY,
+      imagekitUrlEndpoint: process.env.IMAGEKIT_URL_ENDPOINT
+    }
   }
 })

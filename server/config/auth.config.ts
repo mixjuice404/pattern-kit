@@ -10,4 +10,7 @@ export const publicRoutes: string[] = [
   // 在这里添加其他不需要验证的 API 路由
   // 例如: '/api/public/some-data'
   '/api/pattern',
+  '/api/auth/upload/imagekit',
+
+  
 ];

@@ -3,6 +3,7 @@ import { createRouter, useBase, readBody } from 'h3' // 导入 createError
 import { defineApiHandler } from '../../utils/defineApiHandler' // 确保路径正确
 import { useApiResponse } from '../../utils/apiResponse' // 保留用于成功响应
 import * as authService from '../../services/auth.service'
+import ImageKit from 'imagekit'
 
 const router = createRouter()
 
@@ -29,6 +30,31 @@ router.post('/login', defineApiHandler(async (event) => {
   // 调用登录服务
   return useApiResponse(await authService.loginUser(email, password), '登录成功')
 }))
+
+
+/**
+ * ======================================================================
+ * third auth 
+ * ======================================================================
+ */
+
+router.get('/upload/imagekit', defineApiHandler(async (event) => {
+  console.log("上传图片到ImageKit")
+  const config = useRuntimeConfig()
+  const imagekit = new ImageKit({
+    publicKey: config.public.imagekitPublicKey as string,
+    privateKey: config.imagekitPrivateKey as string,
+    urlEndpoint: config.public.imagekitUrlEndpoint as string
+  })
+  try {
+    const { token, expire, signature } = imagekit.getAuthenticationParameters()
+    console.log(token, expire, signature)
+    return { token, expire, signature, publicKey: process.env.IMAGEKIT_PUBLIC_KEY }
+  } catch (error) {
+    throw new BasicError('UNKNOWN_ERROR', { statusCode: 404, message: '获取上传凭证失败' });
+  }
+}))
+
 
 /**
  * ======================================================================

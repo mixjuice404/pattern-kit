@@ -35,6 +35,7 @@ export class PatternInfo {
   public bonus_tips: TextListData
   public bonus_idea: TextListData
   public bonus_community: TextListData
+  public cover_image: string
 
   constructor(
     title: string = 'Jacket Chickie',
@@ -57,6 +58,7 @@ export class PatternInfo {
     bonus_tips: TextListData = { title: '', description: null, text: '', list: ['Tension Control: Keep consistent tension for even stitches', 'Safety Eye Placement: Mark positions before inserting', 'Color Changing: Carry yarn up inside for clean lines', 'Assembly Order: Complete all pieces before assembly' ]},
     bonus_idea: TextListData = { title: '', description: null, text: '', list: ['Try different color combinations', 'Add embroidered details', 'Create seasonal versions', 'Make mini versions as keychains']},
     bonus_community: TextListData = { title: '', description: null, text: '', list: ['Tag us in your finished projects! We love seeing your creations!', 'Use hashtag: #JacketChickiePattern']},
+    cover_image: string = '',
     terms: CrochetTerm[] = [
       { alias: 'ch', full_text: 'chain', description: 'Basic foundation stitch' },
       { alias: 'sc', full_text: 'single crochet', description: 'Basic crochet stitch' },
@@ -92,6 +94,7 @@ export class PatternInfo {
     this.bonus_tips = bonus_tips
     this.bonus_idea = bonus_idea
     this.bonus_community = bonus_community
+    this.cover_image = cover_image
   }
 
   // 导出为 JSON
@@ -117,7 +120,8 @@ export class PatternInfo {
       troubleshooting: this.troubleshooting,
       bonus_tips: this.bonus_tips,
       bonus_idea: this.bonus_idea,
-      bonus_community: this.bonus_community
+      bonus_community: this.bonus_community,
+      cover_image: this.cover_image
     }
   }
 
@@ -190,6 +194,7 @@ export class PatternInfo {
     const bonus_tips = normalizeTextListData(data?.bonus_tips)
     const bonus_idea = normalizeTextListData(data?.bonus_idea)
     const bonus_community = normalizeTextListData(data?.bonus_community)
+    const cover_image = typeof data?.cover_image === 'string' ? data.cover_image : undefined
 
     // 严格按构造函数参数顺序传参
     return new PatternInfo(
@@ -213,7 +218,9 @@ export class PatternInfo {
       bonus_tips,
       bonus_idea,
       bonus_community,
+      cover_image,
       normalizedTerms
+      
     )
   }
 }
