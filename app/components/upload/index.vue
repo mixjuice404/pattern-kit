@@ -129,7 +129,7 @@ interface Props {
   // 新增上传标识符
   uploadId?: string 
   // 新增：初始预览URL
-  initialUrl?: string
+  initialUrl?: string[]
 }
 
 interface Emits {
@@ -224,18 +224,27 @@ async function uploadToImageKit(file: File): Promise<any> {
   }
 }
 
-// 在现有watch之前添加初始URL处理
-watch(() => props.initialUrl, (newUrl) => {
-  if (newUrl && previewImages.value.length === 0) {
-    const fileName = newUrl.split('/').pop() || 'image'
-    previewImages.value = [{
-      url: newUrl,
-      name: fileName,
-      uploadStatus: 'initial',
-      isFromUrl: true
-    }]
-  } else if (!newUrl) {
-    // 清除URL预览
+// 修改初始URL处理逻辑以支持多图
+watch(() => props.initialUrl, (newUrls) => {
+  if (newUrls && newUrls.length > 0 && previewImages.value.filter(img => !img.isFromUrl).length === 0) {
+    // 清除现有的URL预览
+    previewImages.value = previewImages.value.filter(img => !img.isFromUrl)
+    
+    // 为每个URL创建预览项
+    const urlPreviews = newUrls.map((url, index) => {
+      const fileName = url.split('/').pop() || `image-${index + 1}`
+      return {
+        url: url,
+        name: fileName,
+        uploadStatus: 'initial' as const,
+        isFromUrl: true
+      }
+    })
+    
+    // 添加URL预览到现有预览列表
+    previewImages.value = [...previewImages.value, ...urlPreviews]
+  } else if (!newUrls || newUrls.length === 0) {
+    // 清除所有URL预览
     previewImages.value = previewImages.value.filter(img => !img.isFromUrl)
   }
 }, { immediate: true })
@@ -501,6 +510,7 @@ defineExpose({
 }
 
 .upload-preview {
+  width: 100%;
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   gap: 5px;
@@ -685,6 +695,7 @@ defineExpose({
   }
   
   .upload-preview {
+
     .preview-item {
       width: 80px;
       height: 100px;

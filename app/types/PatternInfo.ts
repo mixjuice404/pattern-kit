@@ -5,6 +5,7 @@ export interface TextListData {
   text: string
   description: string | null | undefined  // 允许为 null 或 undefined
   list: string[]
+  image: string[]
 }
 
 export interface CrochetTerm {
@@ -44,20 +45,20 @@ export class PatternInfo {
     skillLevel: string = 'Beginner',
     estimatedTime: string = '6-8 hours',
     finishedSize: string = 'Approximately 12cm tall (using 3.5mm hook)',
-    info: TextListData = { title: '', description: null, text: 'A charming amigurumi chicken wearing a dapper jacket', list: ['Detailed body with textured stitching', 'Moveable wings/arms', 'Adorable feet', 'Stylish jacket with pocket details', 'Crown comb and tail feathers', 'Expressive safety eyes and beak'] },
-    note: TextListData = { title: '', description: null, text: 'This pattern requires knowledge of', list: ['Basic amigurumi techniques', 'Color changes', 'Sewing pieces together', 'Basic embroidery for details'] },
-    techniques: TextListData = { title: '', description: null, text: '', list: ['Magic Ring: Adjustable starting circle', 'Invisible Decrease: Neat decreasing method', 'Color Changes: Clean color transition technique', 'Mattress Stitch: Invisible seaming method'] },
+    info: TextListData = { title: '', image: [], description: null, text: 'A charming amigurumi chicken wearing a dapper jacket', list: ['Detailed body with textured stitching', 'Moveable wings/arms', 'Adorable feet', 'Stylish jacket with pocket details', 'Crown comb and tail feathers', 'Expressive safety eyes and beak'] },
+    note: TextListData = { title: '', image: [], description: null, text: 'This pattern requires knowledge of', list: ['Basic amigurumi techniques', 'Color changes', 'Sewing pieces together', 'Basic embroidery for details'] },
+    techniques: TextListData = { title: '', image: [], description: null, text: '', list: ['Magic Ring: Adjustable starting circle', 'Invisible Decrease: Neat decreasing method', 'Color Changes: Clean color transition technique', 'Mattress Stitch: Invisible seaming method'] },
     yarn: string = 'Medium weight yarn (4/DK weight)',
     brands: string = 'YarnArt Jeans, Alize Cotton Gold, Red Heart Super Saver',
-    colors: TextListData = { title: '', description: null, text: '', list: ['White (Main): 50g', 'Red: 25g', 'Watermelon Red: 15g', 'Navy Blue: 30g', 'Light Khaki: 20g' ] },
-    tools: TextListData = { title: '', description: null, text: '', list: ['Crochet Hook: 3.5mm or 4.0mm (US E/4 or G/6)', 'Safety Eyes: 8mm black (1 pair)','Fiberfill Stuffing: Polyester fill', 'Tapestry Needle: For sewing and embroidery', 'Stitch Markers: For marking rounds', 'Scissors: Sharp fabric scissors', 'Pins: For positioning before sewing'] },
-    supplies: TextListData = { title: '', description: null, text: '', list: ['Hot glue gun (alternative to sewing)', 'Scissors (sharp)', 'Pencil (for marking)', 'Stitch markers (optional)'] },
-    instructions: TextListData[] = [{ title: 'Body', description: "Start with making a round base. Work in continuous rounds without slip stitches. you can stuff the chick's body with fiberfill to achieve the desired appearance; there's no need to pack it too tightly—a bit of fluffiness is ideal", text: 'With white yarn', list: ['Rnd 1: 6sc in the MR(6)','Rnd 2: 6inc (12)'] }, { title: 'WINGS/HANDS', description: null, text: 'Make 2 - Using White yarn', list: ['Round 1: Magic ring, 6 sc in ring (6)', "Change to light khaki color", 'Round 2: 6inc (12)'] }],
-    finishingTips: TextListData = { title: '', description: null, text: '', list: ['Weaving Ends: Always weave in ends securely, going through multiple stitches', 'Shaping: Block pieces if needed for consistent shape', 'Stuffing: Stuff firmly but not overly tight to maintain shape']},
-    troubleshooting: TextListData = { title: '', description: null, text: '', list: ['Uneven Stitches: Maintain consistent tension throughout', 'Loose Parts: Double-check all sewing before final assembly']},
-    bonus_tips: TextListData = { title: '', description: null, text: '', list: ['Tension Control: Keep consistent tension for even stitches', 'Safety Eye Placement: Mark positions before inserting', 'Color Changing: Carry yarn up inside for clean lines', 'Assembly Order: Complete all pieces before assembly' ]},
-    bonus_idea: TextListData = { title: '', description: null, text: '', list: ['Try different color combinations', 'Add embroidered details', 'Create seasonal versions', 'Make mini versions as keychains']},
-    bonus_community: TextListData = { title: '', description: null, text: '', list: ['Tag us in your finished projects! We love seeing your creations!', 'Use hashtag: #JacketChickiePattern']},
+    colors: TextListData = { title: '', image: [], description: null, text: '', list: ['White (Main): 50g', 'Red: 25g', 'Watermelon Red: 15g', 'Navy Blue: 30g', 'Light Khaki: 20g' ] },
+    tools: TextListData = { title: '', image: [], description: null, text: '', list: ['Crochet Hook: 3.5mm or 4.0mm (US E/4 or G/6)', 'Safety Eyes: 8mm black (1 pair)','Fiberfill Stuffing: Polyester fill', 'Tapestry Needle: For sewing and embroidery', 'Stitch Markers: For marking rounds', 'Scissors: Sharp fabric scissors', 'Pins: For positioning before sewing'] },
+    supplies: TextListData = { title: '', image: [], description: null, text: '', list: ['Hot glue gun (alternative to sewing)', 'Scissors (sharp)', 'Pencil (for marking)', 'Stitch markers (optional)'] },
+    instructions: TextListData[] = [{ title: 'Body', image: [], description: "Start with making a round base. Work in continuous rounds without slip stitches. you can stuff the chick's body with fiberfill to achieve the desired appearance; there's no need to pack it too tightly—a bit of fluffiness is ideal", text: 'With white yarn', list: ['Rnd 1: 6sc in the MR(6)','Rnd 2: 6inc (12)'] }, { title: 'WINGS/HANDS', image: [], description: null, text: 'Make 2 - Using White yarn', list: ['Round 1: Magic ring, 6 sc in ring (6)', "Change to light khaki color", 'Round 2: 6inc (12)'] }],
+    finishingTips: TextListData = { title: '', image: [], description: null, text: '', list: ['Weaving Ends: Always weave in ends securely, going through multiple stitches', 'Shaping: Block pieces if needed for consistent shape', 'Stuffing: Stuff firmly but not overly tight to maintain shape']},
+    troubleshooting: TextListData = { title: '', image: [], description: null, text: '', list: ['Uneven Stitches: Maintain consistent tension throughout', 'Loose Parts: Double-check all sewing before final assembly']},
+    bonus_tips: TextListData = { title: '', image: [], description: null, text: '', list: ['Tension Control: Keep consistent tension for even stitches', 'Safety Eye Placement: Mark positions before inserting', 'Color Changing: Carry yarn up inside for clean lines', 'Assembly Order: Complete all pieces before assembly' ]},
+    bonus_idea: TextListData = { title: '', image: [], description: null, text: '', list: ['Try different color combinations', 'Add embroidered details', 'Create seasonal versions', 'Make mini versions as keychains']},
+    bonus_community: TextListData = { title: '', image: [], description: null, text: '', list: ['Tag us in your finished projects! We love seeing your creations!', 'Use hashtag: #JacketChickiePattern']},
     cover_image: string = '',
     terms: CrochetTerm[] = [
       { alias: 'ch', full_text: 'chain', description: 'Basic foundation stitch' },
@@ -136,7 +137,8 @@ export class PatternInfo {
           title: '',
           text: typeof d === 'string' ? d : '',
           description: null,
-          list: Array.isArray(d) ? d.map((x: any) => String(x)) : []
+          list: Array.isArray(d) ? d.map((x: any) => String(x)) : [],
+          image: []
         }
       }
       // 对象：安全读取各字段
@@ -144,7 +146,8 @@ export class PatternInfo {
         title: typeof d.title === 'string' ? d.title : '',
         text: typeof d.text === 'string' ? d.text : '',
         description: 'description' in d ? d.description : null,
-        list: Array.isArray(d.list) ? d.list.map((x: any) => String(x)) : []
+        list: Array.isArray(d.list) ? d.list.map((x: any) => String(x)) : [],
+        image: Array.isArray(d.image) ? d.image : []
       }
     }
 

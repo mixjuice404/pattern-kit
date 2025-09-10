@@ -10,7 +10,7 @@
                     uploadId="cover-image"
                     v-model="coverImage"
                     :multiple="false" 
-                    :initial-url="patternInfo.cover_image"
+                    :initial-url="patternInfo.cover_image ? [patternInfo.cover_image] : []"
                     @remove="handleRemove"
                     @upload-success="handleUploadSuccess"
                     @upload-error="handleUploadError"
@@ -249,7 +249,10 @@
                     <Upload 
                         :uploadId="`pattern-step:${stepIndex}`"
                         v-model="imageMatrix[stepIndex]"
+                        :initial-url="patternInfo.instructions[stepIndex]?.image || []"
+                        :multiple="true"
                         :max-count="5"
+                        @remove="handleRemove"
                         @upload-success="handleUploadSuccess"
                         @upload-error="handleUploadError"
                     />
@@ -358,7 +361,8 @@ const addInstructionStep = () => {
     title: '',
     text: '',
     description: '',
-    list: []
+    list: [],
+    image: []
   })
 }
 
@@ -411,8 +415,17 @@ const imageMatrix = ref<File[][]>([])
 const handleUploadSuccess = (uploadId: string, result: any, file: File) => {
     if (uploadId === 'cover-image') {
         props.patternInfo.cover_image = result.url
+    } else if (uploadId.startsWith('pattern-step:')) {
+        const stepIndexStr = uploadId.split(':')[1]
+        if (stepIndexStr) {
+            const stepIndex = parseInt(stepIndexStr)
+            const instruction = props.patternInfo.instructions[stepIndex]
+            if (instruction && stepIndex >= 0 && stepIndex < props.patternInfo.instructions.length) {
+                instruction.image.push(result.url)
+            }
+        }
     }
-  console.log('Upload success', uploadId, result, file)
+    console.log('Upload success', uploadId, result, file)
 }
 
 const handleRemove = (uploadId: string, file: File | null, index: number, isUrl?: boolean) => {
@@ -420,6 +433,15 @@ const handleRemove = (uploadId: string, file: File | null, index: number, isUrl?
   if (uploadId === 'cover-image') {
     // 无论是文件还是URL预览被移除，都清空cover_image
     props.patternInfo.cover_image = ''
+  } else if (uploadId.startsWith('pattern-step:')) {
+    const stepIndexStr = uploadId.split(':')[1]
+    if (stepIndexStr) {
+      const stepIndex = parseInt(stepIndexStr)
+      const instruction = props.patternInfo.instructions[stepIndex]
+      if (instruction && stepIndex >= 0 && stepIndex < props.patternInfo.instructions.length) {
+        instruction.image.splice(index, 1)
+      }
+    }
   }
 }
 
