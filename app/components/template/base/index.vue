@@ -77,8 +77,8 @@
                 </thead>
                 <tbody>
                     <tr v-for="(term, index) in patternData.terms" :key="index">
-                        <td>{{ term.alias }}</td>
-                        <td>{{ term.full_text }}</td>
+                        <td style="white-space: nowrap;">{{ term.alias }}</td>
+                        <td style="white-space: nowrap;">{{ term.full_text }}</td>
                         <td>{{ term.description }}</td>
                     </tr>
                 </tbody>
@@ -104,6 +104,9 @@
     <div class="section-block">
         <div class="divider-title">
             🧶 MATERIALS & TOOLS
+        </div>
+        <div v-if="patternData.materialsDesc">
+            <div style="white-space: pre-wrap; word-wrap: break-word;">{{ patternData.materialsDesc }}</div>
         </div>
         <div>
             <h4>Yarn Requirements</h4>
@@ -413,7 +416,7 @@ const props = withDefaults(defineProps<Props>(), {
 }
 
 .section-block {
-    padding: 10px 0;
+    padding: 15px 0;
 
     .divider-title {
         margin: 20px 0;

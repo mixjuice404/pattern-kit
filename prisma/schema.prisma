@@ -8,28 +8,25 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-// User 模型 ========================================================================
-
 model User {
-  id            Int       @id @default(autoincrement())
-  user_id       String    @unique @default(cuid())
-  email         String    @unique
-  mobile        String?   @unique
-  password      String
-  name          String?
-  avatar_url    String?   @map("avatar_url")
-  bio           String?
-  status        Int       @db.SmallInt
-  is_root       Boolean   @default(false) @map("is_root")
-  refresh_token String?  @map("refresh_token")
+  email                    String    @unique
+  name                     String?
+  password                 String
+  bio                      String?
+  status                   Int       @db.SmallInt
+  id                       Int       @id @default(autoincrement())
+  avatar_url               String?   @map("avatar_url")
+  created_at               DateTime  @default(now()) @map("created_at")
+  last_login_at            DateTime? @map("last_login_at")
+  updated_at               DateTime  @updatedAt @map("updated_at")
+  is_root                  Boolean   @default(false) @map("is_root")
+  mobile                   String?   @unique
+  refresh_token            String?   @map("refresh_token")
+  last_ip                  String?   @map("last_ip")
   refresh_token_expires_at DateTime? @map("refresh_token_expires_at")
-  last_login_at DateTime? @map("last_login_at")
-  last_ip       String?   @map("last_ip")
-  version       Int       @default(1)
-  created_at    DateTime  @default(now()) @map("created_at")
-  updated_at    DateTime  @updatedAt @map("updated_at")
-  deleted     BigInt      @default(0)
-  
+  user_id                  String    @unique @default(cuid())
+  deleted                  BigInt    @default(0)
+  version                  Int       @default(1)
 
   @@map("users")
 }
@@ -38,43 +35,39 @@ model Role {
   id          Int      @id @default(autoincrement())
   name        String   @unique
   description String?
-  version     Int      @default(1)
   created_at  DateTime @default(now()) @map("created_at")
   updated_at  DateTime @updatedAt @map("updated_at")
   deleted     BigInt   @default(0)
+  version     Int      @default(1)
 
   @@map("roles")
 }
 
-// 显式定义 User-Role 连接表
 model UserRoleRelation {
-  id          Int      @id @default(autoincrement())
-  userId      Int      @map("user_id")
-  roleId      Int      @map("role_id")
-  assignedAt  DateTime @default(now()) @map("assigned_at")
-  version     Int       @default(1)
-  created_at  DateTime @default(now()) @map("created_at")
-  updated_at  DateTime @updatedAt @map("updated_at")
-  deleted     BigInt   @default(0)
+  id         Int      @id @default(autoincrement())
+  userId     Int      @map("user_id")
+  roleId     Int      @map("role_id")
+  assignedAt DateTime @default(now()) @map("assigned_at")
+  created_at DateTime @default(now()) @map("created_at")
+  deleted    BigInt   @default(0)
+  updated_at DateTime @updatedAt @map("updated_at")
+  version    Int      @default(1)
 
   @@map("user_role_relation")
 }
 
 model Permission {
   id          Int      @id @default(autoincrement())
-  name        String   @unique // 权限名称/标识符，例如 'create_post', 'edit_user', 'view_dashboard'
-  description String?  // 可选的权限描述
-  group       String?  // 可选：权限分组，方便管理，例如 'posts', 'users'
-  version     Int      @default(1)
+  name        String   @unique
+  description String?
+  group       String?
   created_at  DateTime @default(now()) @map("created_at")
   updated_at  DateTime @updatedAt @map("updated_at")
   deleted     BigInt   @default(0)
+  version     Int      @default(1)
 
   @@map("permissions")
 }
-
-
-// Crochet Pattern 模型 ========================================================================
 
 model CrochetPattern {
   id           Int      @id @default(autoincrement())

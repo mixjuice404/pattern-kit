@@ -5,7 +5,7 @@
         <div class="input-set">
             <legend class="form-title">Basic Info</legend>
             <div class="input-item">
-                <div class="input-label" style="margin-bottom: 8px;">封面/主图</div>
+                <div class="input-label" style="margin-bottom: 15px;">封面/主图</div>
                 <Upload 
                     uploadId="cover-image"
                     v-model="coverImage"
@@ -17,7 +17,7 @@
                 />
             </div>
             <div class="input-item">
-                <div class="input-label" style="margin-bottom: 8px;">标题</div>
+                <div class="input-label" style="margin-bottom: 15px;">标题</div>
                 <input 
                   type="text" 
                   class="input" 
@@ -27,7 +27,7 @@
                 />
             </div>
             <div class="input-item">
-                <div class="input-label" style="margin-bottom: 8px;">描述</div>
+                <div class="input-label" style="margin-bottom: 15px;">描述</div>
                 <input 
                   type="text" 
                   class="input" 
@@ -37,7 +37,7 @@
                 />
             </div>
             <div class="input-item">
-                <div class="input-label" style="margin-bottom: 8px;">创作灵感</div>
+                <div class="input-label" style="margin-bottom: 15px;">创作灵感</div>
                 <textarea 
                   class="textarea" 
                   placeholder="Bio" 
@@ -50,7 +50,7 @@
         <div class="input-set">
             <legend class="form-title">Pattern Properties</legend>
             <div class="input-item">
-                <div class="input-label" style="margin-bottom: 8px;">SKILL LEVEL</div>
+                <div class="input-label" style="margin-bottom: 15px;">SKILL LEVEL</div>
                 <select class="select" style="width: 100%;" v-model="patternInfo.skillLevel" >
                     <option selected>Beginner</option>
                     <option>Easy</option>
@@ -60,7 +60,7 @@
                 </select>
             </div>
             <div class="input-item">
-                <div class="input-label" style="margin-bottom: 8px;">ESTIMATED TIME</div>
+                <div class="input-label" style="margin-bottom: 15px;">ESTIMATED TIME</div>
                 <input 
                   type="text" 
                   class="input" 
@@ -70,7 +70,7 @@
                 />
             </div>
             <div class="input-item">
-                <div class="input-label" style="margin-bottom: 8px;">FINISHED SIZE</div>
+                <div class="input-label" style="margin-bottom: 15px;">FINISHED SIZE</div>
                 <input 
                   type="text" 
                   class="input" 
@@ -103,21 +103,35 @@
             <legend class="form-title" style="display: flex; align-items: center; gap: 6px">
                 <input type="checkbox" :checked="true" class="checkbox checkbox-primary checkbox-xs" />
                 <div>ABBREVIATIONS & TECHNIQUES</div>
+                
             </legend>
             <div class="input-item">
-                <div class="input-label" style="margin-bottom: 8px; display: flex; align-items: center; gap: 5px">
+                <div class="input-label" style="margin-bottom: 15px; display: flex; align-items: center; gap: 5px">
                     <input type="checkbox" :checked="true" class="checkbox checkbox-success checkbox-xs" />
                     <div>Abbreviations List</div>
+                    <div @click="resetAbbreviations"
+                    style="flex-shrink: 0; margin-left: auto; display: flex; align-items:center; gap: 4px; cursor: pointer;">
+                        <icon name="solar:restart-square-outline" />
+                        <div>Reset</div>
+                    </div>
                 </div>
-                <div class="grid-btn-group">
-                    <div 
-                        v-for="(value, key) in gridBtnList" 
-                        :key="key" 
-                        class="grid-btn"
-                        :class="{ 'selected': isTermSelected(key) }"
-                        @click="toggleTerm(key)"
-                    >
-                        {{ key }}
+                
+                <!-- 按 section 分组显示 -->
+                <div v-for="section in crochetSections" :key="section.id" style="margin-bottom: 20px;">
+                    <div style="font-size: 12px; font-weight: 600; margin-bottom: 15px; opacity: 0.7;">
+                        {{ section.name }}
+                    </div>
+                    <div class="grid-btn-group">
+                        <div 
+                            v-for="(termData, usName) in section.terms" 
+                            :key="usName" 
+                            class="grid-btn"
+                            :class="{ 'selected': isTermSelected(termData.us_abbrev) }"
+                            @click="toggleTerm(termData.us_abbrev)"
+                            :title="`${termData.chinese} (${termData.notation_cn}) - ${termData.description}`"
+                        >
+                            {{ termData.us_abbrev || usName }}
+                        </div>
                     </div>
                 </div>
             </div>
@@ -135,7 +149,7 @@
                 <div>MATERIALS & TOOLS</div>
             </legend>
             <div class="input-item">
-                <div class="input-label" style="margin-bottom: 8px; display: flex; align-items: center; gap: 5px">
+                <div class="input-label" style="margin-bottom: 15px; display: flex; align-items: center; gap: 5px">
                     <input type="checkbox" :checked="true" class="checkbox checkbox-success checkbox-xs" />
                     <div>Recommended Yarn</div>
                 </div>
@@ -148,7 +162,7 @@
                 />
             </div>
             <div class="input-item">
-                <div class="input-label" style="margin-bottom: 8px; display: flex; align-items: center; gap: 5px">
+                <div class="input-label" style="margin-bottom: 15px; display: flex; align-items: center; gap: 5px">
                     <input type="checkbox" :checked="true" class="checkbox checkbox-success checkbox-xs" />
                     <div>Suggested Brands</div>
                 </div>
@@ -158,6 +172,17 @@
                   style="width: 100%; margin-bottom: 8px;" 
                   placeholder="Suggested brands for this pattern ..." 
                   v-model="patternInfo.brands"
+                />
+            </div>
+            <div class="input-item">
+                <div class="input-label" style="margin-bottom: 15px; display: flex; align-items: center; gap: 5px">
+                    <input type="checkbox" :checked="true" class="checkbox checkbox-success checkbox-xs" />
+                    <div>Materials Description</div>
+                </div>
+                <textarea class="textarea" 
+                  style="width: 100%; margin-bottom: 8px;" 
+                  placeholder="Materials description for this pattern ..." 
+                  v-model="patternInfo.materialsDesc"
                 />
             </div>
             <TextListEditor
@@ -317,9 +342,9 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
 import { PatternInfo } from '~/types/PatternInfo'
-import crochetTermsData from '~/data/crochet-terms.json'
+import crochetDictData from '~/data/crochet_dict.json'
 import TextListEditor from '~/components/editor/text-list/index.vue'
 import Upload from '~/components/upload/index.vue'
 
@@ -329,27 +354,57 @@ interface Props {
 
 const props = defineProps<Props>()
 
-// 使用导入的 JSON 数据
-const gridBtnList = ref<Record<string, { full_text: string; description: string }>>(crochetTermsData)
+// 处理 crochet_dict.json 数据，按 section 分组
+const crochetSections = computed(() => {
+  return crochetDictData.sections.map(section => ({
+    id: section.section_id,
+    name: section.section_name,
+    terms: section.rows.reduce((acc, row) => {
+      acc[row.us] = {
+        chinese: row.chinese,
+        notation_cn: row.notation_cn,
+        us_abbrev: row.us_abbrev,
+        us_description: row.us_description,  // 添加这一行
+        description: row.description
+      }
+      return acc
+    }, {} as Record<string, any>)
+  }))
+})
+
+
+// 重置所有术语选中状态
+const resetAbbreviations = () => {
+  props.patternInfo.terms = []
+}
 
 // 检查术语是否已被选中
-const isTermSelected = (alias: string) => {
-  return props.patternInfo.terms.some(term => term.alias === alias)
+const isTermSelected = (key: string) => {
+  return props.patternInfo.terms.some(term => term.alias === key)
 }
 
 // 切换术语选中状态
-const toggleTerm = (alias: string) => {
-  const existingIndex = props.patternInfo.terms.findIndex(term => term.alias === alias)
+const toggleTerm = (abbrev: string) => {
+  const existingIndex = props.patternInfo.terms.findIndex(term => term.alias === abbrev)
   
   if (existingIndex >= 0) {
     props.patternInfo.terms.splice(existingIndex, 1)
   } else {
-    const termData = gridBtnList.value[alias]
+    // 在所有 sections 中查找对应的术语
+    let termData = null
+    for (const section of crochetSections.value) {
+      const foundTerm = Object.values(section.terms).find(term => term.us_abbrev === abbrev)
+      if (foundTerm) {
+        termData = foundTerm
+        break
+      }
+    }
+    
     if (termData) {
       props.patternInfo.terms.push({
-        alias: alias,
-        full_text: termData.full_text,
-        description: termData.description
+        alias: abbrev,  // 使用 us_abbrev 作为 alias
+        full_text: termData.us || abbrev,  // 使用完整的 us 名称
+        description: termData.us_description || termData.description
       })
     }
   }
@@ -451,8 +506,8 @@ const handleUploadError = (uploadId: string, err: Error, file: File) => {
 
 <style scoped lang="scss">
 .grid-btn-group {
-    display: grid; 
-    grid-template-columns: repeat(6, 1fr); 
+    display: flex; 
+    flex-wrap: wrap;
     gap: 10px;
 
     .grid-btn {
@@ -511,6 +566,8 @@ const handleUploadError = (uploadId: string, err: Error, file: File) => {
                 font-size: 12px;
                 font-weight: 500;
                 opacity: 0.6;
+                display: flex;
+                align-items: center;
             }
         }
     }

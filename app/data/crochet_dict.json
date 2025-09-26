@@ -1,0 +1,367 @@
+{
+    "title": "中/美/英 钩织图解符号术语对照 - Anthea Crochet",
+    "sections":
+    [
+        {
+            "section_id": "basic_stitches",
+            "section_name": "基础针法 / Basic stitches",
+            "rows":
+            [
+                {
+                    "chinese": "环形起针",
+                    "notation_cn": "○",
+                    "us": "magic ring / circle",
+                    "us_abbrev": "MR",
+                    "us_description": "A starting method for crocheting in the round, creates a tight center without a hole.",
+                    "uk": "magic ring / loop",
+                    "uk_abbrev": "MR",
+                    "description": "一种常见的起针方法，适用于编织圆形物件（如玩偶、杯垫），中心收紧后不会留下孔洞。"
+                },
+                {
+                    "chinese": "锁编起针",
+                    "notation_cn": "ch",
+                    "us": "foundation chain",
+                    "us_abbrev": "ch(f)",
+                    "us_description": "Used at the start of a project as the foundation row (starting chain).",
+                    "uk": "foundation chain",
+                    "uk_abbrev": "ch",
+                    "description": "起始针法，用于建立作品的基础行，相当于“打地基”。"
+                },
+                {
+                    "chinese": "锁针 / 辫子针",
+                    "notation_cn": "ch",
+                    "us": "chain stitch",
+                    "us_abbrev": "ch",
+                    "us_description": "A braid-like stitch used within a project for height, edges, or decorations.",
+                    "uk": "chain stitch",
+                    "uk_abbrev": "ch",
+                    "description": "常用于增加高度、编织花边或作为装饰，形状像辫子。"
+                },
+                {
+                    "chinese": "引拔针",
+                    "notation_cn": "• / sl",
+                    "us": "slip stitch",
+                    "us_abbrev": "sl / st",
+                    "us_description": "A flat stitch used to join, move yarn, or finish edges without adding height.",
+                    "uk": "slip stitch",
+                    "uk_abbrev": "ss",
+                    "description": "将线圈直接拉过针目形成平针，不增加高度，常用于收尾、连接或移动针位。"
+                },
+                {
+                    "chinese": "空针",
+                    "notation_cn": "K",
+                    "us": "skip",
+                    "us_abbrev": "sk",
+                    "us_description": "Skip a stitch to create space or shaping in the fabric.",
+                    "uk": "miss / skip",
+                    "uk_abbrev": "mss",
+                    "description": "跳过一个针目，不在该位置钩针，用于形成镂空或控制图案形状。"
+                },
+                {
+                    "chinese": "短针",
+                    "notation_cn": "X",
+                    "us": "single crochet",
+                    "us_abbrev": "sc",
+                    "us_description": "A dense and tight stitch, commonly used for amigurumi and sturdy items.",
+                    "uk": "double crochet",
+                    "uk_abbrev": "dc",
+                    "description": "最基础的实心针法，针脚紧密，常用于玩偶、饰品等需要结构稳定的作品。"
+                },
+                {
+                    "chinese": "中长针",
+                    "notation_cn": "T",
+                    "us": "half double crochet",
+                    "us_abbrev": "hdc",
+                    "us_description": "A stitch between single and double crochet, offers moderate height and flexibility.",
+                    "uk": "half treble crochet",
+                    "uk_abbrev": "htr",
+                    "description": "介于短针和长针之间，针脚高度适中，常用于服饰或需要适度弹性的作品。"
+                },
+                {
+                    "chinese": "长针",
+                    "notation_cn": "F",
+                    "us": "double crochet",
+                    "us_abbrev": "dc",
+                    "us_description": "A tall stitch with a looser structure, widely used in blankets and lace patterns.",
+                    "uk": "treble crochet",
+                    "uk_abbrev": "tr",
+                    "description": "常用的高针目，结构相对疏松，适合披肩、毯子和镂空花样。"
+                },
+                {
+                    "chinese": "长长针",
+                    "notation_cn": "E",
+                    "us": "treble / triple crochet",
+                    "us_abbrev": "tr",
+                    "us_description": "Taller than double crochet, creates open stitches for decorative designs.",
+                    "uk": "double treble crochet",
+                    "uk_abbrev": "dtr",
+                    "description": "比长针更高，针脚疏松，适合装饰性花样或拉伸效果明显的图案。"
+                },
+                {
+                    "chinese": "3 卷长针",
+                    "notation_cn": "≡",
+                    "us": "double treble crochet",
+                    "us_abbrev": "dtr",
+                    "us_description": "An extra tall stitch, used for lacy patterns or special textures.",
+                    "uk": "triple treble crochet",
+                    "uk_abbrev": "ttr",
+                    "description": "超长的针法，线条拉长，用于复杂花样或特殊装饰。"
+                },
+                {
+                    "chinese": "只钩内 / 后半针",
+                    "notation_cn": "BLO",
+                    "us": "work in back loop only",
+                    "us_abbrev": "BLO",
+                    "us_description": "Insert hook only through the back loop, creates ribbing or textured effects.",
+                    "uk": "work in back loop only",
+                    "uk_abbrev": "BLO",
+                    "description": "只在针目的后半圈插针，产生凸纹效果，常用于边框或立体花纹。"
+                },
+                {
+                    "chinese": "只钩外 / 前半针",
+                    "notation_cn": "FLO",
+                    "us": "work in front loop only",
+                    "us_abbrev": "FLO",
+                    "us_description": "Insert hook only through the front loop, often used for layered or textured designs.",
+                    "uk": "work in front loop only",
+                    "uk_abbrev": "FLO",
+                    "description": "只在针目的前半圈插针，常与 BLO 配合制造纹理和层次感。"
+                }
+            ]
+        },
+        {
+            "section_id": "advanced_increases_decreases",
+            "section_name": "进阶针法 / Increases & decreases",
+            "rows":
+            [
+                {
+                    "chinese": "短针加针",
+                    "notation_cn": "V",
+                    "us": "single crochet 2 increase",
+                    "us_abbrev": "sc inc",
+                    "us_description": "Work two single crochets in one stitch to increase width.",
+                    "uk": "double crochet 2 increase",
+                    "uk_abbrev": "dc inc",
+                    "description": "在同一针目里钩两次短针，用于增加针数。"
+                },
+                {
+                    "chinese": "短针加加针",
+                    "notation_cn": "W",
+                    "us": "single crochet 3 increase",
+                    "us_abbrev": "sc 3 inc",
+                    "us_description": "Work three single crochets in one stitch for a stronger increase.",
+                    "uk": "double crochet 3 increase",
+                    "uk_abbrev": "dc 3 inc",
+                    "description": "在同一针目里钩三次短针，增加更明显的宽度。"
+                },
+                {
+                    "chinese": "中长针加针",
+                    "notation_cn": "TV",
+                    "us": "half double crochet 2 increase",
+                    "us_abbrev": "hdc inc",
+                    "us_description": "Two half double crochets in one stitch to expand fabric height and width.",
+                    "uk": "half treble crochet 2 increase",
+                    "uk_abbrev": "htr inc",
+                    "description": "在同一针目钩两次中长针，使作品更宽更高。"
+                },
+                {
+                    "chinese": "中长针加加针",
+                    "notation_cn": "TW",
+                    "us": "half double crochet 3 increase",
+                    "us_abbrev": "hdc 3 inc",
+                    "us_description": "Three half double crochets in one stitch, strong shaping technique.",
+                    "uk": "half treble crochet 3 increase",
+                    "uk_abbrev": "htr 3 inc",
+                    "description": "在同一针目里钩三次中长针，常用于特殊造型。"
+                },
+                {
+                    "chinese": "长针加针",
+                    "notation_cn": "FV",
+                    "us": "double crochet 2 increase",
+                    "us_abbrev": "dc inc",
+                    "us_description": "Two double crochets in one stitch, expands row quickly.",
+                    "uk": "treble crochet 2 increase",
+                    "uk_abbrev": "tr inc",
+                    "description": "在同一针目里钩两次长针，使作品更松更宽。"
+                },
+                {
+                    "chinese": "长针加加针",
+                    "notation_cn": "FW",
+                    "us": "double crochet 3 increase",
+                    "us_abbrev": "dc 3 inc",
+                    "us_description": "Three double crochets in one stitch for decorative increases.",
+                    "uk": "treble crochet 3 increase",
+                    "uk_abbrev": "tr 3 inc",
+                    "description": "在同一针目里钩三次长针，多用于花样编织。"
+                },
+                {
+                    "chinese": "短针减针",
+                    "notation_cn": "A",
+                    "us": "single crochet 2 together",
+                    "us_abbrev": "sc2tog",
+                    "us_description": "Crochet two stitches together to decrease width.",
+                    "uk": "double crochet 2 together",
+                    "uk_abbrev": "dc2tog",
+                    "description": "将相邻两针合并成一针，减少针数。"
+                },
+                {
+                    "chinese": "短针减减针",
+                    "notation_cn": "M",
+                    "us": "single crochet 3 together",
+                    "us_abbrev": "sc3tog",
+                    "us_description": "Crochet three stitches together for stronger shaping.",
+                    "uk": "double crochet 3 together",
+                    "uk_abbrev": "dc3tog",
+                    "description": "将三针合并成一针，收针更明显。"
+                },
+                {
+                    "chinese": "中长针减针",
+                    "notation_cn": "TA",
+                    "us": "half double crochet 2 together",
+                    "us_abbrev": "hdc2tog",
+                    "us_description": "Combine two half double crochets into one to decrease.",
+                    "uk": "half treble crochet 2 together",
+                    "uk_abbrev": "htr2tog",
+                    "description": "将两针中长针合并，减少针数。"
+                },
+                {
+                    "chinese": "中长针减减针",
+                    "notation_cn": "TM",
+                    "us": "half double crochet 3 together",
+                    "us_abbrev": "hdc3tog",
+                    "us_description": "Three half double crochets combined into one stitch.",
+                    "uk": "half treble crochet 3 together",
+                    "uk_abbrev": "htr3tog",
+                    "description": "将三针中长针合并成一针，常用于收缩形状。"
+                },
+                {
+                    "chinese": "长针减针",
+                    "notation_cn": "FA",
+                    "us": "double crochet 2 together",
+                    "us_abbrev": "dc2tog",
+                    "us_description": "Two double crochets joined together into one decrease.",
+                    "uk": "treble crochet 2 together",
+                    "uk_abbrev": "tr2tog",
+                    "description": "将两针长针合并为一针，收窄织物。"
+                },
+                {
+                    "chinese": "长针减减针",
+                    "notation_cn": "FM",
+                    "us": "double crochet 3 together",
+                    "us_abbrev": "dc3tog",
+                    "us_description": "Three double crochets worked together into one stitch.",
+                    "uk": "treble crochet 3 together",
+                    "uk_abbrev": "tr3tog",
+                    "description": "将三针长针合并为一针，常见于花瓣或收拢结构。"
+                }
+            ]
+        },
+        {
+            "section_id": "special_techniques",
+            "section_name": "特殊针法 / Special techniques",
+            "rows":
+            [
+                {
+                    "chinese": "反短针",
+                    "notation_cn": "N",
+                    "us": "reverse single crochet",
+                    "us_abbrev": "RSC",
+                    "us_description": "Also called crab stitch, worked backwards for a twisted edge.",
+                    "uk": "crab stitch",
+                    "uk_abbrev": "CS",
+                    "description": "反方向钩短针，形成绞链状边缘，常用于收边。"
+                },
+                {
+                    "chinese": "内钩短针",
+                    "notation_cn": "NX",
+                    "us": "back post sc",
+                    "us_abbrev": "bpsc",
+                    "us_description": "Work around the back post of the stitch, creates deep texture.",
+                    "uk": "back post dc",
+                    "uk_abbrev": "bpdc",
+                    "description": "在针柱后绕线钩短针，织物表面形成凹陷纹理。"
+                },
+                {
+                    "chinese": "外钩短针",
+                    "notation_cn": "WX",
+                    "us": "front post sc",
+                    "us_abbrev": "fpsc",
+                    "us_description": "Work around the front post of the stitch, makes raised texture.",
+                    "uk": "front post dc",
+                    "uk_abbrev": "fpdc",
+                    "description": "在针柱前绕线钩短针，使表面产生凸起效果。"
+                },
+                {
+                    "chinese": "内钩中长针",
+                    "notation_cn": "NT",
+                    "us": "back post hdc",
+                    "us_abbrev": "bphdc",
+                    "us_description": "Half double crochet around the back post, adds depth.",
+                    "uk": "back post htr",
+                    "uk_abbrev": "bphtr",
+                    "description": "在针柱后绕线钩中长针，产生立体凹纹。"
+                },
+                {
+                    "chinese": "外钩中长针",
+                    "notation_cn": "WT",
+                    "us": "front post hdc",
+                    "us_abbrev": "fphdc",
+                    "us_description": "Half double crochet around the front post, creates raised texture.",
+                    "uk": "front post htr",
+                    "uk_abbrev": "fphtr",
+                    "description": "在针柱前绕线钩中长针，产生立体凸纹。"
+                },
+                {
+                    "chinese": "内钩长针",
+                    "notation_cn": "NF",
+                    "us": "back post dc",
+                    "us_abbrev": "bpdc",
+                    "us_description": "Double crochet worked around back post, adds recessed texture.",
+                    "uk": "back post tr",
+                    "uk_abbrev": "bptr",
+                    "description": "在针柱后钩长针，形成深凹纹理。"
+                },
+                {
+                    "chinese": "外钩长针",
+                    "notation_cn": "WF",
+                    "us": "front post dc",
+                    "us_abbrev": "fpdc",
+                    "us_description": "Double crochet worked around front post, creates prominent raised texture.",
+                    "uk": "front post tr",
+                    "uk_abbrev": "fptr",
+                    "description": "在针柱前钩长针，形成明显凸起的纹理。"
+                },
+                {
+                    "chinese": "枣形针",
+                    "notation_cn": "Q",
+                    "us": "cluster or bubble stitch",
+                    "us_abbrev": "3dc cluster",
+                    "us_description": "Group of stitches worked together in one stitch, forms a textured bump.",
+                    "uk": "cluster or bubble stitch",
+                    "uk_abbrev": "3tr cluster",
+                    "description": "多个针在同一针目收并成团，形成鼓起的颗粒效果。"
+                },
+                {
+                    "chinese": "爆米花针",
+                    "notation_cn": "G",
+                    "us": "popcorn or bobble stitch",
+                    "us_abbrev": "5dc popcorn",
+                    "us_description": "Multiple stitches worked into the same stitch, released to form a popcorn-like bump.",
+                    "uk": "popcorn or bobble stitch",
+                    "uk_abbrev": "5tr popcorn",
+                    "description": "在同一针中钩多针再并合，鼓起的形状像爆米花。"
+                },
+                {
+                    "chinese": "狗牙针",
+                    "notation_cn": "Y",
+                    "us": "picot",
+                    "us_abbrev": "picot",
+                    "us_description": "Small looped stitch, commonly used as decorative edging.",
+                    "uk": "picot",
+                    "uk_abbrev": "picot",
+                    "description": "小环针法，常用于边缘装饰，形成细小尖角。"
+                }
+            ]
+        }
+    ]
+}

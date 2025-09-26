@@ -27,6 +27,7 @@ export class PatternInfo {
   public techniques: TextListData
   public yarn: string
   public brands: string
+   public materialsDesc: string
   public colors: TextListData
   public tools: TextListData
   public supplies: TextListData
@@ -60,19 +61,8 @@ export class PatternInfo {
     bonus_idea: TextListData = { title: '', image: [], description: null, text: '', list: ['Try different color combinations', 'Add embroidered details', 'Create seasonal versions', 'Make mini versions as keychains']},
     bonus_community: TextListData = { title: '', image: [], description: null, text: '', list: ['Tag us in your finished projects! We love seeing your creations!', 'Use hashtag: #JacketChickiePattern']},
     cover_image: string = '',
-    terms: CrochetTerm[] = [
-      { alias: 'ch', full_text: 'chain', description: 'Basic foundation stitch' },
-      { alias: 'sc', full_text: 'single crochet', description: 'Basic crochet stitch' },
-      { alias: 'dc', full_text: 'double crochet', description: 'Taller crochet stitch' },
-      { alias: 'tc', full_text: 'treble crochet', description: 'Tallest basic stitch' },
-      { alias: 'sl st', full_text: 'slip stitch', description: 'Joining/finishing stitch' },
-      { alias: 'inc', full_text: 'increase', description: '2 sc in same stitch' },
-      { alias: 'dec', full_text: 'decrease', description: 'sc2tog (single crochet 2 together)' },
-      { alias: 'BLO', full_text: 'back loop only', description: 'Crochet through back loop only' },
-      { alias: 'FLO', full_text: 'front loop only', description: 'Crochet through front loop only' },
-      { alias: 'rnd', full_text: 'round', description: 'Working in continuous rounds' },
-      { alias: 'st/sts', full_text: 'stitch/stitches', description: 'Individual crochet units' }
-    ]
+    materialsDesc: string = '',
+    terms: CrochetTerm[] = []
   ) {
     this.title = title
     this.subtitle = subtitle
@@ -96,6 +86,7 @@ export class PatternInfo {
     this.bonus_idea = bonus_idea
     this.bonus_community = bonus_community
     this.cover_image = cover_image
+    this.materialsDesc = materialsDesc
   }
 
   // 导出为 JSON
@@ -122,7 +113,8 @@ export class PatternInfo {
       bonus_tips: this.bonus_tips,
       bonus_idea: this.bonus_idea,
       bonus_community: this.bonus_community,
-      cover_image: this.cover_image
+      cover_image: this.cover_image,
+      materialsDesc: this.materialsDesc
     }
   }
 
@@ -198,6 +190,7 @@ export class PatternInfo {
     const bonus_idea = normalizeTextListData(data?.bonus_idea)
     const bonus_community = normalizeTextListData(data?.bonus_community)
     const cover_image = typeof data?.cover_image === 'string' ? data.cover_image : undefined
+    const materialsDesc = typeof data?.materialsDesc === 'string' ? data.materialsDesc : undefined
 
     // 严格按构造函数参数顺序传参
     return new PatternInfo(
@@ -209,7 +202,7 @@ export class PatternInfo {
       finishedSize,
       info,
       note,
-      techniques,
+      techniques,  // 注意：techniques 在 terms 之前
       yarn,
       brands,
       colors,
@@ -222,8 +215,8 @@ export class PatternInfo {
       bonus_idea,
       bonus_community,
       cover_image,
-      normalizedTerms
-      
+      materialsDesc,
+      normalizedTerms  // terms 参数应该在这个位置
     )
   }
 }

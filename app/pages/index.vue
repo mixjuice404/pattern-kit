@@ -16,7 +16,7 @@
     </div>
 
     <!-- 加载占位骨架屏 -->
-    <div v-if="loading" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+    <div v-if="loading" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
       <div v-for="n in 6" :key="n" class="card bg-base-100 shadow">
         <div class="skeleton h-40 w-full"></div>
         <div class="card-body">
