@@ -158,97 +158,24 @@
         </div>
         <div v-for="(item, index) in patternData.instructions">
             <h4>{{ item.title }}</h4>
-            <div>{{ item.text }}</div>
-            <div>{{ item.description }}</div>
+            <div v-if="item.text">{{ item.text }}</div>
+            <div v-if="item.description" style="white-space: pre-wrap; word-wrap: break-word;">{{ item.description }}</div>
             <div class="py-2" style="display: flex; width: 100%; justify-content: space-between;">
                 <div style="flex-grow: 1;">
                     <div v-for="(step, index) in item.list" :key="index" class="round-step">
                         <div v-if="step.toLowerCase().startsWith('rnd') || step.toLowerCase().startsWith('round')" class="checkbox"></div>
-                        {{ step }}
+                        <div v-html="step"></div>
                     </div>
                 </div>
-                <div style="width: 21%; display: flex; flex-direction: column; gap: 10px; padding-top: 5px">
+                <div v-if="!item.bottom" style="width: 21%; display: flex; flex-direction: column; gap: 10px; padding-top: 5px">
                     <img v-for="(url, index) in item.image" style="width: 100%; margin: 0; border-radius: 4px;" :key="index" :src="url" />
                 </div>
-            </div>  
+            </div> 
+            <div v-if="item.bottom" style="width: 100%; display: flex; gap: 10px; padding: 10px 0; flex-wrap: wrap;">
+                <img v-for="(url, index) in item.image" style="margin: 0; border-radius: 4px; height: 220px; object-fit:contain;" :key="index" :src="url" />
+            </div> 
+            <div v-if="item.end_description" style="white-space: pre-wrap; word-wrap: break-word;">{{ item.end_description }}</div>
         </div>
-        <!-- <div>
-            <h4>Body</h4>
-            <div>With white yarn</div>
-            <div>Start with making a round base. Work in continuous rounds without slip stitches.
-                you can stuff the chick's body with fiberfill to achieve the desired appearance; 
-                there's no need to pack it too tightly—a bit of fluffiness is ideal.
-            </div>
-            <div class="py-2" style="display: flex; width: 100%; justify-content: space-between;">
-                <div style="flex-grow: 1;">
-                    <div class="round-step"><div class="checkbox"></div>Rnd 1: 6sc in the MR(6)</div>
-                    <div class="round-step"><div class="checkbox"></div>Rnd 2: 6inc (12)</div>
-                    <div class="round-step"><div class="checkbox"></div>Rnd 3: 6 * (sc, inc) (18)</div>
-                    <div class="round-step"><div class="checkbox"></div>Rnd 4: 6 * (sc, inc, sc) (24)</div>
-                    <div class="round-step"><div class="checkbox"></div>Rnd 5: 6 * (3sc, inc) (30)</div>
-                    <div class="round-step"><div class="checkbox"></div>Rnd 6: 6 * (2sc, inc, 2sc) (36)</div>
-                    <div class="round-step"><div class="checkbox"></div>Rnd 7-8: 36sc (2 rounds)</div>
-                    <div class="round-step"><div class="checkbox"></div>Rnd 9: 9sc, inc, 16sc, inc, 9sc (38)</div>
-                    <div class="round-step"><div class="checkbox"></div>Rnd 10-11: 38sc (2 rounds)</div>
-                    <div class="round-step"><div class="checkbox"></div>Rnd 12: 10sc, inc, 16sc, inc, 10sc (40)</div>
-                    <div class="round-step"><div class="checkbox"></div>Rnd 13-14: 40sc (2 rounds)</div>
-                    <div class="round-step"><div class="checkbox"></div>Rnd 15:BLO 11sc, inc, 16sc, inc, 11sc (42)</div>
-                    <div>Change to light khaki color</div>
-                    <div class="round-step"><div class="checkbox"></div>Rnd 16: BLO 42sc (42)</div>
-                    <div class="round-step"><div class="checkbox"></div>Rnd 17: 11sc, 2inc, 16sc, 2inc, 11sc (46)</div>
-                    <div class="round-step"><div class="checkbox"></div>Rnd 18-19: 46sc (2 rounds)</div>
-                    <div class="round-step"><div class="checkbox"></div>Rnd 20: 12sc, 2inc, 18sc, 2inc, 12sc (50)</div>
-                    <div class="round-step"><div class="checkbox"></div>Rnd 21: BLO 50sc (50)</div>
-                    <div class="round-step"><div class="checkbox"></div>Rnd 22-23: 50sc (2 rounds)</div>
-                    <div class="round-step"><div class="checkbox"></div>Rnd 24: 4 * (10sc, dec), 2sc (46)</div>
-                    <div class="round-step"><div class="checkbox"></div>Rnd 25: 46sc (46)</div>
-                    <div class="round-step"><div class="checkbox"></div>Rnd 26: 6 * (5sc, dec), 4sc (40)</div>
-                    <div class="round-step"><div class="checkbox"></div>Rnd 27: 6 * (2sc, dec, 2sc), 4sc (34)</div>
-                    <div class="round-step"><div class="checkbox"></div>Rnd 28: 6 * (3sc, dec), 4sc (28)</div>
-                    <div class="round-step"><div class="checkbox"></div>Rnd 29: 7 * (sc, dec, sc) (21)</div>
-                    <div class="round-step"><div class="checkbox"></div>Rnd 30: 7 * (sc, dec) (14)</div>
-                    <div class="round-step"><div class="checkbox"></div>Rnd 31: 7 * (dec) (7)</div>
-                </div>
-                <div style="width: 21%; display: flex; flex-direction: column; gap: 10px; padding-top: 5px">
-                    <img style="width: 100%; margin: 0; border-radius: 4px;" src="https://pub.qingheplus.cn/%E5%B0%8F%E9%B8%A1%E4%BB%94%E8%A1%A3%E6%9C%8D%E8%B5%B7%E9%92%88%E4%BD%8D%E7%BD%AE.jpg" />
-                    <img style="width: 100%; margin: 0; border-radius: 4px;" src="https://pub.qingheplus.cn/%E5%B0%8F%E9%B8%A1%E4%BB%94%E8%A1%A3%E6%9C%8D%E8%B5%B7%E9%92%88%E4%BD%8D%E7%BD%AE.jpg" />
-                </div>
-            </div>
-        </div>
-
-        <div>
-            <h4>WINGS/HANDS</h4>
-            <div>Make 2 - Using White yarn</div>
-            <div></div>
-            <div class="py-2" style="display: flex; width: 100%; justify-content: space-between;">
-                <div style="flex-grow: 1;">
-                    <div class="round-step"><div class="checkbox"></div>Round 1: Magic ring, 6 sc in ring (6)</div>
-                    <div class="round-step"><div class="checkbox"></div>Round 2: inc in each st around (12)</div>
-                    <div class="round-step"><div class="checkbox"></div>Round 3-8: sc in each st around (12)</div>
-                    <div class="round-step"><div class="checkbox"></div>Lightly stuff</div>
-                    <div class="round-step"><div class="checkbox"></div>Round 9: dec around (6)</div>
-                    <div class="round-step"><div class="checkbox"></div>Fasten off, leaving long tail for sewing</div>
-                </div>
-                <div style="width: 21%; display: flex; flex-direction: column; gap: 10px; padding-top: 5px">
-                    <img style="width: 100%; margin: 0; border-radius: 4px;" src="https://pub.qingheplus.cn/%E5%B0%8F%E9%B8%A1%E4%BB%94%E8%A1%A3%E6%9C%8D%E8%B5%B7%E9%92%88%E4%BD%8D%E7%BD%AE.jpg" />
-                </div>
-            </div>  
-        </div>
-
-        <div>
-            <h4>ASSEMBLY/DECORATION</h4>
-            <div>Make 2 - Using White yarn</div>
-            <div>Use a hot glue gun or fine thread to attach the other parts to the chick's body, 
-                then wait for everything to set before completing.
-            </div>
-            <div class="py-2" style="display: flex; width: 100%; justify-content: space-between;">
-                <div style="flex-grow: 1;">
-                </div>
-                <div style="width: 21%; display: flex; flex-direction: column; gap: 10px; padding-top: 5px; flex-shrink: 0;">
-                    <img style="width: 100%; margin: 0; border-radius: 4px;" src="https://pub.qingheplus.cn/%E5%B0%8F%E9%B8%A1%E4%BB%94-%E5%B0%BE%E5%B7%B4%E7%85%A7%E7%89%87.jpg" />
-                </div>
-            </div>  
-        </div> -->
     </div>
 
 
@@ -257,7 +184,7 @@
             ✨ FINISHING TIPS & TECHNIQUES
         </div>
         <div>
-            <h4>Professional Finishing</h4>
+            <h4>{{ patternData.finishingTips.text || 'Finishing Tips' }}</h4>
             <ul>
                 <li v-for="item in patternData.finishingTips.list" :key="item">
                     <template v-if="item.includes(':')">
@@ -368,7 +295,7 @@
             📱 THANK YOU!
         </div>
         <div style="display: flex; flex-direction: column; gap: 20px;">
-            <div>Thank you for choosing our pattern! We hope you enjoy creating your Jacket Chickie.</div>
+            <div>Thank you for choosing our pattern! We hope you enjoy creating your <strong>{{ patternData.title }}</strong>.</div>
             <strong>Happy Crocheting! 🧶💕</strong>
             <div class="italic">If you loved this pattern, please consider leaving a review on Etsy. Your feedback helps us create more amazing patterns!</div>
         </div>

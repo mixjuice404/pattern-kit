@@ -232,13 +232,19 @@
                         :value="instruction.title"
                         @input="updateInstructionField(stepIndex, 'title', ($event.target as HTMLInputElement).value)"
                     />
-                    <input
-                        type="text" 
-                        class="input" 
+                    <textarea
+                        class="textarea" 
                         style="width: 100%; margin-bottom: 8px;" 
                         placeholder="Description of the instruction ..." 
                         :value="instruction.description || ''"
                         @input="updateInstructionField(stepIndex, 'description', ($event.target as HTMLInputElement).value)"
+                    />
+                    <textarea
+                        class="textarea" 
+                        style="width: 100%; margin-bottom: 8px;" 
+                        placeholder="After Description of the instruction ..." 
+                        :value="instruction.end_description || ''"
+                        @input="updateInstructionField(stepIndex, 'end_description', ($event.target as HTMLInputElement).value)"
                     />
                     <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 8px;">
                         <input 
@@ -281,6 +287,11 @@
                         @upload-success="handleUploadSuccess"
                         @upload-error="handleUploadError"
                     />
+
+                    <div class="input-item" style="padding: 10px 2px; margin-bottom: 0; text-align:right">
+                        <label style="font-size: 12px; font-weight: 500; opacity: 0.6; margin-right: 5px">Bottom Layout</label>
+                        <input type="checkbox" :checked="instruction.bottom" class="checkbox checkbox-primary checkbox-xs" @change="updateInstructionField(stepIndex, 'bottom', ($event.target as HTMLInputElement).checked)" />
+                    </div>
                     
                 </div>
             </div>
@@ -364,6 +375,7 @@ const crochetSections = computed(() => {
         chinese: row.chinese,
         notation_cn: row.notation_cn,
         us_abbrev: row.us_abbrev,
+        us: row.us,  // 添加这一行
         us_description: row.us_description,  // 添加这一行
         description: row.description
       }
@@ -417,7 +429,9 @@ const addInstructionStep = () => {
     text: '',
     description: '',
     list: [],
-    image: []
+    image: [],
+    end_description: null,
+    bottom: false
   })
 }
 
@@ -429,10 +443,10 @@ const removeInstructionStep = (stepIndex: number) => {
 }
 
 // 统一的指令字段更新函数
-const updateInstructionField = (stepIndex: number, field: 'title' | 'description' | 'text', value: string) => {
+const updateInstructionField = (stepIndex: number, field: 'title' | 'description' | 'text' | 'end_description' | 'bottom', value: string | boolean) => {
   const instruction = props.patternInfo.instructions[stepIndex]
   if (instruction) {
-    instruction[field] = value
+    (instruction as any)[field] = value
   }
 }
 
