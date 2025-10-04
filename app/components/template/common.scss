@@ -1,0 +1,210 @@
+// 模板公共样式
+.base-container {
+  font-size: 16px;
+
+  &.prose {
+    max-width: none !important; /* 移除 prose 的宽度限制 */
+    width: 100% !important;     /* 确保填满父容器 */
+  }
+
+  .title {
+    font-size: 28px;
+    font-weight: 800;
+  }
+
+  .subtitle {
+    opacity: 0.8;
+    margin-bottom: 10px;
+  }
+}
+
+.section-block {
+    padding: 15px 0;
+
+    .divider-title {
+        margin: 20px 0;
+        display: flex;
+        align-items: center;
+        width: 100%;
+        padding-bottom: 5px;
+        border-bottom: 1px dashed #e5e5e5;
+        font-weight: 600;
+    }
+
+    li {
+        margin: 0;
+    }
+
+    .round-step {
+       display: flex;
+       align-items: center;
+       gap: 10px;
+
+       .checkbox {
+        width: 16px;
+        height: 16px;
+        border: 1px solid #000;
+        border-radius: 3px;
+        opacity: 0.2;
+       }
+    }
+}
+
+.info-box {
+    border: 1px dashed oklch(75% 0.183 55.934);
+    padding: 12px; 
+    border-radius: 5px;
+    background-color: oklch(98% 0.016 73.684);
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    
+    /* 强制打印背景色 - 修复版本 */
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+    /* 移除已废弃的 color-adjust 属性 */
+
+    .box-item {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        font-size: 13px;
+
+        .item-label {
+            opacity: 0.8;
+            min-width: 150px;
+        }
+
+        .item-value {
+            font-weight: 600;
+        }
+    }
+}
+
+/* 表格样式 */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 16px 0;
+  font-size: 14px;
+}
+
+thead {
+  background-color: #f8f9fa;
+}
+
+th, td {
+  padding: 10px 12px;
+  text-align: left;
+  border: 1px solid #dee2e6;
+}
+
+th {
+  font-weight: 600;
+  color: #495057;
+  background-color: #e9ecef;
+}
+
+td {
+  color: #212529;
+}
+
+tbody td:nth-child(1) {
+  white-space: nowrap;
+  font-weight: 600;
+}
+
+tbody tr:nth-child(even) {
+  background-color: #f8f9fa;
+}
+
+tbody tr:hover {
+  background-color: #e3f2fd;
+}
+
+.gray-scale {
+    filter: grayscale(70%);
+    opacity: 0.5;
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+  .title {
+    font-size: 24px;
+  }
+  
+  .info-box {
+    grid-template-columns: 1fr;
+  }
+  
+  table {
+    font-size: 12px;
+  }
+  
+  th, td {
+    padding: 8px 12px;
+  }
+}
+
+/* 专门的打印样式 */
+@media print {
+    .info-box {
+        background-color: oklch(98% 0.016 73.684) !important;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+    }
+}
+
+/* 指令区域样式 */
+.instruction-item {
+    
+    .description {
+        white-space: pre-wrap;
+        word-wrap: break-word;
+    }
+
+    .content-row {
+        display: flex;
+        width: 100%;
+        justify-content: space-between;
+        padding: 8px 0;
+
+        .steps-column {
+            flex-grow: 1;
+        }
+
+        .images-column {
+            width: 21%;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            padding-top: 5px;
+
+            img {
+                width: 100%;
+                margin: 0;
+                border-radius: 4px;
+            }
+        }
+    }
+
+    .bottom-images {
+        width: 100%;
+        display: flex;
+        gap: 10px;
+        padding: 10px 0;
+        flex-wrap: wrap;
+
+        img {
+            margin: 0;
+            border-radius: 4px;
+            height: 220px;
+            object-fit: contain;
+        }
+    }
+
+    .end-description {
+        white-space: pre-wrap;
+        word-wrap: break-word;
+    }
+}

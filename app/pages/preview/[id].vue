@@ -14,7 +14,9 @@
 
     <!-- 预览内容 -->
     <div id="pdf-content" class="print-content">
-      <BaseTemplate
+      <component
+        :is="currentTemplate"
+        :key="patternInfo.template"
         v-if="!loading"
         style="width: 100%;"
         :padding-x="90"
@@ -27,6 +29,7 @@
 
 <script setup lang="ts">
 import BaseTemplate from '~/components/template/base/index.vue'
+import SimpleTemplate from '~/components/template/simple/index.vue'
 import { PatternInfo } from '~/types/PatternInfo'
 
 useHead({
@@ -101,6 +104,11 @@ const updatePageHeight = () => {
   const heightInMm = Math.ceil((contentHeight + 151) * 0.264583) // 转为 mm 并加边距
   document.documentElement.style.setProperty('--page-height', `${heightInMm}mm`)
 }
+
+// 动态组件计算
+const currentTemplate = computed(() => {
+  return patternInfo.template === 'simple' ? SimpleTemplate : BaseTemplate
+})
 </script>
 
 <style scoped>

@@ -3,7 +3,7 @@
     <div class="mb-4">
         <div class="mb-8">
             <div class="title">{{ patternData.title ? patternData.title : 'Default Title (Required)' }}</div>
-            <div class="subtitle">{{ patternData.subtitle ? patternData.subtitle : 'Default Subtitle Description' }}</div>
+            <!-- <div class="subtitle">{{ patternData.subtitle ? patternData.subtitle : 'Default Subtitle Description' }}</div> -->
             <div class="italic mt-2" v-if="patternData.inspiration" style="background-color: oklch(98.5% 0.002 247.839); border-radius: 6px; padding: 8px 10px; font-size: 12px">
                 {{ patternData.inspiration }}
             </div>
@@ -11,7 +11,7 @@
 
         <div class="mb-10" style="font-size: 12px; opacity: 0.8;">
             <div>Created by: MixionAria Studio</div>
-            <div>Contact: Message us on Etsy for support</div>
+            <div>Contact: Message us on Etsy for support</div>  
             <div>Website/Shop: <a href="https://www.etsy.com/sg-en/shop/MixionAriaStudio">https://www.etsy.com/sg-en/shop/MixionAriaStudio</a></div>
         </div>
 
@@ -37,27 +37,6 @@
                 <div class="item-label">🎯 PATTERN TYPE</div>
                 <div class="item-value">Digital PDF Download</div>
             </div>
-        </div>
-    </div>
-
-
-    <div class="section-block">
-        <div class="divider-title">
-            📋 PATTERN INFORMATION
-        </div>
-        <div>
-            <h4>What You'll Create</h4>
-            <div>{{ patternData.info.text }}, complete with:</div>
-            <ul>
-                <li v-for="(item, index) in patternData.info.list" :key="index">{{ item }}</li>
-            </ul>
-        </div>
-        <div>
-            <h4>Difficulty Notes</h4>
-            <div>{{ patternData.note.text }}</div>
-            <ul>
-                <li v-for="(item, index) in patternData.note.list" :key="index">{{ item }}</li>
-            </ul>
         </div>
     </div>
 
@@ -181,34 +160,18 @@
 
     <div class="section-block">
         <div class="divider-title">
-            ✨ FINISHING TIPS & TECHNIQUES
+            ✨ FINISHING TIPS & NOTES
         </div>
-        <div>
-            <h4>{{ patternData.finishingTips.text || 'Finishing Tips' }}</h4>
-            <ul>
-                <li v-for="item in patternData.finishingTips.list" :key="item">
-                    <template v-if="item.includes(':')">
-                        <strong>{{ item.split(':')[0] }}:</strong>{{ item.split(':')[1] }}
-                    </template>
-                    <template v-else>
-                        {{ item }}
-                    </template> 
-                </li>
-            </ul>
-        </div>
-        <div>
-            <h4>Troubleshooting</h4>
-            <ul>
-                <li v-for="item in patternData.troubleshooting.list" :key="item">
-                    <template v-if="item.includes(':')">
-                        <strong>{{ item.split(':')[0] }}:</strong>{{ item.split(':')[1] }}
-                    </template>
-                    <template v-else>
-                        {{ item }}
-                    </template> 
-                </li>
-            </ul>
-        </div>
+        <ul>
+            <li v-for="item in patternData.finishingTips.list" :key="item">
+                <template v-if="item.includes(':')">
+                    <strong>{{ item.split(':')[0] }}:</strong>{{ item.split(':')[1] }}
+                </template>
+                <template v-else>
+                    {{ item }}
+                </template> 
+            </li>
+        </ul>
     </div>
 
 

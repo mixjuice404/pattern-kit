@@ -28,7 +28,9 @@
     </div>
     <div class="panel-preview">
       <div id="pdf-content" class="preview-body w-full 2xl:w-[1200px]">
-        <BaseTemplate
+        <component
+          :is="currentTemplate"
+          :key="patternInfo.template"
           style="width: 100%;"
           :padding-x="90"
           :padding-y="90"
@@ -41,6 +43,7 @@
 
 <script setup lang="ts">
 import BaseTemplate from '~/components/template/base/index.vue'
+import SimpleTemplate from '~/components/template/simple/index.vue'
 import Eidtor from '~/components/editor/index.vue'
 import { PatternInfo } from '~/types/PatternInfo'
 
@@ -51,6 +54,11 @@ const router = useRouter()
 const patternInfo = reactive(new PatternInfo())
 const isUploading = ref(false)
 const patternId = ref<number | null>(null)
+
+// 动态组件计算
+const currentTemplate = computed(() => {
+  return patternInfo.template === 'simple' ? SimpleTemplate : BaseTemplate
+})
 
 const loadDetail = async (id: number) => {
   try {

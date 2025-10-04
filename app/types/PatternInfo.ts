@@ -1,5 +1,3 @@
-import type { List } from "postcss/lib/list"
-
 export interface TextListData {
   title: string
   text: string
@@ -17,6 +15,7 @@ export interface CrochetTerm {
 }
 
 export class PatternInfo {
+  public template: string
   public title: string
   public subtitle: string
   public inspiration: string
@@ -42,6 +41,7 @@ export class PatternInfo {
   public cover_image: string
 
   constructor(
+    template: string = 'simple',
     title: string = 'Jacket Chickie',
     subtitle: string = 'Subtitle for Jacket Chickie Crochet Pattern',
     inspiration: string = 'This adorable Jacket Chickie was inspired by the charm of well-dressed farm animals and the joy of creating something both cute and sophisticated. Perfect for gifting or adding character to any space!',
@@ -61,11 +61,25 @@ export class PatternInfo {
     troubleshooting: TextListData = { title: '', bottom: false, image: [], end_description: null, description: null, text: '', list: ['Uneven Stitches: Maintain consistent tension throughout', 'Loose Parts: Double-check all sewing before final assembly']},
     bonus_tips: TextListData = { title: '', bottom: false, image: [], end_description: null, description: null, text: '', list: ['Tension Control: Keep consistent tension for even stitches', 'Safety Eye Placement: Mark positions before inserting', 'Color Changing: Carry yarn up inside for clean lines', 'Assembly Order: Complete all pieces before assembly' ]},
     bonus_idea: TextListData = { title: '', bottom: false, image: [], end_description: null, description: null, text: '', list: ['Try different color combinations', 'Add embroidered details', 'Create seasonal versions', 'Make mini versions as keychains']},
-    bonus_community: TextListData = { title: '', bottom: false, image: [], end_description: null, description: null, text: '', list: ['Tag us in your finished projects! We love seeing your creations!', 'Use hashtag: #JacketChickiePattern']},
+    bonus_community: TextListData = { 
+        title: '', 
+        bottom: false, 
+        image: [], 
+        end_description: null, 
+        description: null, 
+        text: '', 
+        list: [
+            '📸 Share your work! We\'d love to see your finished projects. Tag us on social media with #MixionAriaStudio to inspire other makers.',
+            '🧐 Found an issue? If you notice something in the pattern that doesn\'t look right, please send us a message on Etsy. We\'ll be happy to review it and provide updates or clarifications if needed.',
+            '💬 Join the journey! Leaving a review with photos on Etsy helps other makers and supports our small shop. Every project—whether beginner or advanced—is a meaningful step in your crochet journey.',
+            '🎁 Our thank-you: Occasionally, we may send a small shop coupon as a gesture of appreciation for especially helpful feedback or detailed reviews.'
+        ]
+    },
     cover_image: string = '',
     materialsDesc: string = '',
     terms: CrochetTerm[] = []
   ) {
+    this.template = template
     this.title = title
     this.subtitle = subtitle
     this.inspiration = inspiration
@@ -94,6 +108,7 @@ export class PatternInfo {
   // 导出为 JSON
   toJSON() {
     return {
+      template: this.template,
       title: this.title,
       subtitle: this.subtitle,
       inspiration: this.inspiration,
@@ -173,6 +188,7 @@ export class PatternInfo {
     }
 
     // 标量：传 undefined 触发构造器默认值
+    const template = typeof data?.template === 'string' ? data.template : undefined
     const title = typeof data?.title === 'string' ? data.title : undefined
     const subtitle = typeof data?.subtitle === 'string' ? data.subtitle : undefined
     const inspiration = typeof data?.inspiration === 'string' ? data.inspiration : undefined
@@ -200,6 +216,7 @@ export class PatternInfo {
 
     // 严格按构造函数参数顺序传参
     return new PatternInfo(
+      template,
       title,
       subtitle,
       inspiration,
