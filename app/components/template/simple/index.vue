@@ -158,7 +158,7 @@
     </div>
 
 
-    <div class="section-block">
+    <div class="section-block" v-if="patternData.finishingTips.list.length > 0">
         <div class="divider-title">
             ✨ FINISHING TIPS & NOTES
         </div>

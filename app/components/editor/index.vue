@@ -318,7 +318,7 @@
                           :value="instruction.text"
                           @input="updateInstructionField(stepIndex, 'text', ($event.target as HTMLInputElement).value)"
                       />
-                      <button class="btn btn-soft btn-primary" @click="openImportModal">
+                      <button class="btn btn-soft btn-primary" @click="openImportModal(stepIndex)">
                           <icon name="hugeicons:file-import" />
                       </button>
                       <button class="btn btn-soft btn-primary" @click="addInstructionListItem(stepIndex)">
@@ -326,23 +326,7 @@
                       </button>
                   </div>
 
-                  <dialog id="import-instruction-modal" class="modal">
-                    <div class="modal-box">
-                      <h3 class="text-lg font-bold mb-6">Import Instruction</h3>
-                      <textarea 
-                        v-model="importTextArea"
-                        class="textarea"
-                        style="width: 100%; margin-bottom: 8px; min-height: 360px;"
-                        placeholder="Paste the instruction text here..."
-                      ></textarea>
-                      <div class="modal-action">
-                        <form method="dialog" style="display: flex; gap: 10px;">
-                          <button type="button" class="btn btn-soft btn-primary" @click="confirmImportInstruction(stepIndex)">Confirm</button>
-                          <button class="btn">Cancel</button>
-                        </form>
-                      </div>
-                    </div>
-                  </dialog>
+                  
                   
                   <!-- 动态渲染列表项 -->
                   <div v-for="(listItem, listIndex) in instruction.list" 
@@ -433,6 +417,28 @@
 
       <div style="padding: 80px 0"></div>
     </div>
+
+
+
+    <dialog id="import-instruction-modal" class="modal">
+      <div class="modal-box">
+        <h3 class="text-lg font-bold mb-6">Import Instruction</h3>
+        <textarea 
+          v-model="importTextArea"
+          class="textarea"
+          style="width: 100%; margin-bottom: 8px; min-height: 360px;"
+          placeholder="Paste the instruction text here..."
+        ></textarea>
+        <div class="modal-action">
+          <form method="dialog" style="display: flex; gap: 10px;">
+            <button type="button" class="btn btn-soft btn-primary" @click="confirmImportInstruction()">Confirm</button>
+            <button class="btn">Cancel</button>
+          </form>
+        </div>
+      </div>
+    </dialog>
+
+
   </div>
 </template>
 
@@ -611,22 +617,30 @@ const handleUploadError = (uploadId: string, err: Error, file: File) => {
   console.error('Upload error', uploadId, err, file)
 }
 
-const openImportModal = () => {
-  (document.getElementById('import-instruction-modal') as HTMLDialogElement)?.showModal()
+const currentStepIndex = ref(0)
+
+const openImportModal = (stepIndex: number) => {
+  currentStepIndex.value = stepIndex
+  ;(document.getElementById('import-instruction-modal') as HTMLDialogElement)?.showModal()
 }
 
 // 添加 ref
-const importTextArea = ref<string>()
+const importTextArea = ref<string>('')
 
 // 添加确认导入方法
-const confirmImportInstruction = (currentStepIndex: number) => {
+const confirmImportInstruction = () => {
   const content = importTextArea.value || ''
+  console.log("content: ", content)
+  console.log("currentStepIndex: ", currentStepIndex)
   if (content.trim()) {
     // 按换行分割成数组，过滤空行
     const steps = content.split('\n').filter(line => line.trim() !== '')    
+    console.log("steps: ", steps)
+    console.log("currentStepIndex: ", currentStepIndex.value)
     // 直接替换当前 instruction 的 list
-    if (props.patternInfo.instructions[currentStepIndex]) {
-      props.patternInfo.instructions[currentStepIndex].list = steps
+    const instruction = props.patternInfo.instructions[currentStepIndex.value]
+    if (instruction) {
+      instruction.list = steps
     }
     
     // 清空输入框并关闭模态框
