@@ -332,10 +332,20 @@
                     "description": "在针柱前钩长针，形成明显凸起的纹理。"
                 },
                 {
+                    "chinese": "二长针并针 / 2 长针枣形针",
+                    "notation_cn": "2Q",
+                    "us": "2 double crochet cluster",
+                    "us_abbrev": "2dc cluster",
+                    "us_description": "Work two double crochets together in the same stitch or space, joining at the top to form a small raised cluster.",
+                    "uk": "2 treble crochet cluster",
+                    "uk_abbrev": "2tr cluster",
+                    "description": "在同一针目中钩两次长针并在顶端收并成一针，形成轻微鼓起的立体效果。"
+                },
+                {
                     "chinese": "枣形针",
                     "notation_cn": "Q",
                     "us": "cluster or bubble stitch",
-                    "us_abbrev": "3dc cluster",
+                    "us_abbrev": "3dc clustrt",
                     "us_description": "Group of stitches worked together in one stitch, forms a textured bump.",
                     "uk": "cluster or bubble stitch",
                     "uk_abbrev": "3tr cluster",
