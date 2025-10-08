@@ -218,7 +218,7 @@
         <div class="divider-title">
             🎁 BONUS CONTENT
         </div>
-        <div>
+        <div v-if="patternData.bonus_tips.list.length > 0">
             <h4>Pro Tips for Success</h4>
             <ul>
                 <li v-for="item in patternData.bonus_tips.list" :key="item">
@@ -231,7 +231,7 @@
                 </li>
             </ul>
         </div>
-        <div>
+        <div v-if="patternData.bonus_idea.list.length > 0">
             <h4>Variation Ideas</h4>
             <ul>
                 <li v-for="item in patternData.bonus_idea.list" :key="item">
