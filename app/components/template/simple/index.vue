@@ -94,8 +94,9 @@
                 <div><strong>Suggested Brands:</strong> {{ patternData.brands }}</div>
             </div>
         </div>
-        <div>
+        <div v-if="patternData.colors.list.length > 0">
             <h4>Color Palette</h4>
+            <div v-if="patternData.colors.text">{{ patternData.colors.text }}</div>
             <ul>
                 <li v-for="(color, index) in patternData.colors.list" :key="index">
                   <template v-if="color.includes(':')">
