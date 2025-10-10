@@ -213,9 +213,8 @@
                   <input type="checkbox" :checked="true" class="checkbox checkbox-success checkbox-xs" />
                   <div>Recommended Yarn</div>
               </div>
-              <input 
-                type="text" 
-                class="input" 
+              <textarea 
+                class="textarea" 
                 style="width: 100%; margin-bottom: 8px;" 
                 placeholder="Recommended yarn for this pattern ..." 
                 v-model="patternInfo.yarn"

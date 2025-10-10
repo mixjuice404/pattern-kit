@@ -90,7 +90,7 @@
         <div>
             <h4>Yarn Requirements</h4>
             <div>
-                <div><strong>Recommended Yarn:</strong> {{ patternData.yarn }}</div>
+                <div><strong>Recommended Yarn:</strong> <span v-html="patternData.yarn"></span></div>
                 <div><strong>Suggested Brands:</strong> {{ patternData.brands }}</div>
             </div>
         </div>
