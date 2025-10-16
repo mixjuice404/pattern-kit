@@ -10,9 +10,9 @@
         </div>
 
         <div class="mb-10" style="font-size: 12px; opacity: 0.8;">
-            <div>Created by: MixionAria Studio</div>
+            <div>Created by: CozyDogOutfits</div>
             <div>Contact: Message us on Etsy for support</div>  
-            <div>Website/Shop: <a href="https://www.etsy.com/sg-en/shop/MixionAriaStudio">https://www.etsy.com/sg-en/shop/MixionAriaStudio</a></div>
+            <div>Website/Shop: <a href="https://www.etsy.com/shop/CozyDogOutfits">https://www.etsy.com/shop/CozyDogOutfits</a></div>
         </div>
 
         <div class="info-box">
@@ -205,7 +205,7 @@
         </div>
         <div>
             <h4>Copyright Notice</h4>
-            <div>© 2025 MixionAria. All rights reserved. This pattern is for personal use only. </div>
+            <div>© 2025 CozyDogOutfits. All rights reserved. This pattern is for personal use only. </div>
         </div>
         <div>
             <h4>Support & Contact</h4>

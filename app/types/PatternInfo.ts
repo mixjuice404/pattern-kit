@@ -69,7 +69,7 @@ export class PatternInfo {
         description: null, 
         text: '', 
         list: [
-            '📸 Share your work! We\'d love to see your finished projects. Tag us on social media with #MixionAriaStudio to inspire other makers.',
+            '📸 Share your work! We\'d love to see your finished projects. Review us on social media to inspire other makers.',
             '🧐 Found an issue? If you notice something in the pattern that doesn\'t look right, please send us a message on Etsy. We\'ll be happy to review it and provide updates or clarifications if needed.',
             '💬 Join the journey! Leaving a review with photos on Etsy helps other makers and supports our small shop. Every project—whether beginner or advanced—is a meaningful step in your crochet journey.',
             '🎁 Our thank-you: Occasionally, we may send a small shop coupon as a gesture of appreciation for especially helpful feedback or detailed reviews.'
