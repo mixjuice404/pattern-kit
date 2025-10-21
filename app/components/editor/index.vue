@@ -86,7 +86,7 @@
                 v-model="patternInfo.title"
               />
           </div>
-          <div class="input-item">
+          <div class="input-item" v-if="patternInfo.template === 'base'">
               <div class="input-label" style="margin-bottom: 15px;">描述</div>
               <input 
                 type="text" 
@@ -140,7 +140,7 @@
               />
           </div>
       </div>
-      <div class="input-set" data-nav="Pattern Information">
+      <div class="input-set" data-nav="Pattern Information" v-if="patternInfo.template === 'base'">
           <legend class="form-title" style="display: flex; align-items: center; gap: 6px">
               <input type="checkbox" :checked="true" class="checkbox checkbox-primary checkbox-xs" />
               <div>Pattern Information</div>
