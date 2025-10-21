@@ -46,9 +46,11 @@ import BaseTemplate from '~/components/template/base/index.vue'
 import SimpleTemplate from '~/components/template/simple/index.vue'
 import Eidtor from '~/components/editor/index.vue'
 import { PatternInfo } from '~/types/PatternInfo'
+import { useAppToast } from '~/composables/useAppToast';
 
 const route = useRoute()
 const router = useRouter()
+const toast = useAppToast()
 
 // 编辑态：根据路由参数 id 加载详情
 const patternInfo = reactive(new PatternInfo())
@@ -107,11 +109,11 @@ const onUpload = async (): Promise<number | null> => {
       },
     })
     if (res?.data?.id) patternId.value = res.data.id
-    console.log('Saved pattern id:', patternId.value)
+    toast.success('Pattern saved successfully!')
     return patternId.value ?? null
   } catch (err) {
-    console.error('Save failed:', err)
-    return null
+    toast.error('Save failed, please try again.')
+    return patternId.value ?? null
   } finally {
     isUploading.value = false
   }

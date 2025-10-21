@@ -8,6 +8,9 @@ export default defineNuxtConfig({
     '@nuxt/icon',
     '@nuxt/image'
   ],
+  build: {
+    transpile: ['vue-toastification']
+  },
   css: [
     '~/assets/scss/main.scss',
     '~/assets/css/tailwind.css'

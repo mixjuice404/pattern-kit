@@ -137,9 +137,9 @@ const removeItem = async (id: number) => {
     await $fetch(`/api/pattern/remove/${id}`, { method: 'POST' })
     // 本地移除
     list.value = list.value.filter((i: any) => i.id !== id)
+
   } catch (e) {
     console.error('Delete failed:', e)
-    alert('删除失败，请稍后重试')
   } finally {
     deletingIds.value.delete(id)
   }
