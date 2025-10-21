@@ -101,3 +101,150 @@ export async function deleteCrochetPattern(id: number) {
     throw new BasicError('UNKNOWN_ERROR', { statusCode: 500 });
   }
 }
+
+
+/*
+ * 提示词模板服务 ========================================================================
+ * 1. 创建或更新提示词模板
+ * 3. 获取提示词模板详情(默认1 个)
+ */
+
+// 创建或更新提示词模板
+export async function createOrUpdatePromptTemplate(id: number | null, data: {
+  name: string;
+  template: string;
+  description?: string;
+  alias?: string;
+}) {
+  try {
+    // 检查 alias 是否为空
+    if (!data.alias || data.alias.trim() === '') {
+      throw new BasicError('UNKNOWN_ERROR', { statusCode: 400, message: 'alias 不能为空' });
+    }
+
+    if (id) {
+      // 更新现有模板
+      const updatedTemplate = await prisma.promptTemplate.update({
+        where: { id, deleted: 0 },
+        data: {
+          name: data.name,
+          alias: data.alias,
+          template: data.template,
+          description: data.description,
+          updated_at: new Date(),
+        },
+        select: {
+          id: true,
+          name: true,
+          alias: true,
+          template: true,
+          description: true,
+          version: true,
+          created_at: true,
+          updated_at: true,
+        },
+      });
+      console.log(`提示词模板 ${data.name} 更新成功`);
+      return updatedTemplate;
+    } else {
+      // 检查是否已存在同 alias 的模板
+      const existingTemplate = await prisma.promptTemplate.findFirst({
+        where: { 
+          alias: data.alias,
+          deleted: 0 
+        }
+      });
+
+      if (existingTemplate) {
+        // 如果存在，则更新
+        const updatedTemplate = await prisma.promptTemplate.update({
+          where: { id: existingTemplate.id },
+          data: {
+            name: data.name,
+            template: data.template,
+            description: data.description,
+            updated_at: new Date(),
+          },
+          select: {
+            id: true,
+            name: true,
+            alias: true,
+            template: true,
+            description: true,
+            version: true,
+            created_at: true,
+            updated_at: true,
+          },
+        });
+        console.log(`提示词模板 ${data.name} 更新成功`);
+        return updatedTemplate;
+      } else {
+        // 创建新模板
+        const newTemplate = await prisma.promptTemplate.create({
+          data: {
+            name: data.name,
+            alias: data.alias,
+            template: data.template,
+            description: data.description,
+          },
+          select: {
+            id: true,
+            name: true,
+            alias: true,
+            template: true,
+            description: true,
+            version: true,
+            created_at: true,
+            updated_at: true,
+          },
+        });
+        console.log(`提示词模板 ${data.name} 创建成功`);
+        return newTemplate;
+      }
+    }
+  } catch (error) {
+    console.error('创建或更新提示词模板失败:', error);
+    if (error instanceof BasicError) {
+      throw error;
+    }
+    throw new BasicError('RESOURCE_CREATION_FAILED', { statusCode: 500, message: '提示词模板操作失败' });
+  }
+}
+
+// 获取提示词模板详情(默认获取第一个)
+export async function getPromptTemplateByAlias(alias?: string) {
+  try {
+    // 如果 alias 为空，直接抛出错误
+    if (!alias) {
+      throw new BasicError('RESOURCE_NOT_FOUND', { statusCode: 404, message: '提示词模板不存在' });
+    }
+
+    // 根据 alias 获取指定模板
+    const template = await prisma.promptTemplate.findFirst({
+      where: { alias, deleted: 0 },
+      select: {
+        id: true,
+        name: true,
+        template: true,
+        description: true,
+        version: true,
+        created_at: true,
+        updated_at: true,
+      },
+    });
+
+    if (!template) {
+      throw new BasicError('RESOURCE_NOT_FOUND', { statusCode: 404, message: '提示词模板不存在' });
+    }
+
+    console.log(`获取提示词模板成功: ${template.name}`);
+    return template;
+  } catch (error) {
+    console.error('获取提示词模板失败:', error);
+    if (error instanceof BasicError) {
+      throw error;
+    }
+    throw new BasicError('UNKNOWN_ERROR', { statusCode: 500, message: '获取提示词模板失败' });
+  }
+}
+

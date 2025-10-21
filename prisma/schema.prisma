@@ -82,3 +82,18 @@ model CrochetPattern {
 
   @@map("crochet_pattern")
 }
+
+// 增加一个 管理 prompt 模板的表
+model PromptTemplate {
+  id          Int      @id @default(autoincrement())
+  name        String   @unique
+  alias       String   @default("")
+  template    String
+  description String?
+  version     Int      @default(1)
+  created_at  DateTime @default(now()) @map("created_at")
+  updated_at  DateTime @updatedAt @map("updated_at")
+  deleted     BigInt   @default(0)
+
+  @@map("prompt_template")
+}

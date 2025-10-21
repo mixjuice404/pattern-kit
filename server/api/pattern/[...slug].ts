@@ -1,7 +1,9 @@
 import { createRouter, useBase, readBody } from 'h3'
 import { defineApiHandler } from '../../utils/defineApiHandler'
 import { useApiResponse } from '../../utils/apiResponse'
-import { createOrUpdateCrochetPattern, getCrochetPatternList, getCrochetPattern, deleteCrochetPattern } from '../../services/pattern.service'
+import { createOrUpdateCrochetPattern, 
+  getCrochetPatternList, getCrochetPattern, deleteCrochetPattern, 
+  createOrUpdatePromptTemplate, getPromptTemplateByAlias } from '../../services/pattern.service'
 
 const router = createRouter()
 
@@ -44,5 +46,32 @@ router.post('/remove/:id', defineApiHandler(async (event) => {
   await deleteCrochetPattern(Number(id))
   return useApiResponse({ status: 'ok', data: {} })
 }));
+
+
+/**
+ * ======================================================================
+ * Crochet Pattern Prompt 统一处理路由
+ * 1. 创建或更新提示词模板
+ * 3. 获取提示词模板详情(默认1 个)
+ * ======================================================================
+ */
+
+// 创建或更新提示词模板
+router.post('/prompt/edit', defineApiHandler(async (event) => {
+  const body = await readBody(event)
+  console.log(`收到请求:`, body)
+  const { id, ...data } = body
+  const templateId = await createOrUpdatePromptTemplate(id, data)
+  return useApiResponse({  id: templateId })
+}));
+
+// 获取提示词模板详情(默认获取第一个)
+router.get('/prompt/:alias', defineApiHandler(async (event) => {
+  const { alias } = getRouterParams(event)
+  const template = await getPromptTemplateByAlias(alias) 
+  return useApiResponse({ template })
+}));
+
+
 
 export default useBase('/api/pattern', router.handler)

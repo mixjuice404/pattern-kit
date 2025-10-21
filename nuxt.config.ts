@@ -33,7 +33,8 @@ export default defineNuxtConfig({
     imagekitPrivateKey: process.env.IMAGEKIT_PRIVATE_KEY,
     public: {
       imagekitPublicKey: process.env.IMAGEKIT_PUBLIC_KEY,
-      imagekitUrlEndpoint: process.env.IMAGEKIT_URL_ENDPOINT
+      imagekitUrlEndpoint: process.env.IMAGEKIT_URL_ENDPOINT,
+      geminiApiKey: process.env.GEMINI_API_KEY
     }
   }
 })

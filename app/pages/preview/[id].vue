@@ -2,7 +2,13 @@
   <div class="preview-container">
     <!-- 打印按钮（仅在屏幕显示） -->
     <div class="btn-container">
-      <button @click="printPDF" class="btn" :disabled="loading">
+      <button class="btn btn-neutral" @click="openPromptBuilderModal"> 
+        Prompt Builder
+      </button>
+      <button class="btn btn-neutral" @click="openReviewJsonModal"> 
+        查看JSON
+      </button>
+      <button @click="printPDF" class="btn btn-primary" :disabled="loading">
         {{ loading ? '加载中…' : '导出 PDF' }}
       </button>
     </div>
@@ -24,6 +30,42 @@
         :pattern-data="patternInfo"
       />
     </div>
+
+    <dialog id="review-json" class="modal">
+      <div class="modal-box" style="max-width: 50rem; ">
+        <div style="margin-bottom: 10px;" class="text-lg font-bold">Pattern Info JSON</div>
+        <div style="margin-bottom: 15px; color: text-secondary; font-size: 12px;">
+          该 JSON 包含了完整的 pattern 信息，用于调试和分析。
+        </div>
+        <pre ref="promptResult" class="bg-base-200 p-4 rounded-lg overflow-auto max-h-100 whitespace-pre-wrap text-primary" style="font-size: 12px;">{{ JSON.stringify(patternInfo, null, 2) }}</pre>
+        <div class="modal-action">
+          <form method="dialog" style="display: flex; align-items: center; gap: 10px;">
+            <button type="button" class="btn" @click="copyJsonToClipboard">{{ copyButtonText }}</button>
+            <button class="btn">Close</button>
+          </form>
+        </div>
+      </div>
+    </dialog>
+
+
+    <dialog id="prompt-builder" class="modal">
+      <div class="modal-box" style="max-width: 50rem;">
+        <div style="margin-bottom: 10px;" class="text-lg font-bold">Pattern Info JSON</div>
+        <div style="margin-bottom: 15px; color: text-secondary; font-size: 12px;">
+          该 JSON 包含了完整的 prompt 信息，用于调试和分析。
+        </div>
+        <pre ref="promptResult" class="bg-base-200 p-4 rounded-lg overflow-auto max-h-100 whitespace-pre-wrap text-primary" style="font-size: 12px;">{{ promptLoading ? '加载中...' : builtPrompt }}</pre>
+        <div class="modal-action">
+          <form method="dialog" style="display: flex; align-items: center; gap: 10px;">
+            <button type="button" class="btn" @click="copyPromptToClipboard">Copy Prompt</button>
+            <button type="button" class="btn btn-primary" @click="buildPrompt">Build</button>
+            <button class="btn">Close</button>
+          </form>
+        </div>
+      </div>
+    </dialog>
+    
+
   </div>
 </template>
 
@@ -31,6 +73,7 @@
 import BaseTemplate from '~/components/template/base/index.vue'
 import SimpleTemplate from '~/components/template/simple/index.vue'
 import { PatternInfo } from '~/types/PatternInfo'
+import { generateWithGemini } from '~/utils/gemini'
 
 useHead({
   title: '',
@@ -48,6 +91,7 @@ const route = useRoute()
 const loading = ref(true)
 const error = ref<string | null>(null)
 const patternInfo = reactive(new PatternInfo())
+const promptResult = ref<HTMLPreElement>()
 
 const load = async () => {
   loading.value = true
@@ -109,6 +153,102 @@ const updatePageHeight = () => {
 const currentTemplate = computed(() => {
   return patternInfo.template === 'simple' ? SimpleTemplate : BaseTemplate
 })
+
+
+// 格式化 JSON 显示
+const formattedJson = computed(() => {
+  return JSON.stringify(patternInfo, null, 2)
+})
+
+// 复制功能
+const copyButtonText = ref('Copy JSON')
+
+const copyPromptToClipboard = async () => {
+  try {
+    await navigator.clipboard.writeText(builtPrompt.value)
+    // 可以添加成功提示
+    console.log('Prompt 已复制到剪贴板')
+  } catch (err) {
+    console.error('复制失败:', err)
+  }
+}
+
+const copyJsonToClipboard = async () => {
+  try {
+    await navigator.clipboard.writeText(formattedJson.value)
+    copyButtonText.value = 'Copied'
+    setTimeout(() => {
+      copyButtonText.value = 'Copy JSON'
+    }, 2000)
+  } catch (err) {
+    console.error('复制失败:', err)
+  }
+}
+
+const openReviewJsonModal = () => {
+  ;(document.getElementById('review-json') as HTMLDialogElement)?.showModal()
+}
+
+const openPromptBuilderModal = () => {
+  ;(document.getElementById('prompt-builder') as HTMLDialogElement)?.showModal()
+}
+
+
+// 响应式变量存储构建的 prompt
+const builtPrompt = ref('无内容')
+const promptLoading = ref(false)
+
+// 执行 prompt builder 功能
+const buildPrompt = async () => {
+  try {
+    promptLoading.value = true
+    // 1. 获取 normalize 模板
+    const response = await $fetch('/api/pattern/prompt/normalize')
+    
+    if (!response?.success || !response?.data?.template) {
+      throw new Error('获取 normalize 模板失败')
+    }
+    const template = response.data.template.template
+    if (!template) {
+      throw new Error('normalize 模板为空')
+    }
+    // 2. 替换模板中的 {{content}}
+    const content = JSON.stringify(patternInfo, null, 2)
+    const result = template.replace(/\{\{content\}\}/g, content)
+
+    // 3. 调用 Gemini API 执行 prompt 并获取结果
+    try {
+      // 从运行时配置获取 API Key
+      const config = useRuntimeConfig()
+      const apiKey = config.public.geminiApiKey
+      
+      if (!apiKey || apiKey === 'your-gemini-api-key') {
+        throw new Error('请配置有效的 Gemini API Key')
+      }
+      
+      const geminiResult = await generateWithGemini(result, apiKey)
+
+      // 1. 查询 alias = pattern 的模板
+      const patternTemplateResponse = await $fetch('/api/pattern/prompt/pattern')
+      const patternTemplate = patternTemplateResponse.data.template.template
+      
+      // 2. 用 geminiResult 替换模板中的 {{json}} 字段
+      const finalResult = patternTemplate.replace(/\{\{json\}\}/g, geminiResult)
+
+      // 3. 合并后的字段赋值给 builtPrompt.value
+      builtPrompt.value = finalResult
+    } catch (geminiError: any) {
+      console.error('Gemini API 调用失败:', geminiError)
+      // 如果 Gemini 调用失败，显示原始 prompt
+      builtPrompt.value = `❌ Gemini API 调用失败: ${geminiError.message}\n\n原始 Prompt:\n${result}`
+    } finally {
+      promptLoading.value = false
+    }
+  } catch (error: any) {
+    console.error('构建 prompt 失败:', error)
+  }
+}
+
 </script>
 
 <style scoped>
@@ -122,6 +262,9 @@ const currentTemplate = computed(() => {
 
 .btn-container {
   position: fixed;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
   bottom: 20px;
   right: 20px;
 }

@@ -10,6 +10,7 @@
     "postinstall": "nuxt prepare && prisma generate"
   },
   "dependencies": {
+    "@google/genai": "^1.25.0",
     "@imagekit/vue": "^4.0.0",
     "@nuxt/icon": "2.0.0",
     "@nuxt/image": "1.11.0",
