@@ -40,6 +40,13 @@
         </div>
     </div>
 
+    <div class="section-block" v-if="patternData.introduction.title">
+        <div class="divider-title">
+            {{ patternData.introduction.title }}
+        </div>
+        <div class="rich-text" v-html="patternData.introduction.text"></div>
+    </div>
+
     <div class="section-block">
         <div class="divider-title">
             🔤 ABBREVIATIONS & TECHNIQUES
@@ -68,7 +75,7 @@
             <div>{{ patternData.techniques.text }}</div>
             <ul>
                 <li v-for="(technique, index) in patternData.techniques.list" :key="index">
-                    <template v-if="technique.includes(':')">
+                    <template v-if="typeof technique === 'string' && technique.includes(':')">
                         <strong>{{ technique.split(':')[0] }}:</strong>{{ technique.split(':')[1] }}
                     </template>
                     <template v-else>
@@ -99,7 +106,7 @@
             <div v-if="patternData.colors.text">{{ patternData.colors.text }}</div>
             <ul>
                 <li v-for="(color, index) in patternData.colors.list" :key="index">
-                  <template v-if="color.includes(':')">
+                  <template v-if="typeof color === 'string' && color.includes(':')">
                     <strong>{{ color.split(':')[0] }}</strong>{{ color.substring(color.indexOf(':')) }}
                   </template>
                   <template v-else>
@@ -112,7 +119,7 @@
             <h4>Tools & Notions</h4>
             <ul>
                 <li v-for="(tool, index) in patternData.tools.list" :key="index">
-                    <template v-if="tool.includes(':')">
+                    <template v-if="typeof tool === 'string' && tool.includes(':')">
                         <strong>{{ tool.split(':')[0] }}:</strong>{{ tool.split(':')[1] }}
                     </template>
                     <template v-else>
@@ -139,12 +146,20 @@
         <div v-for="(item, index) in patternData.instructions" class="instruction-item">
             <h4>{{ item.title }}</h4>
             <div v-if="item.text">{{ item.text }}</div>
-            <div v-if="item.description" class="description">{{ item.description }}</div>
+            <div v-if="item.description" class="description" v-html="item.description"></div>
             <div class="content-row">
                 <div class="steps-column">
-                    <div v-for="(step, index) in item.list" :key="index" class="round-step">
-                        <div v-if="step.toLowerCase().startsWith('rnd') || step.toLowerCase().startsWith('round')" class="checkbox"></div>
-                        <div v-html="step"></div>
+                    <div v-for="(step, index) in item.extendList || []" :key="index" class="round-step">
+                        <div style="display: flex; align-items: center; gap: 8px;">
+                            <div style="height: 100%" v-if="step.content && (step.content.toLowerCase().startsWith('rnd') || step.content.toLowerCase().startsWith('round'))">
+                                <div  class="checkbox"></div>
+                            </div>
+                            <div v-html="step.content"></div>
+                        </div>
+                        
+                        <ul v-if="step.subList && step.subList.length > 0" class="sub-list">
+                            <li v-for="(subItem, subIndex) in step.subList" :key="subIndex" v-html="subItem"></li>
+                        </ul>
                     </div>
                 </div>
                 <div v-if="!item.bottom" class="images-column">
@@ -154,7 +169,7 @@
             <div v-if="item.bottom" class="bottom-images">
                 <img v-for="(url, index) in item.image" :key="index" :src="url" />
             </div> 
-            <div v-if="item.end_description" class="end-description">{{ item.end_description }}</div>
+            <div v-if="item.end_description" class="end-description" v-html="item.end_description"></div>
         </div>
     </div>
 
@@ -164,8 +179,8 @@
             ✨ FINISHING TIPS & NOTES
         </div>
         <ul>
-            <li v-for="item in patternData.finishingTips.list" :key="item">
-                <template v-if="item.includes(':')">
+            <li v-for="(item, index) in patternData.finishingTips.list" :key="index">
+                <template v-if="typeof item === 'string' && item.includes(':')">
                     <strong>{{ item.split(':')[0] }}:</strong>{{ item.split(':')[1] }}
                 </template>
                 <template v-else>
@@ -222,8 +237,8 @@
         <div v-if="patternData.bonus_tips.list.length > 0">
             <h4>Pro Tips for Success</h4>
             <ul>
-                <li v-for="item in patternData.bonus_tips.list" :key="item">
-                    <template v-if="item.includes(':')">
+                <li v-for="(item, index) in patternData.bonus_tips.list" :key="index">
+                    <template v-if="typeof item === 'string' && item.includes(':')">
                         <strong>{{ item.split(':')[0] }}:</strong>{{ item.split(':')[1] }}
                     </template>
                     <template v-else>
@@ -235,8 +250,8 @@
         <div v-if="patternData.bonus_idea.list.length > 0">
             <h4>Variation Ideas</h4>
             <ul>
-                <li v-for="item in patternData.bonus_idea.list" :key="item">
-                    <template v-if="item.includes(':')">
+                <li v-for="(item, index) in patternData.bonus_idea.list" :key="index">
+                    <template v-if="typeof item === 'string' && item.includes(':')">
                         <strong>{{ item.split(':')[0] }}:</strong>{{ item.split(':')[1] }}
                     </template>
                     <template v-else>
@@ -247,7 +262,7 @@
         </div>
         <div>
             <h4>Community & Feedback</h4>
-            <div v-for="item in patternData.bonus_community.list" :key="item">
+            <div v-for="(item, index) in patternData.bonus_community.list" :key="index">
                  {{ item }}
             </div>
         </div>

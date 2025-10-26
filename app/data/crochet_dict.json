@@ -370,6 +370,16 @@
                     "uk": "picot",
                     "uk_abbrev": "picot",
                     "description": "小环针法，常用于边缘装饰，形成细小尖角。"
+                },
+                {
+                    "chinese": "翻面",
+                    "notation_cn": "-",
+                    "us": "turn your work",
+                    "us_abbrev": "turn",
+                    "us_description": "At the end of a row, rotate your piece 180° so you can crochet back along the previous row. Tip: keep your stitches tight and aligned when turning.",
+                    "uk": "turn your work",
+                    "uk_abbrev": "turn",
+                    "description": "在一行结束时，将作品旋转180°，以便从另一侧继续钩织。提示：翻面时保持针脚紧致且对齐。"
                 }
             ]
         }

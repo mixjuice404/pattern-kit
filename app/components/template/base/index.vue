@@ -89,7 +89,7 @@
             <div>{{ patternData.techniques.text }}</div>
             <ul>
                 <li v-for="(technique, index) in patternData.techniques.list" :key="index">
-                    <template v-if="technique.includes(':')">
+                    <template v-if="typeof technique === 'string' && technique.includes(':')">
                         <strong>{{ technique.split(':')[0] }}:</strong>{{ technique.split(':')[1] }}
                     </template>
                     <template v-else>
@@ -119,7 +119,7 @@
             <h4>Color Palette</h4>
             <ul>
                 <li v-for="(color, index) in patternData.colors.list" :key="index">
-                  <template v-if="color.includes(':')">
+                  <template v-if="typeof color === 'string' && color.includes(':')">
                     <strong>{{ color.split(':')[0] }}</strong>{{ color.substring(color.indexOf(':')) }}
                   </template>
                   <template v-else>
@@ -132,7 +132,7 @@
             <h4>Tools & Notions</h4>
             <ul>
                 <li v-for="(tool, index) in patternData.tools.list" :key="index">
-                    <template v-if="tool.includes(':')">
+                    <template v-if="typeof tool === 'string' && tool.includes(':')">
                         <strong>{{ tool.split(':')[0] }}:</strong>{{ tool.split(':')[1] }}
                     </template>
                     <template v-else>
@@ -163,7 +163,7 @@
             <div class="content-row">
                 <div class="steps-column">
                     <div v-for="(step, index) in item.list" :key="index" class="round-step">
-                        <div v-if="step.toLowerCase().startsWith('rnd') || step.toLowerCase().startsWith('round')" class="checkbox"></div>
+                        <div v-if="typeof step === 'string' && (step.toLowerCase().startsWith('rnd') || step.toLowerCase().startsWith('round'))" class="checkbox"></div>
                         <div v-html="step"></div>
                     </div>
                 </div>
@@ -186,8 +186,8 @@
         <div>
             <h4>{{ patternData.finishingTips.text || 'Finishing Tips' }}</h4>
             <ul>
-                <li v-for="item in patternData.finishingTips.list" :key="item">
-                    <template v-if="item.includes(':')">
+                <li v-for="(item, index) in patternData.finishingTips.list" :key="index">
+                    <template v-if="typeof item === 'string' && item.includes(':')">
                         <strong>{{ item.split(':')[0] }}:</strong>{{ item.split(':')[1] }}
                     </template>
                     <template v-else>
@@ -199,8 +199,8 @@
         <div>
             <h4>Troubleshooting</h4>
             <ul>
-                <li v-for="item in patternData.troubleshooting.list" :key="item">
-                    <template v-if="item.includes(':')">
+                <li v-for="(item, index) in patternData.troubleshooting.list" :key="index">
+                    <template v-if="typeof item === 'string' && item.includes(':')">
                         <strong>{{ item.split(':')[0] }}:</strong>{{ item.split(':')[1] }}
                     </template>
                     <template v-else>
@@ -258,8 +258,8 @@
         <div>
             <h4>Pro Tips for Success</h4>
             <ul>
-                <li v-for="item in patternData.bonus_tips.list" :key="item">
-                    <template v-if="item.includes(':')">
+                <li v-for="(item, index) in patternData.bonus_tips.list" :key="index">
+                    <template v-if="typeof item === 'string' && item.includes(':')">
                         <strong>{{ item.split(':')[0] }}:</strong>{{ item.split(':')[1] }}
                     </template>
                     <template v-else>
@@ -271,8 +271,8 @@
         <div>
             <h4>Variation Ideas</h4>
             <ul>
-                <li v-for="item in patternData.bonus_idea.list" :key="item">
-                    <template v-if="item.includes(':')">
+                <li v-for="(item, index) in patternData.bonus_idea.list" :key="index">
+                    <template v-if="typeof item === 'string' && item.includes(':')">
                         <strong>{{ item.split(':')[0] }}:</strong>{{ item.split(':')[1] }}
                     </template>
                     <template v-else>
@@ -283,7 +283,7 @@
         </div>
         <div>
             <h4>Community & Feedback</h4>
-            <div v-for="item in patternData.bonus_community.list" :key="item">
+            <div v-for="(item, index) in patternData.bonus_community.list" :key="index">
                  {{ item }}
             </div>
         </div>

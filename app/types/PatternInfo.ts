@@ -1,9 +1,15 @@
+export interface ListItem {
+  content: string
+  subList?: string[]
+}
+
 export interface TextListData {
   title: string
   text: string
   description: string | null | undefined  // 允许为 null 或 undefined
   end_description: string | null | undefined  // 允许为 null 或 undefined
   list: string[]
+  extendList?: ListItem[] | null
   image: string[]
   bottom: boolean
 }
@@ -12,6 +18,11 @@ export interface CrochetTerm {
   alias: string
   full_text: string
   description: string
+}
+
+export interface Introduction {
+  title: string
+  text: string
 }
 
 export class PatternInfo {
@@ -39,6 +50,9 @@ export class PatternInfo {
   public bonus_idea: TextListData
   public bonus_community: TextListData
   public cover_image: string
+  public introduction: Introduction
+
+
 
   constructor(
     template: string = 'simple',
@@ -77,7 +91,8 @@ export class PatternInfo {
     },
     cover_image: string = '',
     materialsDesc: string = '',
-    terms: CrochetTerm[] = []
+    terms: CrochetTerm[] = [],
+    introduction: Introduction = { title: "🧵 Before You Start – Please Read!", text: "" },
   ) {
     this.template = template
     this.title = title
@@ -103,6 +118,7 @@ export class PatternInfo {
     this.bonus_community = bonus_community
     this.cover_image = cover_image
     this.materialsDesc = materialsDesc
+    this.introduction = introduction
   }
 
   // 导出为 JSON
@@ -131,7 +147,8 @@ export class PatternInfo {
       bonus_idea: this.bonus_idea,
       bonus_community: this.bonus_community,
       cover_image: this.cover_image,
-      materialsDesc: this.materialsDesc
+      materialsDesc: this.materialsDesc,
+      introduction: this.introduction
     }
   }
 
@@ -147,17 +164,29 @@ export class PatternInfo {
           text: typeof d === 'string' ? d : '',
           description: null,
           list: Array.isArray(d) ? d.map((x: any) => String(x)) : [],
+          extendList: null,
           image: [],
           end_description: null,
           bottom: false
         }
       }
+      
+      // 处理 extendList 字段
+      let extendList: ListItem[] | null = null
+      if (Array.isArray(d.extendList)) {
+        extendList = d.extendList.map((item: any) => ({
+          content: typeof item === 'string' ? item : (item?.content || ''),
+          subList: Array.isArray(item?.subList) ? item.subList : undefined
+        }))
+      }
+      
       // 对象：安全读取各字段
       return {
         title: typeof d.title === 'string' ? d.title : '',
         text: typeof d.text === 'string' ? d.text : '',
         description: 'description' in d ? d.description : null,
         list: Array.isArray(d.list) ? d.list.map((x: any) => String(x)) : [],
+        extendList: extendList,
         image: Array.isArray(d.image) ? d.image : [],
         end_description: d.end_description ?? null,
         bottom: d.bottom ?? false
@@ -213,6 +242,9 @@ export class PatternInfo {
     const bonus_community = normalizeTextListData(data?.bonus_community)
     const cover_image = typeof data?.cover_image === 'string' ? data.cover_image : undefined
     const materialsDesc = typeof data?.materialsDesc === 'string' ? data.materialsDesc : undefined
+    const introduction = data?.introduction ?? { title: '', text: '' }
+
+
 
     // 严格按构造函数参数顺序传参
     return new PatternInfo(
@@ -239,7 +271,8 @@ export class PatternInfo {
       bonus_community,
       cover_image,
       materialsDesc,
-      normalizedTerms  // terms 参数应该在这个位置
+      normalizedTerms,  // terms 参数应该在这个位置
+      introduction
     )
   }
 }

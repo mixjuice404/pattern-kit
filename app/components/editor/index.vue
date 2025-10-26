@@ -140,6 +140,30 @@
               />
           </div>
       </div>
+      <div class="input-set" data-nav="introduction">
+        <legend class="form-title" style="display: flex; align-items: center; gap: 6px">
+          <input type="checkbox" :checked="true" class="checkbox checkbox-primary checkbox-xs" />
+          <div>INTRODUCTION</div>
+        </legend>
+        <div class="input-item">
+            <div class="input-label" style="margin-bottom: 15px;">introduction title</div>
+            <input 
+              type="text" 
+              class="input" 
+              style="width: 100%;" 
+              placeholder="Before You Start – Please Read!" 
+              v-model="patternInfo.introduction.title"
+            />
+        </div>
+         <div class="input-item">
+            <div class="input-label" style="margin-bottom: 15px;">introduction content</div>
+            <RichTextEditor
+              v-model="patternInfo.introduction.text"
+              placeholder="Introduction content ..."
+              :rows="16"
+            />
+        </div>
+      </div>
       <div class="input-set" data-nav="Pattern Information" v-if="patternInfo.template === 'base'">
           <legend class="form-title" style="display: flex; align-items: center; gap: 6px">
               <input type="checkbox" :checked="true" class="checkbox checkbox-primary checkbox-xs" />
@@ -323,25 +347,47 @@
                       <button class="btn btn-soft btn-primary" @click="addInstructionListItem(stepIndex)">
                           <icon name="hugeicons:add-01" />
                       </button>
-                  </div>
-
-                  
+                    </div>
                   
                   <!-- 动态渲染列表项 -->
-                  <div v-for="(listItem, listIndex) in instruction.list" 
+                  <div v-for="(listItem, listIndex) in instruction.extendList || []" 
                         :key="listIndex" 
-                        style="display: flex; align-items: center; gap: 10px; margin-bottom: 8px;">
-                      <div @click="removeInstructionListItem(stepIndex, listIndex)">
-                          <icon name="solar:minus-square-bold" style="flex-shrink: 0; opacity: 0.5; cursor: pointer;" class="remove-btn" size="20" />
-                      </div>
-                      <input 
-                          type="text" 
-                          class="input" 
-                          style="width: 100%;" 
-                          placeholder="Add a step ..." 
-                          :value="listItem"
-                          @input="updateInstructionListItem(stepIndex, listIndex, ($event.target as HTMLInputElement).value)"
-                      />
+                        style="margin-bottom: 8px;">
+                        <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 8px;">
+                          <div @click="removeInstructionListItem(stepIndex, listIndex)">
+                              <icon name="solar:minus-square-bold" style="flex-shrink: 0; opacity: 0.5; cursor: pointer;" class="remove-btn" size="20" />
+                          </div>
+                          <input 
+                              type="text" 
+                              class="input" 
+                              style="width: 100%;" 
+                              placeholder="Add a step ..." 
+                              :value="typeof listItem === 'string' ? listItem : listItem.content"
+                              @input="updateInstructionListItem(stepIndex, listIndex, ($event.target as HTMLInputElement).value)"
+                          />
+                          <button class="btn btn-soft btn-neutral" @click="addSubListItem(stepIndex, listIndex)">
+                              <icon name="hugeicons:add-01" />
+                          </button>
+                        </div>
+                      
+                        <!-- sub-list -->
+                        <div v-if="(typeof listItem === 'object' && listItem.subList && listItem.subList.length > 0)" v-for="(subItem, subIndex) in listItem.subList" :key="subIndex" style="width: 100%; display: flex; gap: 10px; margin-bottom: 4px;">
+                          <div style="border-left: 1px dashed #94a3b8; border-bottom: 1px dashed #94a3b8; height: 13px;margin-left: 9px; margin-top: 3px; width: 20px; flex-shrink: 0;"></div>
+                          <div style="display: flex; align-items: center; gap: 10px; flex-grow: 1;">
+                            <div @click="removeSubListItem(stepIndex, listIndex, subIndex)">
+                              <icon name="solar:minus-square-bold" style="flex-shrink: 0; opacity: 0.5; cursor: pointer;" class="remove-btn" size="16" />
+                            </div>
+                            <input 
+                                type="text" 
+                                class="input input-sm" 
+                                style="width: 100%;" 
+                                placeholder="Add a sub-step ..." 
+                                :value="subItem"
+                                @input="updateSubListItem(stepIndex, listIndex, subIndex, ($event.target as HTMLInputElement).value)"
+                            />
+                          </div>
+                          
+                        </div>
                   </div>
 
                   <Upload 
@@ -447,6 +493,7 @@ import { PatternInfo } from '~/types/PatternInfo'
 import crochetDictData from '~/data/crochet_dict.json'
 import TextListEditor from '~/components/editor/text-list/index.vue'
 import Upload from '~/components/upload/index.vue'
+import RichTextEditor from '~/components/editor/rich-text/index.vue'
 
 interface Props {
   patternInfo: PatternInfo
@@ -471,17 +518,6 @@ const crochetSections = computed(() => {
       return acc
     }, {} as Record<string, any>)
   }))
-})
-
-// 添加响应式依赖
-const navSections = computed(() => {
-  if (typeof document === 'undefined') return []
-  
-  // 依赖可能影响 DOM 的数据
-  const _ = crochetSections.value // 触发重新计算
-  
-  // 查找所有 data-nav 元素
-  return Array.from(document.querySelectorAll('[data-nav]'))
 })
 
 
@@ -529,6 +565,7 @@ const addInstructionStep = () => {
     text: '',
     description: '',
     list: [],
+    extendList: [],
     image: [],
     end_description: null,
     bottom: false
@@ -554,23 +591,60 @@ const updateInstructionField = (stepIndex: number, field: 'title' | 'description
 const addInstructionListItem = (stepIndex: number) => {
   const instruction = props.patternInfo.instructions[stepIndex]
   if (instruction) {
-    instruction.list.push('')
+    if (!instruction.extendList) {
+      instruction.extendList = []
+    }
+    instruction.extendList.push({ content: '' })
   }
 }
 
 // 删除指令列表项
 const removeInstructionListItem = (stepIndex: number, listIndex: number) => {
   const instruction = props.patternInfo.instructions[stepIndex]
-  if (instruction && listIndex >= 0 && listIndex < instruction.list.length) {
-    instruction.list.splice(listIndex, 1)
+  if (instruction && instruction.extendList && listIndex >= 0 && listIndex < instruction.extendList.length) {
+    instruction.extendList.splice(listIndex, 1)
   }
 }
 
 // 更新指令列表项
 const updateInstructionListItem = (stepIndex: number, listIndex: number, value: string) => {
   const instruction = props.patternInfo.instructions[stepIndex]
-  if (instruction && instruction.list[listIndex] !== undefined) {
-    instruction.list[listIndex] = value
+  if (instruction && instruction.extendList && instruction.extendList[listIndex]) {
+    instruction.extendList[listIndex].content = value
+  }
+}
+
+// 添加子列表项
+const addSubListItem = (stepIndex: number, listIndex: number) => {
+  const instruction = props.patternInfo.instructions[stepIndex]
+  if (instruction && instruction.extendList && instruction.extendList[listIndex]) {
+    const item = instruction.extendList[listIndex]
+    if (!item.subList) {
+      item.subList = []
+    }
+    item.subList.push('')
+  }
+}
+
+// 删除子列表项
+const removeSubListItem = (stepIndex: number, listIndex: number, subIndex: number) => {
+  const instruction = props.patternInfo.instructions[stepIndex]
+  if (instruction && instruction.extendList && instruction.extendList[listIndex]) {
+    const item = instruction.extendList[listIndex]
+    if (item.subList && subIndex >= 0 && subIndex < item.subList.length) {
+      item.subList.splice(subIndex, 1)
+    }
+  }
+}
+
+// 更新子列表项
+const updateSubListItem = (stepIndex: number, listIndex: number, subIndex: number, value: string) => {
+  const instruction = props.patternInfo.instructions[stepIndex]
+  if (instruction && instruction.extendList && instruction.extendList[listIndex]) {
+    const item = instruction.extendList[listIndex]
+    if (item.subList && item.subList[subIndex] !== undefined) {
+      item.subList[subIndex] = value
+    }
   }
 }
 
@@ -636,10 +710,10 @@ const confirmImportInstruction = () => {
     const steps = content.split('\n').filter(line => line.trim() !== '')    
     console.log("steps: ", steps)
     console.log("currentStepIndex: ", currentStepIndex.value)
-    // 直接替换当前 instruction 的 list
+    // 直接替换当前 instruction 的 extendList
     const instruction = props.patternInfo.instructions[currentStepIndex.value]
     if (instruction) {
-      instruction.list = steps
+      instruction.extendList = steps.map(step => ({ content: step }))
     }
     
     // 清空输入框并关闭模态框
