@@ -156,7 +156,7 @@
         <div class="divider-title">
             🎯 MAIN PATTERN INSTRUCTIONS
         </div>
-        <div v-for="(item, index) in patternData.instructions" class="instruction-item">
+        <!-- <div v-for="(item, index) in patternData.instructions" class="instruction-item">
             <h4>{{ item.title }}</h4>
             <div v-if="item.text">{{ item.text }}</div>
             <div v-if="item.description" class="description">{{ item.description }}</div>
@@ -175,7 +175,7 @@
                 <img v-for="(url, index) in item.image" :key="index" :src="url" />
             </div> 
             <div v-if="item.end_description" class="end-description">{{ item.end_description }}</div>
-        </div>
+        </div> -->
     </div>
 
 

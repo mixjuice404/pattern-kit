@@ -410,13 +410,15 @@
               gap: 4px;
             "
             class="hover:underline text-primary"
+            @click="addInstructionGroup"
           >
             <icon name="solar:add-square-bold" size="14" />
             <div>ADD INSTRUCTION</div>
           </div>
         </legend>
 
-        <div>
+        <!-- 动态渲染指令组 -->
+        <div v-for="(instructionGroup, groupIndex) in patternInfo.instructions" :key="groupIndex" style="margin-bottom: 30px">
           <div class="input-item" style="margin-bottom: 10px">
             <div
               class="input-label"
@@ -428,7 +430,7 @@
                 gap: 5px;
               "
             >
-              <div style="font-weight: 500">Instruction Item</div>
+              <div style="font-weight: 500">Instruction Group {{ groupIndex + 1 }}</div>
               <div
                 style="
                   font-size: 12px;
@@ -439,18 +441,25 @@
                   gap: 4px;
                 "
                 class="hover:underline text-error"
+                @click="removeInstructionGroup(groupIndex)"
+                v-if="patternInfo.instructions.length > 1"
               >
                 <icon name="solar:file-remove-bold" size="14" />
                 <div>REMOVE</div>
               </div>
             </div>
+
             <input
               type="text"
               class="input"
               style="width: 100%; margin-bottom: 8px"
-              placeholder="Title of the instruction ..."
+              placeholder="Title of the instruction group ..."
+              v-model="instructionGroup.title"
             />
+
           </div>
+
+
 
           <div
             style="
@@ -461,17 +470,17 @@
               margin-bottom: 20px;
             "
           >
-            <button class="btn btn-primary">Export Instruction</button>
-            <button class="btn btn-primary" @click="addInstructionStep">
+            <button class="btn btn-secondary btn-sm btn-soft">Export Instruction</button>
+            <button class="btn btn-secondary btn-sm" @click="addInstructionStep(groupIndex)">
               Add
             </button>
           </div>
 
           <!-- 动态渲染指令步骤 -->
           <div
-            v-for="(instruction, stepIndex) in patternInfo.instructions"
-            :key="stepIndex"
-            :data-nav="`Instructions-${stepIndex}`"
+            v-for="(instruction, stepIndex) in instructionGroup.steps"
+            :key="`${groupIndex}-${stepIndex}`"
+            :data-nav="`Instructions-${groupIndex}-${stepIndex}`"
             style="
               padding: 5px;
               border: 2px dashed #e5e5e5;
@@ -490,7 +499,7 @@
               <icon
                 name="solar:close-square-bold-duotone"
                 style="color: oklch(63.7% 0.237 25.331); cursor: pointer"
-                @click="removeInstructionStep(stepIndex)"
+                @click="removeInstructionStep(groupIndex, stepIndex)"
               />
               <div style="font-size: 12px; font-weight: 500; opacity: 0.6">
                 Step {{ stepIndex + 1 }}
@@ -505,6 +514,7 @@
                 :value="instruction.title"
                 @input="
                   updateInstructionField(
+                    groupIndex,
                     stepIndex,
                     'title',
                     ($event.target as HTMLInputElement).value
@@ -518,6 +528,7 @@
                 :value="instruction.description || ''"
                 @input="
                   updateInstructionField(
+                    groupIndex,
                     stepIndex,
                     'description',
                     ($event.target as HTMLInputElement).value
@@ -531,6 +542,7 @@
                 :value="instruction.end_description || ''"
                 @input="
                   updateInstructionField(
+                    groupIndex,
                     stepIndex,
                     'end_description',
                     ($event.target as HTMLInputElement).value
@@ -553,6 +565,7 @@
                   :value="instruction.text"
                   @input="
                     updateInstructionField(
+                      groupIndex,
                       stepIndex,
                       'text',
                       ($event.target as HTMLInputElement).value
@@ -561,13 +574,13 @@
                 />
                 <button
                   class="btn btn-soft btn-primary"
-                  @click="openImportModal(stepIndex)"
+                  @click="openImportModal(groupIndex, stepIndex)"
                 >
                   <icon name="hugeicons:file-import" />
                 </button>
                 <button
                   class="btn btn-soft btn-primary"
-                  @click="addInstructionListItem(stepIndex)"
+                  @click="addInstructionListItem(groupIndex, stepIndex)"
                 >
                   <icon name="hugeicons:add-01" />
                 </button>
@@ -587,7 +600,7 @@
                     margin-bottom: 8px;
                   "
                 >
-                  <div @click="removeInstructionListItem(stepIndex, listIndex)">
+                  <div @click="removeInstructionListItem(groupIndex, stepIndex, listIndex)">
                     <icon
                       name="solar:minus-square-bold"
                       style="flex-shrink: 0; opacity: 0.5; cursor: pointer"
@@ -600,11 +613,10 @@
                     class="input"
                     style="width: 100%"
                     placeholder="Add a step ..."
-                    :value="
-                      typeof listItem === 'string' ? listItem : listItem.content
-                    "
+                    :value="listItem.content"
                     @input="
                       updateInstructionListItem(
+                        groupIndex,
                         stepIndex,
                         listIndex,
                         ($event.target as HTMLInputElement).value
@@ -613,7 +625,7 @@
                   />
                   <button
                     class="btn btn-soft btn-neutral"
-                    @click="addSubListItem(stepIndex, listIndex)"
+                    @click="addSubListItem(groupIndex, stepIndex, listIndex)"
                   >
                     <icon name="hugeicons:add-01" />
                   </button>
@@ -621,12 +633,7 @@
 
                 <!-- sub-list -->
                 <div
-                  v-if="
-                    typeof listItem === 'object' &&
-                    listItem.subList &&
-                    listItem.subList.length > 0
-                  "
-                  v-for="(subItem, subIndex) in listItem.subList"
+                  v-for="(subItem, subIndex) in listItem.subList || []"
                   :key="subIndex"
                   style="
                     width: 100%;
@@ -655,7 +662,7 @@
                     "
                   >
                     <div
-                      @click="removeSubListItem(stepIndex, listIndex, subIndex)"
+                      @click="removeSubListItem(groupIndex, stepIndex, listIndex, subIndex)"
                     >
                       <icon
                         name="solar:minus-square-bold"
@@ -672,6 +679,7 @@
                       :value="subItem"
                       @input="
                         updateSubListItem(
+                          groupIndex,
                           stepIndex,
                           listIndex,
                           subIndex,
@@ -684,9 +692,9 @@
               </div>
 
               <Upload
-                :uploadId="`pattern-step:${stepIndex}`"
-                v-model="imageMatrix[stepIndex]"
-                :initial-url="patternInfo.instructions[stepIndex]?.image || []"
+                :uploadId="`pattern-step:${groupIndex}-${stepIndex}`"
+                v-model="createImageRef(groupIndex, stepIndex).value"
+                :initial-url="instruction.image || []"
                 :multiple="true"
                 :max-count="5"
                 @remove="handleRemove"
@@ -713,6 +721,7 @@
                   class="checkbox checkbox-primary checkbox-xs"
                   @change="
                     updateInstructionField(
+                      groupIndex,
                       stepIndex,
                       'bottom',
                       ($event.target as HTMLInputElement).checked
@@ -725,7 +734,7 @@
 
           <!-- 无指令步骤时的提示 -->
           <div
-            v-if="patternInfo.instructions.length === 0"
+            v-if="instructionGroup.steps.length === 0"
             style="padding: 20px; text-align: center; opacity: 0.5"
           >
             点击 "Add" 按钮添加第一个指令步骤
@@ -894,53 +903,100 @@ const toggleTerm = (abbrev: string) => {
   }
 };
 
-// 添加新的指令步骤
-const addInstructionStep = () => {
+// 添加指令组
+const addInstructionGroup = () => {
   props.patternInfo.instructions.push({
-    title: "",
-    text: "",
-    description: "",
-    list: [],
-    extendList: [],
-    image: [],
-    end_description: null,
-    bottom: false,
+    title: '',
+    steps: []
   });
 };
 
+// 删除指定索引的指令组
+const removeInstructionGroup = (groupIndex: number) => {
+  if (groupIndex >= 0 && groupIndex < props.patternInfo.instructions.length) {
+    props.patternInfo.instructions.splice(groupIndex, 1);
+    // 同时移除对应的imageMatrix
+    if (imageMatrix.value[groupIndex]) {
+      imageMatrix.value.splice(groupIndex, 1);
+    }
+  }
+};
+
+// 初始化 patternInfo
+const initializePatternInfo = () => {
+  if (!props.patternInfo.instructions) {
+    props.patternInfo.instructions = [{
+      title: '',
+      steps: []
+    }]; // 默认有一个空的instruction组
+  }
+  if (!props.patternInfo.terms) {
+    props.patternInfo.terms = [];
+  }
+  // if (!props.patternInfo.materials) {
+  //   props.patternInfo.materials = [];
+  // }
+};
+
+// 添加新的指令步骤
+const addInstructionStep = (groupIndex: number) => {
+  if (groupIndex >= 0 && groupIndex < props.patternInfo.instructions.length && props.patternInfo.instructions[groupIndex]) {
+    props.patternInfo.instructions[groupIndex].steps.push({
+      title: "",
+      text: "",
+      description: "",
+      list: [],
+      extendList: [],
+      image: [],
+      end_description: null,
+      bottom: false,
+    });
+  }
+};
+
+// 初始化
+initializePatternInfo();
+
 // 删除指定索引的指令步骤
-const removeInstructionStep = (stepIndex: number) => {
-  if (stepIndex >= 0 && stepIndex < props.patternInfo.instructions.length) {
-    props.patternInfo.instructions.splice(stepIndex, 1);
+const removeInstructionStep = (groupIndex: number, stepIndex: number) => {
+  if (groupIndex >= 0 && groupIndex < props.patternInfo.instructions.length &&
+      props.patternInfo.instructions[groupIndex] &&
+      stepIndex >= 0 && stepIndex < props.patternInfo.instructions[groupIndex].steps.length) {
+    props.patternInfo.instructions[groupIndex].steps.splice(stepIndex, 1);
+    // 同时移除对应的imageMatrix
+    if (imageMatrix.value[groupIndex] && imageMatrix.value[groupIndex][stepIndex]) {
+      imageMatrix.value[groupIndex].splice(stepIndex, 1);
+    }
   }
 };
 
 // 统一的指令字段更新函数
 const updateInstructionField = (
+  groupIndex: number,
   stepIndex: number,
   field: "title" | "description" | "text" | "end_description" | "bottom",
   value: string | boolean
 ) => {
-  const instruction = props.patternInfo.instructions[stepIndex];
+  const instruction = props.patternInfo.instructions[groupIndex]?.steps[stepIndex];
   if (instruction) {
     (instruction as any)[field] = value;
   }
 };
 
 // 添加指令列表项
-const addInstructionListItem = (stepIndex: number) => {
-  const instruction = props.patternInfo.instructions[stepIndex];
+const addInstructionListItem = (groupIndex: number, stepIndex: number) => {
+  const instruction = props.patternInfo.instructions[groupIndex]?.steps[stepIndex];
   if (instruction) {
     if (!instruction.extendList) {
       instruction.extendList = [];
     }
-    instruction.extendList.push({ content: "" });
+    instruction.extendList.push({ content: "", subList: [] });
   }
 };
 
 // 删除指令列表项
-const removeInstructionListItem = (stepIndex: number, listIndex: number) => {
-  const instruction = props.patternInfo.instructions[stepIndex];
+const removeInstructionListItem = (groupIndex: number, stepIndex: number, listIndex: number) => {
+  const instruction = props.patternInfo.instructions[groupIndex]?.steps[stepIndex];
   if (
     instruction &&
     instruction.extendList &&
@@ -953,11 +1009,12 @@ const removeInstructionListItem = (stepIndex: number, listIndex: number) => {
 
 // 更新指令列表项
 const updateInstructionListItem = (
+  groupIndex: number,
   stepIndex: number,
   listIndex: number,
   value: string
 ) => {
-  const instruction = props.patternInfo.instructions[stepIndex];
+  const instruction = props.patternInfo.instructions[groupIndex]?.steps[stepIndex];
   if (
     instruction &&
     instruction.extendList &&
@@ -968,8 +1025,8 @@ const updateInstructionListItem = (
 };
 
 // 添加子列表项
-const addSubListItem = (stepIndex: number, listIndex: number) => {
-  const instruction = props.patternInfo.instructions[stepIndex];
+const addSubListItem = (groupIndex: number, stepIndex: number, listIndex: number) => {
+  const instruction = props.patternInfo.instructions[groupIndex]?.steps[stepIndex];
   if (
     instruction &&
     instruction.extendList &&
@@ -985,11 +1042,12 @@ const addSubListItem = (stepIndex: number, listIndex: number) => {
 
 // 删除子列表项
 const removeSubListItem = (
+  groupIndex: number,
   stepIndex: number,
   listIndex: number,
   subIndex: number
 ) => {
-  const instruction = props.patternInfo.instructions[stepIndex];
+  const instruction = props.patternInfo.instructions[groupIndex]?.steps[stepIndex];
   if (
     instruction &&
     instruction.extendList &&
@@ -1004,12 +1062,13 @@ const removeSubListItem = (
 
 // 更新子列表项
 const updateSubListItem = (
+  groupIndex: number,
   stepIndex: number,
   listIndex: number,
   subIndex: number,
   value: string
 ) => {
-  const instruction = props.patternInfo.instructions[stepIndex];
+  const instruction = props.patternInfo.instructions[groupIndex]?.steps[stepIndex];
   if (
     instruction &&
     instruction.extendList &&
@@ -1025,23 +1084,83 @@ const updateSubListItem = (
 // 文件上传
 // 单文件存储
 const coverImage = ref<File[]>([]);
-// 文件二维矩阵
-const imageMatrix = ref<File[][]>([]);
+// 文件四维矩阵 [groupIndex][stepIndex][fileIndex]
+const imageMatrix = ref<File[][][]>([]);
+
+// 创建响应式的图片数组引用
+const createImageRef = (groupIndex: number, stepIndex: number) => {
+  return computed({
+    get: () => {
+      if (!imageMatrix.value[groupIndex]) {
+        imageMatrix.value[groupIndex] = []
+      }
+      if (!imageMatrix.value[groupIndex][stepIndex]) {
+        imageMatrix.value[groupIndex][stepIndex] = []
+      }
+      return imageMatrix.value[groupIndex][stepIndex]
+    },
+    set: (newValue: File[]) => {
+      if (!imageMatrix.value[groupIndex]) {
+        imageMatrix.value[groupIndex] = []
+      }
+      imageMatrix.value[groupIndex][stepIndex] = newValue
+    }
+  })
+};
+
+// 获取图片数组的辅助函数
+const getImageArray = (groupIndex: number, stepIndex: number): File[] => {
+  if (!imageMatrix.value[groupIndex]) {
+    imageMatrix.value[groupIndex] = [];
+  }
+  if (!imageMatrix.value[groupIndex][stepIndex]) {
+    imageMatrix.value[groupIndex][stepIndex] = [];
+  }
+  return imageMatrix.value[groupIndex][stepIndex];
+};
 
 // 上传回调
+// 解析uploadId的辅助函数
+const parseUploadId = (uploadId: string) => {
+  if (!uploadId.startsWith("pattern-step:")) return null;
+  
+  const stepInfo = uploadId.split(":")[1];
+  if (!stepInfo) return null;
+  
+  const parts = stepInfo.split("-");
+  if (parts.length !== 2) return null;
+  
+  const [groupIndexStr, stepIndexStr] = parts;
+  if (!groupIndexStr || !stepIndexStr) return null;
+  
+  const groupIndex = parseInt(groupIndexStr);
+  const stepIndex = parseInt(stepIndexStr);
+  
+  if (isNaN(groupIndex) || isNaN(stepIndex)) return null;
+  
+  return { groupIndex, stepIndex };
+};
+
+// 获取指令对象的辅助函数
+const getInstruction = (groupIndex: number, stepIndex: number) => {
+  if (
+    groupIndex >= 0 && groupIndex < props.patternInfo.instructions.length &&
+    props.patternInfo.instructions[groupIndex] &&
+    stepIndex >= 0 && stepIndex < props.patternInfo.instructions[groupIndex].steps.length
+  ) {
+    return props.patternInfo.instructions[groupIndex].steps[stepIndex];
+  }
+  return null;
+};
+
 const handleUploadSuccess = (uploadId: string, result: any, file: File) => {
   if (uploadId === "cover-image") {
     props.patternInfo.cover_image = result.url;
   } else if (uploadId.startsWith("pattern-step:")) {
-    const stepIndexStr = uploadId.split(":")[1];
-    if (stepIndexStr) {
-      const stepIndex = parseInt(stepIndexStr);
-      const instruction = props.patternInfo.instructions[stepIndex];
-      if (
-        instruction &&
-        stepIndex >= 0 &&
-        stepIndex < props.patternInfo.instructions.length
-      ) {
+    const parsed = parseUploadId(uploadId);
+    if (parsed) {
+      const instruction = getInstruction(parsed.groupIndex, parsed.stepIndex);
+      if (instruction && instruction.image) {
         instruction.image.push(result.url);
       }
     }
@@ -1058,15 +1177,10 @@ const handleRemove = (
     // 无论是文件还是URL预览被移除，都清空cover_image
     props.patternInfo.cover_image = "";
   } else if (uploadId.startsWith("pattern-step:")) {
-    const stepIndexStr = uploadId.split(":")[1];
-    if (stepIndexStr) {
-      const stepIndex = parseInt(stepIndexStr);
-      const instruction = props.patternInfo.instructions[stepIndex];
-      if (
-        instruction &&
-        stepIndex >= 0 &&
-        stepIndex < props.patternInfo.instructions.length
-      ) {
+    const parsed = parseUploadId(uploadId);
+    if (parsed) {
+      const instruction = getInstruction(parsed.groupIndex, parsed.stepIndex);
+      if (instruction && instruction.image) {
         instruction.image.splice(index, 1);
       }
     }
@@ -1077,9 +1191,11 @@ const handleUploadError = (uploadId: string, err: Error, file: File) => {
   console.error("Upload error", uploadId, err, file);
 };
 
+const currentGroupIndex = ref(0);
 const currentStepIndex = ref(0);
 
-const openImportModal = (stepIndex: number) => {
+const openImportModal = (groupIndex: number, stepIndex: number) => {
+  currentGroupIndex.value = groupIndex;
   currentStepIndex.value = stepIndex;
   (
     document.getElementById("import-instruction-modal") as HTMLDialogElement
@@ -1093,14 +1209,14 @@ const importTextArea = ref<string>("");
 const confirmImportInstruction = () => {
   const content = importTextArea.value || "";
   console.log("content: ", content);
-  console.log("currentStepIndex: ", currentStepIndex);
+  console.log("currentGroupIndex: ", currentGroupIndex.value);
+  console.log("currentStepIndex: ", currentStepIndex.value);
   if (content.trim()) {
     // 按换行分割成数组，过滤空行
     const steps = content.split("\n").filter((line) => line.trim() !== "");
     console.log("steps: ", steps);
-    console.log("currentStepIndex: ", currentStepIndex.value);
     // 直接替换当前 instruction 的 extendList
-    const instruction = props.patternInfo.instructions[currentStepIndex.value];
+    const instruction = props.patternInfo.instructions[currentGroupIndex.value]?.steps[currentStepIndex.value];
     if (instruction) {
       instruction.extendList = steps.map((step) => ({ content: step }));
     }

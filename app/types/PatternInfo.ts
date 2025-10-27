@@ -1,3 +1,8 @@
+export interface InstructionGroup {
+  title?: string
+  steps: TextListData[]
+}
+
 export interface ListItem {
   content: string
   subList?: string[]
@@ -5,13 +10,14 @@ export interface ListItem {
 
 export interface TextListData {
   title: string
+  extendTitle?: string
   text: string
   description: string | null | undefined  // 允许为 null 或 undefined
   end_description: string | null | undefined  // 允许为 null 或 undefined
   list: string[]
   extendList?: ListItem[] | null
   image: string[]
-  bottom: boolean
+  bottom: boolean,
 }
 
 export interface CrochetTerm {
@@ -43,7 +49,7 @@ export class PatternInfo {
   public colors: TextListData
   public tools: TextListData
   public supplies: TextListData
-  public instructions: TextListData[]
+  public instructions: InstructionGroup[]
   public finishingTips: TextListData
   public troubleshooting: TextListData
   public bonus_tips: TextListData
@@ -51,8 +57,6 @@ export class PatternInfo {
   public bonus_community: TextListData
   public cover_image: string
   public introduction: Introduction
-
-
 
   constructor(
     template: string = 'simple',
@@ -70,7 +74,7 @@ export class PatternInfo {
     colors: TextListData = { title: '', bottom: false, image: [], description: null, end_description: null, text: '', list: ['White (Main): 50g', 'Red: 25g', 'Watermelon Red: 15g', 'Navy Blue: 30g', 'Light Khaki: 20g' ] },
     tools: TextListData = { title: '', bottom: false, image: [], description: null, end_description: null, text: '', list: ['Crochet Hook: 3.5mm or 4.0mm (US E/4 or G/6)', 'Safety Eyes: 8mm black (1 pair)','Fiberfill Stuffing: Polyester fill', 'Tapestry Needle: For sewing and embroidery', 'Stitch Markers: For marking rounds', 'Scissors: Sharp fabric scissors', 'Pins: For positioning before sewing'] },
     supplies: TextListData = { title: '', bottom: false, image: [], description: null, end_description: null, text: '', list: ['Hot glue gun (alternative to sewing)', 'Scissors (sharp)', 'Pencil (for marking)', 'Stitch markers (optional)'] },
-    instructions: TextListData[] = [{ title: 'Body', bottom: false, image: [],end_description: null, description: "Start with making a round base. Work in continuous rounds without slip stitches. you can stuff the chick's body with fiberfill to achieve the desired appearance; there's no need to pack it too tightly—a bit of fluffiness is ideal", text: 'With white yarn', list: ['Rnd 1: 6sc in the MR(6)','Rnd 2: 6inc (12)'] }, { title: 'WINGS/HANDS', bottom: false, image: [], end_description: null, description: null, text: 'Make 2 - Using White yarn', list: ['Round 1: Magic ring, 6 sc in ring (6)', "Change to light khaki color", 'Round 2: 6inc (12)'] }],
+    instructions: InstructionGroup[] = [{ title: '', steps: [{ title: 'Body', bottom: false, image: [],end_description: null, description: "Start with making a round base. Work in continuous rounds without slip stitches. you can stuff the chick's body with fiberfill to achieve the desired appearance; there's no need to pack it too tightly—a bit of fluffiness is ideal", text: 'With white yarn', list: ['Rnd 1: 6sc in the MR(6)','Rnd 2: 6inc (12)'] }, { title: 'WINGS/HANDS', bottom: false, image: [], end_description: null, description: null, text: 'Make 2 - Using White yarn', list: ['Round 1: Magic ring, 6 sc in ring (6)', "Change to light khaki color", 'Round 2: 6inc (12)'] }] }],
     finishingTips: TextListData = { title: '', bottom: false, image: [], end_description: null, description: null, text: '', list: ['Weaving Ends: Always weave in ends securely, going through multiple stitches', 'Shaping: Block pieces if needed for consistent shape', 'Stuffing: Stuff firmly but not overly tight to maintain shape']},
     troubleshooting: TextListData = { title: '', bottom: false, image: [], end_description: null, description: null, text: '', list: ['Uneven Stitches: Maintain consistent tension throughout', 'Loose Parts: Double-check all sewing before final assembly']},
     bonus_tips: TextListData = { title: '', bottom: false, image: [], end_description: null, description: null, text: '', list: ['Tension Control: Keep consistent tension for even stitches', 'Safety Eye Placement: Mark positions before inserting', 'Color Changing: Carry yarn up inside for clean lines', 'Assembly Order: Complete all pieces before assembly' ]},
@@ -193,9 +197,29 @@ export class PatternInfo {
       }
     }
 
-    const normalizeInstructionArray = (arr: any): TextListData[] => {
+    const normalizeInstructionArray = (arr: any): InstructionGroup[] => {
       if (!Array.isArray(arr)) return []
-      return arr.map((item: any) => normalizeTextListData(item))
+      
+      // 检查是否已经是新的InstructionGroup格式
+      if (arr.length > 0 && arr[0] && typeof arr[0] === 'object' && 'steps' in arr[0]) {
+        // 已经是InstructionGroup格式
+        return arr.map((group: any) => ({
+          title: typeof group.title === 'string' ? group.title : '',
+          steps: Array.isArray(group.steps) ? group.steps.map((item: any) => normalizeTextListData(item)) : []
+        }))
+      } else if (arr.length > 0 && Array.isArray(arr[0])) {
+        // 是二维数组格式，需要转换为InstructionGroup格式
+        return arr.map((subArr: any, index: number) => ({
+          title: '',
+          steps: Array.isArray(subArr) ? subArr.map((item: any) => normalizeTextListData(item)) : []
+        }))
+      } else {
+        // 是一维数组，包装成单个InstructionGroup
+        return [{
+          title: '',
+          steps: arr.map((item: any) => normalizeTextListData(item))
+        }]
+      }
     }
 
     const normalizeTerm = (t: any) => ({

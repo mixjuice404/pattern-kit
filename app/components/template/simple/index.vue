@@ -143,33 +143,36 @@
         <div class="divider-title">
             🎯 MAIN PATTERN INSTRUCTIONS
         </div>
-        <div v-for="(item, index) in patternData.instructions" class="instruction-item">
-            <h4>{{ item.title }}</h4>
-            <div v-if="item.text">{{ item.text }}</div>
-            <div v-if="item.description" class="description" v-html="item.description"></div>
-            <div class="content-row">
-                <div class="steps-column">
-                    <div v-for="(step, index) in item.extendList || []" :key="index" class="round-step">
-                        <div style="display: flex; align-items: center; gap: 8px;">
-                            <div style="height: 100%" v-if="step.content && (step.content.toLowerCase().startsWith('rnd') || step.content.toLowerCase().startsWith('round'))">
-                                <div  class="checkbox"></div>
+        <div v-for="(instructionGroup, groupIndex) in patternData.instructions" :key="groupIndex" class="instruction-group" style="margin-bottom: 40px;">
+            <div style="font-size: 28px; font-weight: 700;" v-if="instructionGroup.title" class="group-title">{{ instructionGroup.title.toUpperCase() }}</div>
+            <div v-for="(item, index) in instructionGroup.steps" :key="index" class="instruction-item">
+                <h4 style="margin-top: 15px;">{{ item.title }}</h4>
+                <div v-if="item.text">{{ item.text }}</div>
+                <div v-if="item.description" class="description" v-html="item.description"></div>
+                <div class="content-row">
+                    <div class="steps-column">
+                        <div v-for="(step, stepIndex) in item.extendList || []" :key="stepIndex" class="round-step">
+                            <div style="display: flex; align-items: center; gap: 8px;">
+                                <div style="height: 100%" v-if="step.content && (step.content.toLowerCase().startsWith('rnd') || step.content.toLowerCase().startsWith('round'))">
+                                    <div  class="checkbox"></div>
+                                </div>
+                                <div v-html="step.content"></div>
                             </div>
-                            <div v-html="step.content"></div>
+                            
+                            <ul v-if="step.subList && step.subList.length > 0" class="sub-list">
+                                <li v-for="(subItem, subIndex) in step.subList" :key="subIndex" v-html="subItem"></li>
+                            </ul>
                         </div>
-                        
-                        <ul v-if="step.subList && step.subList.length > 0" class="sub-list">
-                            <li v-for="(subItem, subIndex) in step.subList" :key="subIndex" v-html="subItem"></li>
-                        </ul>
                     </div>
-                </div>
-                <div v-if="!item.bottom" class="images-column">
-                    <img v-for="(url, index) in item.image" :key="index" :src="url" />
-                </div>
-            </div> 
-            <div v-if="item.bottom" class="bottom-images">
-                <img v-for="(url, index) in item.image" :key="index" :src="url" />
-            </div> 
-            <div v-if="item.end_description" class="end-description" v-html="item.end_description"></div>
+                    <div v-if="!item.bottom" class="images-column">
+                        <img v-for="(url, imgIndex) in item.image" :key="imgIndex" :src="url" />
+                    </div>
+                </div> 
+                <div v-if="item.bottom" class="bottom-images">
+                    <img v-for="(url, imgIndex) in item.image" :key="imgIndex" :src="url" />
+                </div> 
+                <div v-if="item.end_description" class="end-description" v-html="item.end_description"></div>
+            </div>
         </div>
     </div>
 
