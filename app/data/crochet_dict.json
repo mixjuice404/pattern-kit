@@ -370,7 +370,14 @@
                     "uk": "picot",
                     "uk_abbrev": "picot",
                     "description": "小环针法，常用于边缘装饰，形成细小尖角。"
-                },
+                }
+            ]
+        },
+        {
+            "section_id": "custom_abbreviations",
+            "section_name": "自定义针法字典 / Custom Abbreviations",
+            "rows":
+            [
                 {
                     "chinese": "翻面",
                     "notation_cn": "-",
@@ -380,6 +387,16 @@
                     "uk": "turn your work",
                     "uk_abbrev": "turn",
                     "description": "在一行结束时，将作品旋转180°，以便从另一侧继续钩织。提示：翻面时保持针脚紧致且对齐。"
+                },
+                {
+                    "chinese": "三长针并钩",
+                    "notation_cn": "3DC-CL",
+                    "us": "3 double crochet cluster",
+                    "us_abbrev": "3 dc cluster",
+                    "us_description": "Cluster of 3 double crochet stitches worked together into one top loop, creating a raised, textured stitch.",
+                    "uk": "3 treble crochet cluster",
+                    "uk_abbrev": "3 tr cluster",
+                    "description": "将3个长针并在一起收顶形成一针，用于增加立体感或形成花瓣等纹理效果。"
                 }
             ]
         }

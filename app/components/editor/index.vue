@@ -263,18 +263,25 @@
               {{ section.name }}
             </div>
             <div class="grid-btn-group">
-              <div
-                v-for="(termData, usName) in section.terms"
-                :key="usName"
-                class="grid-btn"
-                :class="{ selected: isTermSelected(termData.us_abbrev) }"
-                @click="toggleTerm(termData.us_abbrev)"
-                :title="`${termData.chinese} (${termData.notation_cn}) - ${termData.description}`"
-              >
-                {{ termData.us_abbrev || usName }}
+              <div v-for="(termData, usName) in section.terms" :key="usName">
+                <div class="tooltip">
+                  <div class="tooltip-content tooltip-neutral">
+                    <div style="font-size: 12px;">{{ termData.chinese }} ({{ termData.notation_cn }})</div>
+                  </div>
+                  <div
+                    class="grid-btn"
+                    :class="{ selected: isTermSelected(termData.us_abbrev) }"
+                    @click="toggleTerm(termData.us_abbrev)"
+                    :title="`${termData.chinese} (${termData.notation_cn}) - ${termData.description}`"
+                    >
+                    {{ termData.us_abbrev || usName }}
+                  </div>
+                </div>
               </div>
+              
             </div>
           </div>
+
         </div>
         <TextListEditor
           v-model="patternInfo.techniques"

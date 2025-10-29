@@ -137,7 +137,24 @@ onMounted(load)
 
 // 打印函数
 const printPDF = () => {
+  // 保存原始标题
+  const originalTitle = document.title
+  
+  // 生成文件名
+  const fileName = patternInfo.title 
+    ? `${patternInfo.title.replace(/[^\w\s-]/g, '').trim()}_pattern`
+    : 'crochet_pattern'
+  
+  // 临时设置页面标题（影响默认文件名）
+  document.title = fileName
+  
+  // 执行打印
   window.print()
+  
+  // 恢复原始标题
+  setTimeout(() => {
+    document.title = originalTitle
+  }, 100)
 }
 
 // 动态计算页面高度

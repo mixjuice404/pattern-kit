@@ -153,8 +153,8 @@
                     <div class="steps-column">
                         <div v-for="(step, stepIndex) in item.extendList || []" :key="stepIndex" class="round-step">
                             <div style="display: flex; align-items: center; gap: 8px;">
-                                <div style="height: 100%" v-if="step.content && (step.content.toLowerCase().startsWith('rnd') || step.content.toLowerCase().startsWith('round'))">
-                                    <div  class="checkbox"></div>
+                                <div style="align-self: flex-start;" v-if="step.content && (step.content.toLowerCase().startsWith('rnd') || step.content.toLowerCase().startsWith('round'))">
+                                    <div  class="checkbox" style="margin-top: -2px;"></div>
                                 </div>
                                 <div v-html="step.content"></div>
                             </div>
