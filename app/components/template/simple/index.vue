@@ -4,8 +4,7 @@
         <div class="mb-8">
             <div class="title">{{ patternData.title ? patternData.title : 'Default Title (Required)' }}</div>
             <!-- <div class="subtitle">{{ patternData.subtitle ? patternData.subtitle : 'Default Subtitle Description' }}</div> -->
-            <div class="italic mt-2" v-if="patternData.inspiration" style="background-color: oklch(98.5% 0.002 247.839); border-radius: 6px; padding: 8px 10px; font-size: 12px">
-                {{ patternData.inspiration }}
+            <div class="italic mt-2" v-if="patternData.inspiration" style="white-space: pre-wrap; background-color: oklch(98.5% 0.002 247.839); border-radius: 6px; padding: 8px 10px; font-size: 12px" v-html="patternData.inspiration">
             </div>
         </div>
 
@@ -145,8 +144,9 @@
         </div>
         <div v-for="(instructionGroup, groupIndex) in patternData.instructions" :key="groupIndex" class="instruction-group" style="margin-bottom: 40px;">
             <div style="font-size: 28px; font-weight: 700;" v-if="instructionGroup.title" class="group-title">{{ instructionGroup.title.toUpperCase() }}</div>
+            <div v-if="instructionGroup.description" v-html="instructionGroup.description"></div>
             <div v-for="(item, index) in instructionGroup.steps" :key="index" class="instruction-item">
-                <h4 style="margin-top: 15px;">{{ item.title }}</h4>
+                <h4 style="margin-top: 15px;" v-if="item.title">{{ item.title }}</h4>
                 <div v-if="item.text">{{ item.text }}</div>
                 <div v-if="item.description" class="description" v-html="item.description"></div>
                 <div class="content-row">
@@ -165,11 +165,21 @@
                         </div>
                     </div>
                     <div v-if="!item.bottom" class="images-column">
-                        <img v-for="(url, imgIndex) in item.image" :key="imgIndex" :src="url" />
+                        <div v-for="(url, imgIndex) in item.image" :key="imgIndex" style="position: relative;">
+                            <img  :src="url" />
+                            <div class="shadow" style="font-weight: 600; position: absolute; bottom: 5px; right: 5px; background-color: #f97316; color: #fff; padding: 4px 7px; line-height: 1; font-size: 12px; border-radius: 4px;">
+                                {{ (imgIndex + 1) }}
+                            </div>   
+                        </div>
                     </div>
                 </div> 
                 <div v-if="item.bottom" class="bottom-images">
-                    <img v-for="(url, imgIndex) in item.image" :key="imgIndex" :src="url" />
+                    <div v-for="(url, imgIndex) in item.image" :key="imgIndex" style="position: relative;">
+                        <img  :src="url" />
+                        <div class="shadow" style="font-weight: 600; position: absolute; bottom: 5px; right: 5px; background-color: #f97316; color: #fff; padding: 5px 8px; line-height: 1; font-size: 12px; border-radius: 4px;">
+                            {{(imgIndex + 1) }}
+                        </div> 
+                    </div>
                 </div> 
                 <div v-if="item.end_description" class="end-description" v-html="item.end_description"></div>
             </div>
@@ -179,7 +189,7 @@
 
     <div class="section-block" v-if="patternData.finishingTips.list.length > 0">
         <div class="divider-title">
-            ✨ FINISHING TIPS & NOTES
+            ✨ CREATIVE NOTES & TIPS
         </div>
         <ul>
             <li v-for="(item, index) in patternData.finishingTips.list" :key="index">

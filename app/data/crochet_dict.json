@@ -379,6 +379,16 @@
             "rows":
             [
                 {
+                    "chinese": "收尾（断线并固定）",
+                    "notation_cn": "收尾 / FO",
+                    "us": "fasten off",
+                    "us_abbrev": "FO",
+                    "us_description": "Finish the yarn: cut leaving a tail, pull tail through last loop to secure, then weave in ends.",
+                    "uk": "fasten off",
+                    "uk_abbrev": "FO",
+                    "description": "完成收尾：剪断线头并将尾线穿过最后一针固定，然后将线头藏入织物内并缝合固定。"
+                },
+                {
                     "chinese": "翻面",
                     "notation_cn": "-",
                     "us": "turn your work",
@@ -397,6 +407,26 @@
                     "uk": "3 treble crochet cluster",
                     "uk_abbrev": "3 tr cluster",
                     "description": "将3个长针并在一起收顶形成一针，用于增加立体感或形成花瓣等纹理效果。"
+                },
+                {
+                    "chinese": "侧边针目钩法",
+                    "notation_cn": "SL-side",
+                    "us": "worked into side loop",
+                    "us_abbrev": "worked into side loop",
+                    "us_description": "Crochet into the slanted loop on the side of the previous stitch, often used to create a decorative edge or “picot-like” effect.",
+                    "uk": "worked into side loop",
+                    "uk_abbrev": "side loop",
+                    "description": "在上一针侧面的倾斜线圈中钩针，常用于制作装饰性边缘或类似狗牙边的效果。"
+                },
+                {
+                    "chinese": "重复括号内针法N次",
+                    "notation_cn": "()×N",
+                    "us": "repeat",
+                    "us_abbrev": "()×N",
+                    "us_description": "Repeat the sequence of stitches inside the parentheses N times.",
+                    "uk": "repeat",
+                    "uk_abbrev": "()×N",
+                    "description": "重复括号内的针法序列N次，常用于图解中表示连续重复的针法组合。"
                 }
             ]
         }

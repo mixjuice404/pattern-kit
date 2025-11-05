@@ -1,5 +1,6 @@
 export interface InstructionGroup {
-  title?: string
+  title?: string,
+  description?: string,
   steps: TextListData[]
 }
 

@@ -278,7 +278,6 @@
                   </div>
                 </div>
               </div>
-              
             </div>
           </div>
 
@@ -462,6 +461,13 @@
               style="width: 100%; margin-bottom: 8px"
               placeholder="Title of the instruction group ..."
               v-model="instructionGroup.title"
+            />
+            <input
+              type="text"
+              class="input"
+              style="width: 100%; margin-bottom: 8px"
+              placeholder="Description of the instruction group ..."
+              v-model="instructionGroup.description"
             />
 
           </div>
@@ -1332,6 +1338,30 @@ const confirmImportInstruction = () => {
         align-items: center;
       }
     }
+  }
+}
+
+.custom-abbr-input {
+  font-size: 12px;
+  border: 1px solid #ccc;
+  padding: 8px;
+  border-radius: 4px;
+  background-color: #ffffff;
+  min-height: 60px;
+  outline: none;
+  position: relative;
+
+  &:empty::before {
+    content: attr(data-placeholder);
+    color: #999;
+    pointer-events: none;
+    position: absolute;
+    top: 8px;
+    left: 8px;
+  }
+
+  &:focus::before {
+    display: none;
   }
 }
 </style>
