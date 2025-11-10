@@ -46,7 +46,7 @@ export class PatternInfo {
   public techniques: TextListData
   public yarn: string
   public brands: string
-   public materialsDesc: string
+  public materialsDesc: string
   public colors: TextListData
   public tools: TextListData
   public supplies: TextListData

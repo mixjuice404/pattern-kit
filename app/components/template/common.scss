@@ -36,8 +36,7 @@
   }
 
   .round-step {
-      display: flex;
-    //  align-items: center;
+    display: flex;
     flex-direction: column;
 
       .checkbox {
@@ -166,8 +165,74 @@ tbody tr:hover {
     }
 }
 
+
+.custom-table {
+  /* 设计变量（便于统一调色和紧凑性） */
+  --bg: #fff;
+  --text: #1d1d1f;
+  --muted: #6e6e73;
+  --line: rgba(0, 0, 0, 0.08);
+  --hover: rgba(0, 0, 0, 0.04);
+  --radius: 6px;
+  --font-size: 13px;
+  --pad-y: 8px;
+  --pad-x: 12px;
+
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-size: var(--font-size);
+  line-height: 1.45;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  overflow: hidden;
+
+  thead th {
+    color: var(--muted);
+    font-weight: 600;
+    text-align: left;
+    background: oklch(98.5% 0.002 247.839);
+    border-bottom: 1px solid var(--line);
+  }
+
+  tbody tr {
+    transition: background-color 160ms ease;
+    &:hover {
+      background-color: var(--hover);
+    }
+  }
+
+  th,
+  td {
+    padding: var(--pad-y) var(--pad-x);
+    border: 0;
+    vertical-align: middle;
+  }
+
+  /* 行分隔线（低对比） */
+  tbody tr + tr td {
+    border-top: 1px solid var(--line);
+  }
+
+  /* 弱化文本（用于次级信息） */
+  .cell-muted {
+    color: var(--muted);
+  }
+
+  /* 小屏紧凑模式 */
+  @media (max-width: 640px) {
+    --font-size: 12px;
+    --pad-y: 6px;
+    --pad-x: 10px;
+  }
+}
+
 /* 指令区域样式 */
 .instruction-item {
+
+  margin-bottom: 20px;
     
     .description {
         white-space: pre-wrap;
@@ -221,4 +286,29 @@ tbody tr:hover {
         white-space: pre-wrap;
         word-wrap: break-word;
     }
+}
+
+@media print {
+  /* 保留背景色与精确颜色（Chrome/Safari） */
+  * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+
+  html, body { background: #fff; }
+
+  /* 表格打印优化 */
+  .custom-table {
+    overflow: visible; /* 避免分页时内容被裁剪 */
+    // border-color: rgba(0, 0, 0, 0.25);
+  }
+  .custom-table thead { display: table-header-group; }
+  .custom-table tfoot { display: table-footer-group; }
+  .custom-table tr { page-break-inside: avoid; break-inside: avoid; }
+
+  /* 按需隐藏不需要打印的元素 */
+  .no-print { display: none !important; }
+}
+
+/* 为不支持 oklch 的打印引擎提供回退色（先写fallback，再写oklch） */
+.custom-table thead th {
+  background-color: #f6f7f8; /* fallback */
+  background-color: oklch(98.5% 0.002 247.839);
 }

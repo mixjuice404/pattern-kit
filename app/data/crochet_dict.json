@@ -253,6 +253,16 @@
                     "uk": "treble crochet 3 together",
                     "uk_abbrev": "tr3tog",
                     "description": "将三针长针合并为一针，常见于花瓣或收拢结构。"
+                },
+                {
+                    "chinese": "短针并针（减针）",
+                    "notation_cn": "短针并针 / sc dec",
+                    "us": "single crochet decrease",
+                    "us_abbrev": "sc dec",
+                    "us_description": "Insert hook into next stitch, pull up a loop, repeat in next stitch, yarn over and pull through all loops on the hook.",
+                    "uk": "double crochet decrease",
+                    "uk_abbrev": "dc dec",
+                    "description": "短针减针（并针）：将钩针分别插入两针各拉出一圈线，再勾线一次性拉出所有线圈完成减针。"
                 }
             ]
         },

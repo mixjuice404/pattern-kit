@@ -291,6 +291,7 @@
       </div>
 
       <div class="input-set" data-nav="Materials & Tools">
+        
         <legend
           class="form-title"
           style="display: flex; align-items: center; gap: 6px"
@@ -302,6 +303,7 @@
           />
           <div>MATERIALS & TOOLS</div>
         </legend>
+        
         <div class="input-item">
           <div
             class="input-label"
@@ -368,11 +370,17 @@
             />
             <div>Materials Description</div>
           </div>
-          <textarea
+          
+          <!-- <textarea
             class="textarea"
             style="width: 100%; margin-bottom: 8px"
             placeholder="Materials description for this pattern ..."
             v-model="patternInfo.materialsDesc"
+          /> -->
+          <rich-text-editor
+            v-model="patternInfo.materialsDesc"
+            placeholder="Materials description for this pattern ..."
+            :rows="16"
           />
         </div>
         <TextListEditor
@@ -393,6 +401,8 @@
           text-placeholder="Optional supplies description ..."
           list-placeholder="Optional supplies used in this pattern ..."
         />
+
+        
       </div>
 
       <div class="input-set" data-nav="Main Pattern Instructions">
@@ -774,6 +784,7 @@
           list-placeholder="Finishing tips used in this pattern ..."
         />
         <TextListEditor
+          v-if="patternInfo.template !== 'simple'"
           v-model="patternInfo.troubleshooting"
           label="Troubleshooting"
           text-placeholder="Troubleshooting description ..."
@@ -800,6 +811,7 @@
           list-placeholder="Pro Tips for Success used in this pattern ..."
         />
         <TextListEditor
+          v-if="patternInfo.template !== 'simple'"
           v-model="patternInfo.bonus_idea"
           label="Variation Ideas"
           text-placeholder="Variation Ideas description ..."

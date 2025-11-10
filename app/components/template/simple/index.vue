@@ -52,7 +52,7 @@
         </div>
         <div>
             <h4>Standard Abbreviations</h4>
-            <table>
+            <table class="custom-table">
                 <thead>
                     <tr>
                         <th>Abbreviation</th>
@@ -91,9 +91,9 @@
             🧶 MATERIALS & TOOLS
         </div>
         <div v-if="patternData.materialsDesc">
-            <div style="white-space: pre-wrap; word-wrap: break-word;">{{ patternData.materialsDesc }}</div>
+            <div class="rich-text" v-html="patternData.materialsDesc"></div>
         </div>
-        <div>
+        <div v-if="patternData.yarn || patternData.brands">
             <h4>Yarn Requirements</h4>
             <div>
                 <div><strong>Recommended Yarn:</strong> <span v-html="patternData.yarn"></span></div>
@@ -114,7 +114,7 @@
                 </li>
             </ul>
         </div>
-        <div>
+        <div v-if="patternData.tools.list.length > 0">
             <h4>Tools & Notions</h4>
             <ul>
                 <li v-for="(tool, index) in patternData.tools.list" :key="index">
@@ -127,7 +127,7 @@
                 </li>
             </ul>
         </div>
-        <div>
+        <div v-if="patternData.supplies.list.length > 0">
             <h4>Optional Supplies</h4>
             <ul>
                 <li v-for="(supply, index) in patternData.supplies.list" :key="index">
@@ -146,7 +146,7 @@
             <div style="font-size: 28px; font-weight: 700;" v-if="instructionGroup.title" class="group-title">{{ instructionGroup.title.toUpperCase() }}</div>
             <div v-if="instructionGroup.description" v-html="instructionGroup.description"></div>
             <div v-for="(item, index) in instructionGroup.steps" :key="index" class="instruction-item">
-                <h4 style="margin-top: 15px;" v-if="item.title">{{ item.title }}</h4>
+                <div style="margin-top: 15px; font-size: 20px; font-weight: 700;margin-bottom: 10px;" v-if="item.title">{{ item.title }}</div>
                 <div v-if="item.text">{{ item.text }}</div>
                 <div v-if="item.description" class="description" v-html="item.description"></div>
                 <div class="content-row">
@@ -158,7 +158,6 @@
                                 </div>
                                 <div v-html="step.content"></div>
                             </div>
-                            
                             <ul v-if="step.subList && step.subList.length > 0" class="sub-list">
                                 <li v-for="(subItem, subIndex) in step.subList" :key="subIndex" v-html="subItem"></li>
                             </ul>
@@ -260,7 +259,7 @@
                 </li>
             </ul>
         </div>
-        <div v-if="patternData.bonus_idea.list.length > 0">
+        <div v-if="patternData.bonus_idea.list.length > 0 && patternData.template !== 'simple'">
             <h4>Variation Ideas</h4>
             <ul>
                 <li v-for="(item, index) in patternData.bonus_idea.list" :key="index">
