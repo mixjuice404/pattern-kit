@@ -11,6 +11,9 @@
       <button @click="printPDF" class="btn btn-primary" :disabled="loading">
         {{ loading ? '加载中…' : '导出 PDF' }}
       </button>
+      <button class="btn btn-primary" @click="printA4PDF">
+        分页导出 PDF
+      </button>
     </div>
 
     <!-- 错误提示 -->
@@ -157,6 +160,33 @@ const printPDF = () => {
   }, 100)
 }
 
+// A4 尺寸分页打印
+const printA4PDF = () => {
+  const originalTitle = document.title
+
+  // 生成文件名（区分 A4 分页导出）
+  const fileName = patternInfo.title 
+    ? `${patternInfo.title.replace(/[^\w\s-]/g, '').trim()}_pattern_A4`
+    : 'crochet_pattern_A4'
+
+  // 设置页面标题影响导出文件名
+  document.title = fileName
+
+  // 临时将页面高度设置为 A4 高度，启用分页
+  document.documentElement.style.setProperty('--page-height', '297mm')
+  // 为分页导出添加上下页边距（左右保持 0）
+  document.documentElement.style.setProperty('--page-margin', '10mm 0')
+
+  window.print()
+
+  // 恢复标题并恢复为自适应单页高度
+  setTimeout(() => {
+    document.title = originalTitle
+    document.documentElement.style.removeProperty('--page-margin')
+    updatePageHeight()
+  }, 100)
+}
+
 // 动态计算页面高度
 const updatePageHeight = () => {
   const content = document.querySelector('.print-content') as HTMLElement | null
@@ -300,7 +330,7 @@ const buildPrompt = async () => {
   .btn-container { display: none !important; }
 
   @page {
-    margin: 0;
+    margin: var(--page-margin, 0);
     size: 210mm var(--page-height, 3000mm);
   }
 

@@ -389,6 +389,16 @@
             "rows":
             [
                 {
+                    "chinese": "减针（并针）",
+                    "notation_cn": "减针 / 并针",
+                    "us": "decrease",
+                    "us_abbrev": "dec",
+                    "us_description": "Crochet two stitches together to reduce the stitch count.",
+                    "uk": "decrease",
+                    "uk_abbrev": "dec",
+                    "description": "将相邻的两针并织为一针，用于减少针数，常用于塑形或收口位置。"
+                },
+                {
                     "chinese": "收尾（断线并固定）",
                     "notation_cn": "收尾 / FO",
                     "us": "fasten off",
