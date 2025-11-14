@@ -69,7 +69,7 @@
                 </tbody>
             </table>
         </div>
-        <div>
+        <div v-if="patternData.techniques.text || patternData.techniques.list.length > 0">
             <h4>Special Techniques Used</h4>
             <div>{{ patternData.techniques.text }}</div>
             <ul>
@@ -84,7 +84,6 @@
             </ul>
         </div>
     </div>
-
 
     <div class="section-block">
         <div class="divider-title">
