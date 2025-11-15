@@ -143,7 +143,7 @@
         </div>
         <div v-for="(instructionGroup, groupIndex) in patternData.instructions" :key="groupIndex" class="instruction-group" style="margin-bottom: 40px;">
             <div style="font-size: 28px; font-weight: 700;" v-if="instructionGroup.title" class="group-title">{{ instructionGroup.title.toUpperCase() }}</div>
-            <div v-if="instructionGroup.description" v-html="instructionGroup.description"></div>
+            <div v-if="instructionGroup.description" class="rich-text" v-html="instructionGroup.description"></div>
             <div v-for="(item, index) in instructionGroup.steps" :key="index" class="instruction-item">
                 <div style="margin-top: 15px; font-size: 20px; font-weight: 700;margin-bottom: 10px;" v-if="item.title">{{ item.title }}</div>
                 <div v-if="item.text">{{ item.text }}</div>
@@ -162,21 +162,15 @@
                             </ul>
                         </div>
                     </div>
-                    <div v-if="!item.bottom" class="images-column">
+                    <div class="images-column">
                         <div v-for="(url, imgIndex) in item.image" :key="imgIndex" style="position: relative;">
                             <img  :src="url" />
-                            <div class="shadow" style="font-weight: 600; position: absolute; bottom: 5px; right: 5px; background-color: #f97316; color: #fff; padding: 4px 7px; line-height: 1; font-size: 12px; border-radius: 4px;">
-                                {{ (imgIndex + 1) }}
-                            </div>   
                         </div>
                     </div>
                 </div> 
-                <div v-if="item.bottom" class="bottom-images">
-                    <div v-for="(url, imgIndex) in item.image" :key="imgIndex" style="position: relative;">
+                <div class="bottom-images">
+                    <div v-for="(url, imgIndex) in item.imageBottom" :key="imgIndex" style="position: relative;">
                         <img  :src="url" />
-                        <div class="shadow" style="font-weight: 600; position: absolute; bottom: 5px; right: 5px; background-color: #f97316; color: #fff; padding: 5px 8px; line-height: 1; font-size: 12px; border-radius: 4px;">
-                            {{(imgIndex + 1) }}
-                        </div> 
                     </div>
                 </div> 
                 <div v-if="item.end_description" class="end-description" v-html="item.end_description"></div>

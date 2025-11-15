@@ -472,9 +472,8 @@
               placeholder="Title of the instruction group ..."
               v-model="instructionGroup.title"
             />
-            <input
-              type="text"
-              class="input"
+            <textarea
+              class="textarea"
               style="width: 100%; margin-bottom: 8px"
               placeholder="Description of the instruction group ..."
               v-model="instructionGroup.description"
@@ -714,7 +713,10 @@
                 </div>
               </div>
 
+              <!-- 增加一个 upload 组件 单独支持 imageBottom 这个字段的图片上传 -->
+
               <Upload
+                style="margin-bottom: 8px;"
                 :uploadId="`pattern-step:${groupIndex}-${stepIndex}`"
                 v-model="createImageRef(groupIndex, stepIndex).value"
                 :initial-url="instruction.image || []"
@@ -725,7 +727,19 @@
                 @upload-error="handleUploadError"
               />
 
-              <div
+              <!-- imageBottom 独立上传组件 -->
+              <Upload
+                :uploadId="`pattern-step-bottom:${groupIndex}-${stepIndex}`"
+                v-model="createImageBottomRef(groupIndex, stepIndex).value"
+                :initial-url="instruction.imageBottom || []"
+                :multiple="true"
+                :max-count="5"
+                @remove="handleRemove"
+                @upload-success="handleUploadSuccess"
+                @upload-error="handleUploadError"
+              />
+
+              <!-- <div
                 class="input-item"
                 style="padding: 10px 2px; margin-bottom: 0; text-align: right"
               >
@@ -751,7 +765,7 @@
                     )
                   "
                 />
-              </div>
+              </div> -->
             </div>
           </div>
 
@@ -975,6 +989,7 @@ const addInstructionStep = (groupIndex: number) => {
       image: [],
       end_description: null,
       bottom: false,
+      imageBottom: [],
     });
   }
 };
@@ -1112,6 +1127,30 @@ const coverImage = ref<File[]>([]);
 // 文件四维矩阵 [groupIndex][stepIndex][fileIndex]
 const imageMatrix = ref<File[][][]>([]);
 
+// 新增：用于 imageBottom 的文件矩阵
+const imageBottomMatrix = ref<File[][][]>([]);
+
+// 创建响应式的图片数组引用（bottom）
+const createImageBottomRef = (groupIndex: number, stepIndex: number) => {
+  return computed({
+    get: () => {
+      if (!imageBottomMatrix.value[groupIndex]) {
+        imageBottomMatrix.value[groupIndex] = [];
+      }
+      if (!imageBottomMatrix.value[groupIndex][stepIndex]) {
+        imageBottomMatrix.value[groupIndex][stepIndex] = [];
+      }
+      return imageBottomMatrix.value[groupIndex][stepIndex];
+    },
+    set: (newValue: File[]) => {
+      if (!imageBottomMatrix.value[groupIndex]) {
+        imageBottomMatrix.value[groupIndex] = [];
+      }
+      imageBottomMatrix.value[groupIndex][stepIndex] = newValue;
+    }
+  });
+};
+
 // 创建响应式的图片数组引用
 const createImageRef = (groupIndex: number, stepIndex: number) => {
   return computed({
@@ -1189,6 +1228,18 @@ const handleUploadSuccess = (uploadId: string, result: any, file: File) => {
         instruction.image.push(result.url);
       }
     }
+  } else if (uploadId.startsWith("pattern-step-bottom:")) {
+    const adjustedId = uploadId.replace("pattern-step-bottom:", "pattern-step:");
+    const parsed = parseUploadId(adjustedId);
+    if (parsed) {
+      const instruction = getInstruction(parsed.groupIndex, parsed.stepIndex);
+      if (instruction) {
+        if (!Array.isArray(instruction.imageBottom)) {
+          instruction.imageBottom = [];
+        }
+        instruction.imageBottom.push(result.url);
+      }
+    }
   }
 };
 
@@ -1207,6 +1258,15 @@ const handleRemove = (
       const instruction = getInstruction(parsed.groupIndex, parsed.stepIndex);
       if (instruction && instruction.image) {
         instruction.image.splice(index, 1);
+      }
+    }
+  } else if (uploadId.startsWith("pattern-step-bottom:")) {
+    const adjustedId = uploadId.replace("pattern-step-bottom:", "pattern-step:");
+    const parsed = parseUploadId(adjustedId);
+    if (parsed) {
+      const instruction = getInstruction(parsed.groupIndex, parsed.stepIndex);
+      if (instruction && Array.isArray(instruction.imageBottom)) {
+        instruction.imageBottom.splice(index, 1);
       }
     }
   }
