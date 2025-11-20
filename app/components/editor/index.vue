@@ -739,7 +739,7 @@
                 @upload-error="handleUploadError"
               />
 
-              <!-- <div
+              <div
                 class="input-item"
                 style="padding: 10px 2px; margin-bottom: 0; text-align: right"
               >
@@ -748,24 +748,17 @@
                     font-size: 12px;
                     font-weight: 500;
                     opacity: 0.6;
-                    margin-right: 5px;
+                    margin-right: 10px;
                   "
-                  >Bottom Layout</label
+                  >Bottom Height</label
                 >
                 <input
-                  type="checkbox"
-                  :checked="instruction.bottom"
-                  class="checkbox checkbox-primary checkbox-xs"
-                  @change="
-                    updateInstructionField(
-                      groupIndex,
-                      stepIndex,
-                      'bottom',
-                      ($event.target as HTMLInputElement).checked
-                    )
-                  "
+                  type="number"
+                  v-model.number="instruction.bottomHeight"
+                  class="input input-sm"
+                  style="width: 80px"
                 />
-              </div> -->
+              </div>
             </div>
           </div>
 
@@ -990,6 +983,7 @@ const addInstructionStep = (groupIndex: number) => {
       end_description: null,
       bottom: false,
       imageBottom: [],
+      bottomHeight: null,
     });
   }
 };
@@ -1014,8 +1008,8 @@ const removeInstructionStep = (groupIndex: number, stepIndex: number) => {
 const updateInstructionField = (
   groupIndex: number,
   stepIndex: number,
-  field: "title" | "description" | "text" | "end_description" | "bottom",
-  value: string | boolean
+  field: "title" | "description" | "text" | "end_description" | "bottom" | "bottomHeight",
+  value: string | boolean | number
 ) => {
   const instruction = props.patternInfo.instructions[groupIndex]?.steps[stepIndex];
   if (instruction) {

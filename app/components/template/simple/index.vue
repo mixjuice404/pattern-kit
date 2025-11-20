@@ -16,6 +16,7 @@
 
         <div class="info-box">
             <!-- <div class="badge badge-soft badge-primary">Beginner Friendly</div> -->
+             
             <div class="box-item">
                 <div class="item-label">✨ SKILL LEVEL</div>
                 <div class="badge badge-soft badge-primary">{{ patternData.skillLevel }}</div>
@@ -169,8 +170,8 @@
                     </div>
                 </div> 
                 <div class="bottom-images">
-                    <div v-for="(url, imgIndex) in item.imageBottom" :key="imgIndex" style="position: relative;">
-                        <img  :src="url" />
+                    <div v-for="(url, imgIndex) in item.imageBottom" :key="imgIndex" style="position: relative;" >
+                        <img  :src="url" :style="item.bottomHeight != null ? { height: item.bottomHeight + 'px' } : {}" />
                     </div>
                 </div> 
                 <div v-if="item.end_description" class="end-description" v-html="item.end_description"></div>
