@@ -447,6 +447,16 @@
                     "uk": "repeat",
                     "uk_abbrev": "()×N",
                     "description": "重复括号内的针法序列N次，常用于图解中表示连续重复的针法组合。"
+                },
+                {
+                    "chinese": "疙瘩针 / 爆米花针（bobble）",
+                    "notation_cn": "bobble",
+                    "us": "bobble stitch",
+                    "us_abbrev": "BO",
+                    "us_description": "5 unfinished dc in the same stitch, yarn over and pull through all loops to form a bobble.",
+                    "uk": "bobble stitch",
+                    "uk_abbrev": "BO",
+                    "description": "在同一针目里钩5个未完成长针后一次性拉出，使其鼓起形成疙瘩效果。"
                 }
             ]
         }

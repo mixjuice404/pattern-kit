@@ -163,13 +163,13 @@
                             </ul>
                         </div>
                     </div>
-                    <div class="images-column">
+                    <div class="images-column" v-if="item.image && item.image.length > 0">
                         <div v-for="(url, imgIndex) in item.image" :key="imgIndex" style="position: relative;">
                             <img  :src="url" />
                         </div>
                     </div>
                 </div> 
-                <div class="bottom-images">
+                <div class="bottom-images" v-if="item.imageBottom && item.imageBottom.length > 0">
                     <div v-for="(url, imgIndex) in item.imageBottom" :key="imgIndex" style="position: relative;" >
                         <img  :src="url" :style="item.bottomHeight != null ? { height: item.bottomHeight + 'px' } : {}" />
                     </div>
