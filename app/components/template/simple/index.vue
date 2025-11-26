@@ -16,7 +16,6 @@
 
         <div class="info-box">
             <!-- <div class="badge badge-soft badge-primary">Beginner Friendly</div> -->
-             
             <div class="box-item">
                 <div class="item-label">✨ SKILL LEVEL</div>
                 <div class="badge badge-soft badge-primary">{{ patternData.skillLevel }}</div>
