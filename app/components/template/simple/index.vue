@@ -9,32 +9,31 @@
         </div>
 
         <div class="mb-10" style="font-size: 12px; opacity: 0.8;">
-            <div>Created by: CozyDogOutfits</div>
-            <div>Contact: Message us on Etsy for support</div>  
-            <div>Website/Shop: <a href="https://www.etsy.com/shop/CozyDogOutfits">https://www.etsy.com/shop/CozyDogOutfits</a></div>
+            <div>{{ L.createdBy }}</div>
+            <div>{{ L.contact }}</div>
+            <div>{{ L.websiteShop }}: <a href="https://www.etsy.com/shop/CozyDogOutfits">https://www.etsy.com/shop/CozyDogOutfits</a></div>
         </div>
 
         <div class="info-box">
-            <!-- <div class="badge badge-soft badge-primary">Beginner Friendly</div> -->
             <div class="box-item">
-                <div class="item-label">✨ SKILL LEVEL</div>
+                <div class="item-label">{{ L.skillLevelLabel }}</div>
                 <div class="badge badge-soft badge-primary">{{ patternData.skillLevel }}</div>
             </div>
             <div class="box-item">
-                <div class="item-label">⏱️ ESTIMATED TIME</div>
+                <div class="item-label">{{ L.estimatedTimeLabel }}</div>
                 <div class="item-value" :class="{'gray-scale': !patternData.estimatedTime}">{{ patternData.estimatedTime ? patternData.estimatedTime : 'Required' }}</div>
             </div>
             <div class="box-item">
-                <div class="item-label">📱 LANGUAGE</div>
-                <div class="item-value">English</div>
+                <div class="item-label">{{ L.languageLabel }}</div>
+                <div class="item-value">{{ L.languageValue }}</div>
             </div>
             <div class="box-item" style="grid-column: span 2;">
-                <div class="item-label">📏 FINISHED SIZE</div>
+                <div class="item-label">{{ L.finishedSizeLabel }}</div>
                 <div class="item-value" :class="{'gray-scale': !patternData.finishedSize}">{{ patternData.finishedSize ? patternData.finishedSize : 'Required' }}</div>
             </div>
             <div class="box-item" style="grid-column: span 2;">
-                <div class="item-label">🎯 PATTERN TYPE</div>
-                <div class="item-value">Digital PDF Download</div>
+                <div class="item-label">{{ L.patternTypeLabel }}</div>
+                <div class="item-value">{{ L.patternTypeValue }}</div>
             </div>
         </div>
     </div>
@@ -48,16 +47,16 @@
 
     <div class="section-block">
         <div class="divider-title">
-            🔤 ABBREVIATIONS & TECHNIQUES
+            {{ L.abbreviationsTitle }}
         </div>
         <div>
-            <h4>Standard Abbreviations</h4>
+            <h4>{{ L.standardAbbrev }}</h4>
             <table class="custom-table">
                 <thead>
                     <tr>
-                        <th>Abbreviation</th>
-                        <th>Full Term</th>
-                        <th>Description</th>
+                        <th>{{ L.abbreviationHeader }}</th>
+                        <th>{{ L.fullTermHeader }}</th>
+                        <th>{{ L.descriptionHeader }}</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -70,7 +69,7 @@
             </table>
         </div>
         <div v-if="patternData.techniques.text || patternData.techniques.list.length > 0">
-            <h4>Special Techniques Used</h4>
+            <h4>{{ L.specialTech }}</h4>
             <div>{{ patternData.techniques.text }}</div>
             <ul>
                 <li v-for="(technique, index) in patternData.techniques.list" :key="index">
@@ -87,20 +86,20 @@
 
     <div class="section-block">
         <div class="divider-title">
-            🧶 MATERIALS & TOOLS
+            {{ L.materialsTitle }}
         </div>
         <div v-if="patternData.materialsDesc">
             <div class="rich-text" v-html="patternData.materialsDesc"></div>
         </div>
         <div v-if="patternData.yarn || patternData.brands">
-            <h4>Yarn Requirements</h4>
+            <h4>{{ L.yarnRequirements }}</h4>
             <div>
-                <div><strong>Recommended Yarn:</strong> <span v-html="patternData.yarn"></span></div>
-                <div><strong>Suggested Brands:</strong> {{ patternData.brands }}</div>
+                <div><strong>{{ L.recommendedYarn }}</strong> <span v-html="patternData.yarn"></span></div>
+                <div><strong>{{ L.suggestedBrands }}</strong> {{ patternData.brands }}</div>
             </div>
         </div>
         <div v-if="patternData.colors.list.length > 0">
-            <h4>Color Palette</h4>
+            <h4>{{ L.colorPalette }}</h4>
             <div v-if="patternData.colors.text">{{ patternData.colors.text }}</div>
             <ul>
                 <li v-for="(color, index) in patternData.colors.list" :key="index">
@@ -114,7 +113,7 @@
             </ul>
         </div>
         <div v-if="patternData.tools.list.length > 0">
-            <h4>Tools & Notions</h4>
+            <h4>{{ L.toolsNotions }}</h4>
             <ul>
                 <li v-for="(tool, index) in patternData.tools.list" :key="index">
                     <template v-if="typeof tool === 'string' && tool.includes(':')">
@@ -127,7 +126,7 @@
             </ul>
         </div>
         <div v-if="patternData.supplies.list.length > 0">
-            <h4>Optional Supplies</h4>
+            <h4>{{ L.optionalSupplies }}</h4>
             <ul>
                 <li v-for="(supply, index) in patternData.supplies.list" :key="index">
                     {{ supply }}
@@ -139,7 +138,7 @@
 
     <div class="section-block">
         <div class="divider-title">
-            🎯 MAIN PATTERN INSTRUCTIONS
+            {{ L.mainInstructionsTitle }}
         </div>
         <div v-for="(instructionGroup, groupIndex) in patternData.instructions" :key="groupIndex" class="instruction-group" style="margin-bottom: 40px;">
             <div style="font-size: 28px; font-weight: 700;" v-if="instructionGroup.title" class="group-title">{{ instructionGroup.title.toUpperCase() }}</div>
@@ -198,49 +197,43 @@
 
     <div class="section-block">
         <div class="divider-title">
-            📜 COPYRIGHT & TERMS OF USE
+            {{ L.copyrightTitle }}
         </div>
         <div>
-            <h4>License Terms</h4>
+            <h4>{{ L.licenseTerms }}</h4>
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
                 <div>
-                    <strong>✅ You MAY:</strong>
+                    <strong>{{ L.youMay }}</strong>
                     <ul style="font-size: 12px;">
-                        <li>Use this pattern for personal projects</li>
-                        <li>Sell finished items made from this pattern (small quantities)</li>
-                        <li>Gift finished items to friends and family</li>
-                        <li>Modify the pattern for personal use</li>
+                        <li v-for="(item, i) in L.youMayList" :key="i">{{ item }}</li>
                     </ul>
                 </div>
                 <div>
-                    <strong>❌ You MAY NOT:</strong>
+                    <strong>{{ L.youMayNot }}</strong>
                     <ul style="font-size: 12px;">
-                        <li>Share, distribute, or resell this PDF pattern</li>
-                        <li>Claim this pattern as your own design</li>
-                        <li>Use for mass production or commercial manufacturing</li>
-                        <li>Post the pattern content online or in forums</li>
+                        <li v-for="(item, i) in L.youMayNotList" :key="i">{{ item }}</li>
                     </ul>
                 </div>
             </div>
         </div>
         <div>
-            <h4>Copyright Notice</h4>
-            <div>© 2025 CozyDogOutfits. All rights reserved. This pattern is for personal use only. </div>
+            <h4>{{ L.copyrightNoticeHeader }}</h4>
+            <div>{{ L.copyrightNoticeText }}</div>
         </div>
         <div>
-            <h4>Support & Contact</h4>
-            <div>Questions about the pattern? Message us on Etsy!</div>
-            <div>We're here to help you create something amazing! 💝</div>
+            <h4>{{ L.supportContactHeader }}</h4>
+            <div>{{ L.supportContactLine1 }}</div>
+            <div>{{ L.supportContactLine2 }}</div>
         </div>
     </div>
 
 
     <div class="section-block">
         <div class="divider-title">
-            🎁 BONUS CONTENT
+            {{ L.bonusContentTitle }}
         </div>
         <div v-if="patternData.bonus_tips.list.length > 0">
-            <h4>Pro Tips for Success</h4>
+            <h4>{{ L.proTips }}</h4>
             <ul>
                 <li v-for="(item, index) in patternData.bonus_tips.list" :key="index">
                     <template v-if="typeof item === 'string' && item.includes(':')">
@@ -253,7 +246,7 @@
             </ul>
         </div>
         <div v-if="patternData.bonus_idea.list.length > 0 && patternData.template !== 'simple'">
-            <h4>Variation Ideas</h4>
+            <h4>{{ L.variationIdeas }}</h4>
             <ul>
                 <li v-for="(item, index) in patternData.bonus_idea.list" :key="index">
                     <template v-if="typeof item === 'string' && item.includes(':')">
@@ -266,7 +259,7 @@
             </ul>
         </div>
         <div>
-            <h4>Community & Feedback</h4>
+            <h4>{{ L.communityFeedback }}</h4>
             <div v-for="(item, index) in patternData.bonus_community.list" :key="index">
                  {{ item }}
             </div>
@@ -276,12 +269,12 @@
 
     <div class="section-block">
         <div class="divider-title">
-            📱 THANK YOU!
+            {{ L.thankYouTitle }}
         </div>
         <div style="display: flex; flex-direction: column; gap: 20px;">
-            <div>Thank you for choosing our pattern! We hope you enjoy creating your <strong>{{ patternData.title }}</strong>.</div>
-            <strong>Happy Crocheting! 🧶💕</strong>
-            <div class="italic">If you loved this pattern, please consider leaving a review on Etsy. Your feedback helps us create more amazing patterns!</div>
+            <div>{{ L.thankYouLine1 }} <strong>{{ patternData.title }}</strong>.</div>
+            <strong>{{ L.happyCrocheting }}</strong>
+            <div class="italic">{{ L.reviewHint }}</div>
         </div>
         
     </div>
@@ -291,6 +284,7 @@
 </template>
 <script setup lang="ts">
 import { PatternInfo } from '~/types/PatternInfo'
+import i18nSimple from '~/data/i18n.simple.json'
 
 // Props 定义
 interface Props {
@@ -302,6 +296,10 @@ interface Props {
 const props = withDefaults(defineProps<Props>(), {
   paddingX: 80,
   paddingY: 40
+})
+const L = computed(() => {
+  const lang = (props.patternData?.lang === 'es') ? 'es' : 'en'
+  return (i18nSimple as any)[lang]
 })
 </script>
 <style scoped lang="scss">

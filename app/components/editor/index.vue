@@ -47,6 +47,21 @@
         </div>
       </div>
 
+      <div class="input-set" data-nav="Language">
+        <legend class="form-title">Language</legend>
+        <div class="input-item">
+          <div class="input-label" style="margin-bottom: 15px">选择语言</div>
+          <select
+            class="select"
+            style="width: 100%;"
+            v-model="patternInfo.lang"
+          >
+            <option value="en">English</option>
+            <option value="es">Spanish</option>
+          </select>
+        </div>
+      </div>
+
       <div class="input-set" data-nav="Basic Info">
         <legend class="form-title">Basic Info</legend>
         <div class="input-item">

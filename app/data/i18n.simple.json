@@ -1,0 +1,124 @@
+{
+  "en": {
+    "createdBy": "Created by: CozyDogOutfits",
+    "contact": "Contact: Message us on Etsy for support",
+    "websiteShop": "Website/Shop",
+    "languageLabel": "📱 LANGUAGE",
+    "languageValue": "English",
+    "skillLevelLabel": "✨ SKILL LEVEL",
+    "estimatedTimeLabel": "⏱️ ESTIMATED TIME",
+    "finishedSizeLabel": "📏 FINISHED SIZE",
+    "patternTypeLabel": "🎯 PATTERN TYPE",
+    "patternTypeValue": "Digital PDF Download",
+
+    "abbreviationsTitle": "🔤 ABBREVIATIONS & TECHNIQUES",
+    "standardAbbrev": "Standard Abbreviations",
+    "abbreviationHeader": "Abbreviation",
+    "fullTermHeader": "Full Term",
+    "descriptionHeader": "Description",
+    "specialTech": "Special Techniques Used",
+
+    "materialsTitle": "🧶 MATERIALS & TOOLS",
+    "yarnRequirements": "Yarn Requirements",
+    "recommendedYarn": "Recommended Yarn:",
+    "suggestedBrands": "Suggested Brands:",
+    "colorPalette": "Color Palette",
+    "toolsNotions": "Tools & Notions",
+    "optionalSupplies": "Optional Supplies",
+
+    "mainInstructionsTitle": "🎯 MAIN PATTERN INSTRUCTIONS",
+
+    "licenseTerms": "License Terms",
+    "youMay": "✅ You MAY:",
+    "youMayList": [
+      "Use this pattern for personal projects",
+      "Sell finished items made from this pattern (small quantities)",
+      "Gift finished items to friends and family",
+      "Modify the pattern for personal use"
+    ],
+    "youMayNot": "❌ You MAY NOT:",
+    "youMayNotList": [
+      "Share, distribute, or resell this PDF pattern",
+      "Claim this pattern as your own design",
+      "Use for mass production or commercial manufacturing",
+      "Post the pattern content online or in forums"
+    ],
+    "copyrightTitle": "📜 COPYRIGHT & TERMS OF USE",
+    "copyrightNoticeHeader": "Copyright Notice",
+    "copyrightNoticeText": "© 2025 CozyDogOutfits. All rights reserved. This pattern is for personal use only.",
+    "supportContactHeader": "Support & Contact",
+    "supportContactLine1": "Questions about the pattern? Message us on Etsy!",
+    "supportContactLine2": "We're here to help you create something amazing! 💝",
+
+    "bonusContentTitle": "🎁 BONUS CONTENT",
+    "proTips": "Pro Tips for Success",
+    "variationIdeas": "Variation Ideas",
+    "communityFeedback": "Community & Feedback",
+
+    "thankYouTitle": "📱 THANK YOU!",
+    "thankYouLine1": "Thank you for choosing our pattern! We hope you enjoy creating your",
+    "happyCrocheting": "Happy Crocheting! 🧶💕",
+    "reviewHint": "If you loved this pattern, please consider leaving a review on Etsy. Your feedback helps us create more amazing patterns!"
+  },
+  "es": {
+    "createdBy": "Creado por: CozyDogOutfits",
+    "contact": "Contacto: Envíanos un mensaje en Etsy para soporte",
+    "websiteShop": "Sitio web/Tienda",
+    "languageLabel": "📱 IDIOMA",
+    "languageValue": "Español",
+    "skillLevelLabel": "✨ NIVEL DE HABILIDAD",
+    "estimatedTimeLabel": "⏱️ TIEMPO ESTIMADO",
+    "finishedSizeLabel": "📏 TAMAÑO FINAL",
+    "patternTypeLabel": "🎯 TIPO DE PATRÓN",
+    "patternTypeValue": "Descarga digital en PDF",
+
+    "abbreviationsTitle": "🔤 ABREVIATURAS Y TÉCNICAS",
+    "standardAbbrev": "Abreviaturas estándar",
+    "abbreviationHeader": "Abreviatura",
+    "fullTermHeader": "Término completo",
+    "descriptionHeader": "Descripción",
+    "specialTech": "Técnicas especiales utilizadas",
+
+    "materialsTitle": "🧶 MATERIALES Y HERRAMIENTAS",
+    "yarnRequirements": "Requisitos de hilado",
+    "recommendedYarn": "Hilo recomendado:",
+    "suggestedBrands": "Marcas sugeridas:",
+    "colorPalette": "Paleta de colores",
+    "toolsNotions": "Herramientas y accesorios",
+    "optionalSupplies": "Suministros opcionales",
+
+    "mainInstructionsTitle": "🎯 INSTRUCCIONES PRINCIPALES DEL PATRÓN",
+
+    "licenseTerms": "Términos de licencia",
+    "youMay": "✅ Puedes:",
+    "youMayList": [
+      "Usar este patrón para proyectos personales",
+      "Vender artículos terminados hechos con este patrón (cantidades pequeñas)",
+      "Regalar artículos terminados a amigos y familiares",
+      "Modificar el patrón para uso personal"
+    ],
+    "youMayNot": "❌ No puedes:",
+    "youMayNotList": [
+      "Compartir, distribuir o revender este patrón en PDF",
+      "Reclamar este patrón como tu propio diseño",
+      "Usarlo para producción en masa o fabricación comercial",
+      "Publicar el contenido del patrón en línea o en foros"
+    ],
+    "copyrightTitle": "📜 COPYRIGHT Y TÉRMINOS DE USO",
+    "copyrightNoticeHeader": "Aviso de copyright",
+    "copyrightNoticeText": "© 2025 CozyDogOutfits. Todos los derechos reservados. Este patrón es solo para uso personal.",
+    "supportContactHeader": "Soporte y contacto",
+    "supportContactLine1": "¿Preguntas sobre el patrón? ¡Envíanos un mensaje en Etsy!",
+    "supportContactLine2": "¡Estamos aquí para ayudarte a crear algo increíble! 💝",
+
+    "bonusContentTitle": "🎁 CONTENIDO EXTRA",
+    "proTips": "Consejos profesionales para el éxito",
+    "variationIdeas": "Ideas de variación",
+    "communityFeedback": "Comunidad y comentarios",
+
+    "thankYouTitle": "📱 ¡GRACIAS!",
+    "thankYouLine1": "¡Gracias por elegir nuestro patrón! Esperamos que disfrutes creando tu",
+    "happyCrocheting": "¡Feliz ganchillo! 🧶💕",
+    "reviewHint": "Si te encantó este patrón, considera dejar una reseña en Etsy. ¡Tus comentarios nos ayudan a crear más patrones increíbles!"
+  }
+}

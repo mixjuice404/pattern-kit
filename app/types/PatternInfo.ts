@@ -60,6 +60,7 @@ export class PatternInfo {
   public bonus_community: TextListData
   public cover_image: string
   public introduction: Introduction
+  public lang: string
 
   constructor(
     template: string = 'simple',
@@ -69,39 +70,30 @@ export class PatternInfo {
     skillLevel: string = 'Beginner',
     estimatedTime: string = '6-8 hours',
     finishedSize: string = 'Approximately 12cm tall (using 3.5mm hook)',
-    info: TextListData = { title: '', bottom: false, image: [], imageBottom: [], bottomHeight: null, description: null, end_description: null, text: 'A charming amigurumi chicken wearing a dapper jacket', list: ['Detailed body with textured stitching', 'Moveable wings/arms', 'Adorable feet', 'Stylish jacket with pocket details', 'Crown comb and tail feathers', 'Expressive safety eyes and beak'] },
-    note: TextListData = { title: '', bottom: false, image: [], imageBottom: [], bottomHeight: null, description: null, end_description: null, text: 'This pattern requires knowledge of', list: ['Basic amigurumi techniques', 'Color changes', 'Sewing pieces together', 'Basic embroidery for details'] },
-    techniques: TextListData = { title: '', bottom: false, image: [], imageBottom: [], bottomHeight: null, description: null, end_description: null, text: '', list: ['Magic Ring: Adjustable starting circle', 'Invisible Decrease: Neat decreasing method', 'Color Changes: Clean color transition technique', 'Mattress Stitch: Invisible seaming method'] },
+    info: TextListData = { title: '', bottom: false, image: [], imageBottom: [], description: null, end_description: null, text: 'A charming amigurumi chicken wearing a dapper jacket', list: ['Detailed body with textured stitching', 'Moveable wings/arms', 'Adorable feet', 'Stylish jacket with pocket details', 'Crown comb and tail feathers', 'Expressive safety eyes and beak'] },
+    note: TextListData = { title: '', bottom: false, image: [], imageBottom: [], description: null, end_description: null, text: 'This pattern requires knowledge of', list: ['Basic amigurumi techniques', 'Color changes', 'Sewing pieces together', 'Basic embroidery for details'] },
+    techniques: TextListData = { title: '', bottom: false, image: [], imageBottom: [], description: null, end_description: null, text: '', list: ['Magic Ring: Adjustable starting circle', 'Invisible Decrease: Neat decreasing method', 'Color Changes: Clean color transition technique', 'Mattress Stitch: Invisible seaming method'] },
     yarn: string = 'Medium weight yarn (4/DK weight)',
     brands: string = 'YarnArt Jeans, Alize Cotton Gold, Red Heart Super Saver',
-    colors: TextListData = { title: '', bottom: false, image: [], imageBottom: [], bottomHeight: null, description: null, end_description: null, text: '', list: ['White (Main): 50g', 'Red: 25g', 'Watermelon Red: 15g', 'Navy Blue: 30g', 'Light Khaki: 20g' ] },
-    tools: TextListData = { title: '', bottom: false, image: [], imageBottom: [], bottomHeight: null, description: null, end_description: null, text: '', list: ['Crochet Hook: 3.5mm or 4.0mm (US E/4 or G/6)', 'Safety Eyes: 8mm black (1 pair)','Fiberfill Stuffing: Polyester fill', 'Tapestry Needle: For sewing and embroidery', 'Stitch Markers: For marking rounds', 'Scissors: Sharp fabric scissors', 'Pins: For positioning before sewing'] },
-    supplies: TextListData = { title: '', bottom: false, image: [], imageBottom: [], bottomHeight: null, description: null, end_description: null, text: '', list: ['Hot glue gun (alternative to sewing)', 'Scissors (sharp)', 'Pencil (for marking)', 'Stitch markers (optional)'] },
-    instructions: InstructionGroup[] = [{ title: '', steps: [{ title: 'Body', bottom: false, image: [], imageBottom: [], bottomHeight: null, end_description: null, description: "Start with making a round base. Work in continuous rounds without slip stitches. you can stuff the chick's body with fiberfill to achieve the desired appearance; there's no need to pack it too tightly—a bit of fluffiness is ideal", text: 'With white yarn', list: ['Rnd 1: 6sc in the MR(6)','Rnd 2: 6inc (12)'] }, { title: 'WINGS/HANDS', bottom: false, image: [], imageBottom: [], bottomHeight: null, end_description: null, description: null, text: 'Make 2 - Using White yarn', list: ['Round 1: Magic ring, 6 sc in ring (6)', "Change to light khaki color", 'Round 2: 6inc (12)'] }] }],
-    finishingTips: TextListData = { title: '', bottom: false, image: [], imageBottom: [], bottomHeight: null, end_description: null, description: null, text: '', list: ['Weaving Ends: Always weave in ends securely, going through multiple stitches', 'Shaping: Block pieces if needed for consistent shape', 'Stuffing: Stuff firmly but not overly tight to maintain shape']},
-    troubleshooting: TextListData = { title: '', bottom: false, image: [], imageBottom: [], bottomHeight: null, end_description: null, description: null, text: '', list: ['Uneven Stitches: Maintain consistent tension throughout', 'Loose Parts: Double-check all sewing before final assembly']},
-    bonus_tips: TextListData = { title: '', bottom: false, image: [], imageBottom: [], bottomHeight: null, end_description: null, description: null, text: '', list: ['Tension Control: Keep consistent tension for even stitches', 'Safety Eye Placement: Mark positions before inserting', 'Color Changing: Carry yarn up inside for clean lines', 'Assembly Order: Complete all pieces before assembly' ]},
-    bonus_idea: TextListData = { title: '', bottom: false, image: [], imageBottom: [], bottomHeight: null, end_description: null, description: null, text: '', list: ['Try different color combinations', 'Add embroidered details', 'Create seasonal versions', 'Make mini versions as keychains']},
-    bonus_community: TextListData = { 
-        title: '', 
-        bottom: false, 
-        image: [], 
-        imageBottom: [],
-        bottomHeight: null,
-        end_description: null, 
-        description: null, 
-        text: '', 
-        list: [
-            '📸 Share your work! We\'d love to see your finished projects. Review us on social media to inspire other makers.',
-            '🧐 Found an issue? If you notice something in the pattern that doesn\'t look right, please send us a message on Etsy. We\'ll be happy to review it and provide updates or clarifications if needed.',
-            '💬 Join the journey! Leaving a review with photos on Etsy helps other makers and supports our small shop. Every project—whether beginner or advanced—is a meaningful step in your crochet journey.',
-            '🎁 Our thank-you: Occasionally, we may send a small shop coupon as a gesture of appreciation for especially helpful feedback or detailed reviews.'
-        ]
-    },
+    colors: TextListData = { title: '', bottom: false, image: [], imageBottom: [], description: null, end_description: null, text: '', list: ['White (Main): 50g', 'Red: 25g', 'Watermelon Red: 15g', 'Navy Blue: 30g', 'Light Khaki: 20g' ] },
+    tools: TextListData = { title: '', bottom: false, image: [], imageBottom: [], description: null, end_description: null, text: '', list: ['Crochet Hook: 3.5mm or 4.0mm (US E/4 or G/6)', 'Safety Eyes: 8mm black (1 pair)','Fiberfill Stuffing: Polyester fill', 'Tapestry Needle: For sewing and embroidery', 'Stitch Markers: For marking rounds', 'Scissors: Sharp fabric scissors', 'Pins: For positioning before sewing'] },
+    supplies: TextListData = { title: '', bottom: false, image: [], imageBottom: [], description: null, end_description: null, text: '', list: ['Hot glue gun (alternative to sewing)', 'Scissors (sharp)', 'Pencil (for marking)', 'Stitch markers (optional)'] },
+    instructions: InstructionGroup[] = [{ title: '', steps: [{ title: 'Body', bottom: false, image: [], imageBottom: [], end_description: null, description: "Start with making a round base. Work in continuous rounds without slip stitches. you can stuff the chick's body with fiberfill to achieve the desired appearance; there's no need to pack it too tightly—a bit of fluffiness is ideal", text: 'With white yarn', list: ['Rnd 1: 6sc in the MR(6)','Rnd 2: 6inc (12)'] }, { title: 'WINGS/HANDS', bottom: false, image: [], imageBottom: [], end_description: null, description: null, text: 'Make 2 - Using White yarn', list: ['Round 1: Magic ring, 6 sc in ring (6)', "Change to light khaki color", 'Round 2: 6inc (12)'] }] }],
+    finishingTips: TextListData = { title: '', bottom: false, image: [], imageBottom: [], end_description: null, description: null, text: '', list: ['Weaving Ends: Always weave in ends securely, going through multiple stitches', 'Shaping: Block pieces if needed for consistent shape', 'Stuffing: Stuff firmly but not overly tight to maintain shape']},
+    troubleshooting: TextListData = { title: '', bottom: false, image: [], imageBottom: [], end_description: null, description: null, text: '', list: ['Uneven Stitches: Maintain consistent tension throughout', 'Loose Parts: Double-check all sewing before final assembly']},
+    bonus_tips: TextListData = { title: '', bottom: false, image: [], imageBottom: [], end_description: null, description: null, text: '', list: ['Tension Control: Keep consistent tension for even stitches', 'Safety Eye Placement: Mark positions before inserting', 'Color Changing: Carry yarn up inside for clean lines', 'Assembly Order: Complete all pieces before assembly' ]},
+    bonus_idea: TextListData = { title: '', bottom: false, image: [], imageBottom: [], end_description: null, description: null, text: '', list: ['Try different color combinations', 'Add embroidered details', 'Create seasonal versions', 'Make mini versions as keychains']},
+    bonus_community: TextListData = { title: '', bottom: false, image: [], imageBottom: [], end_description: null, description: null, text: '', list: [
+      '📸 Share your work! We\'d love to see your finished projects. Review us on social media to inspire other makers.',
+      '🧐 Found an issue? If you notice something in the pattern that doesn\'t look right, please send us a message on Etsy. We\'ll be happy to review it and provide updates or clarifications if needed.',
+      '💬 Join the journey! Leaving a review with photos on Etsy helps other makers and supports our small shop. Every project—whether beginner or advanced—is a meaningful step in your crochet journey.',
+      '🎁 Our thank-you: Occasionally, we may send a small shop coupon as a gesture of appreciation for especially helpful feedback or detailed reviews.'
+    ]},
     cover_image: string = '',
     materialsDesc: string = '',
     terms: CrochetTerm[] = [],
     introduction: Introduction = { title: "🧵 Before You Start – Please Read!", text: "" },
+    lang: string = 'en'
   ) {
     this.template = template
     this.title = title
@@ -128,9 +120,9 @@ export class PatternInfo {
     this.cover_image = cover_image
     this.materialsDesc = materialsDesc
     this.introduction = introduction
+    this.lang = lang
   }
 
-  // 导出为 JSON
   toJSON() {
     return {
       template: this.template,
@@ -157,11 +149,11 @@ export class PatternInfo {
       bonus_community: this.bonus_community,
       cover_image: this.cover_image,
       materialsDesc: this.materialsDesc,
-      introduction: this.introduction
+      introduction: this.introduction,
+      lang: this.lang
     }
   }
 
-  // 从 JSON 导入（类型归一化与参数顺序修正）
   static fromJSON(data: any): PatternInfo {
     const isObj = (v: any) => typeof v === 'object' && v !== null
 
@@ -279,8 +271,7 @@ export class PatternInfo {
     const cover_image = typeof data?.cover_image === 'string' ? data.cover_image : undefined
     const materialsDesc = typeof data?.materialsDesc === 'string' ? data.materialsDesc : undefined
     const introduction = data?.introduction ?? { title: '', text: '' }
-
-
+    const lang = data?.lang === 'es' ? 'es' : 'en'
 
     // 严格按构造函数参数顺序传参
     return new PatternInfo(
@@ -308,7 +299,8 @@ export class PatternInfo {
       cover_image,
       materialsDesc,
       normalizedTerms,  // terms 参数应该在这个位置
-      introduction
+      introduction,
+      lang
     )
   }
 }
