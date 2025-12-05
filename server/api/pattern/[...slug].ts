@@ -28,8 +28,10 @@ router.post('/edit', defineApiHandler(async (event) => {
 
 // 获取Crochet Pattern列表
 router.get('/list', defineApiHandler(async (event) => {
-  const patterns = await getCrochetPatternList()
-  return useApiResponse(patterns)
+  console.log(`收到请求:`, getQuery(event))
+  const { page = 1, pageSize = 10 } = getQuery(event)
+  const result = await getCrochetPatternList(Number(page), Number(pageSize))
+  return useApiResponse(result)
 }));
 
 // 获取Crochet Pattern
@@ -71,6 +73,40 @@ router.get('/prompt/:alias', defineApiHandler(async (event) => {
   const template = await getPromptTemplateByAlias(alias) 
   return useApiResponse({ template })
 }));
+
+/**
+ * ======================================================================
+ * Crochet Pattern Testing
+ * ======================================================================
+ */
+
+router.get('/testing', defineApiHandler(async () => {
+
+  // 查询所有 Patterns
+  const patterns = await prisma.crochetPattern.findMany({
+    where: { deleted: 0 },
+    select: { id: true, pattern_json: true },
+    orderBy: { created_at: 'desc' }
+  });
+
+  // 解析 pattern_json 为 JSON 格式，并且将 JSON 结构中的 terms[].alias 全部取出来，放到一个 list 中, 并统计出现了几次
+  const counter = new Map<string, number>();
+  for (const p of patterns) {
+    let data: any = p.pattern_json;
+    if (typeof data === 'string') {
+      try { data = JSON.parse(data); } catch { continue; }
+    }
+    const terms = Array.isArray(data?.terms) ? data.terms : [];
+    for (const t of terms) {
+      const alias = typeof t?.alias === 'string' ? t.alias.trim() : '';
+      if (alias) counter.set(alias, (counter.get(alias) ?? 0) + 1);
+    }
+  }
+  const list = Array.from(counter, ([alias, count]) => ({ alias, count }));
+
+  return useApiResponse(list)
+}));
+
 
 
 

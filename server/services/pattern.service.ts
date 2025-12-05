@@ -38,7 +38,7 @@ export async function createOrUpdateCrochetPattern(id: number | null, data: any)
 }
 
 // 获取 Crochet Pattern 列表
-export async function getCrochetPatternList() {
+export async function getCrochetPatternList(page: number, pageSize: number) {
   try {
     const patterns = await prisma.crochetPattern.findMany({
       where: {
@@ -52,9 +52,18 @@ export async function getCrochetPatternList() {
       },
       orderBy: {
         created_at: 'desc',
-      }
+      },
+      skip: (page - 1) * pageSize,
+      take: pageSize,
     });
-    return patterns;
+    return {
+      patterns,
+      total: await prisma.crochetPattern.count({
+        where: { deleted: 0 },
+      }),
+      page,
+      pageSize
+    };
   } catch (error) {
     console.error('获取 Crochet Pattern 列表失败:', error);
     throw new BasicError('RESOURCE_NOT_FOUND', { statusCode: 404, message: 'Crochet Pattern 列表不存在' });

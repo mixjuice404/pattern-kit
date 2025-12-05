@@ -197,7 +197,10 @@ export async function addStitchLanguage(languageCode: string, flag: string, name
       throw new BasicError('UNKNOWN_ERROR', { statusCode: 400, message: `语言已存在：${code}` });
     }
 
-    return await prisma.stitchLanguage.create({ data: { code, name: n, flag: f } });
+    return await prisma.stitchLanguage.create({
+      data: { code, name: n, flag: f },
+      select: { code: true, name: true, flag: true } // 仅返回可序列化字段
+    });
   } catch (error) {
     console.error('添加 StitchLanguage 失败:', error);
     throw new BasicError('UNKNOWN_ERROR', { statusCode: 500, message: '添加 StitchLanguage 失败' });
@@ -225,6 +228,7 @@ export async function deleteStitchLanguage(languageCode: string) {
     return await prisma.stitchLanguage.update({
       where: { code },
       data: { deleted: 1 },
+      select: { code: true } // 避免返回 BigInt 字段
     });
   } catch (error) {
     console.error('删除 StitchLanguage 失败:', error);

@@ -90,6 +90,49 @@
         <Empty v-else notice="No patterns found." text="Try adjusting filters or add a new pattern." />
       </div>
     </div>
+
+    <!-- Pagination -->
+    <div
+      v-if="!loading && total > 0"
+      class="mt-6 flex items-center justify-between"
+    >
+      <div class="text-sm opacity-70">Total {{ total }} items</div>
+      <div class="join">
+        <button
+          class="btn btn-sm join-item"
+          :disabled="page <= 1"
+          @click="changePage(page - 1)"
+        >
+          Prev
+        </button>
+        <button class="btn btn-sm join-item" disabled>
+          Page {{ page }} / {{ totalPages }}
+        </button>
+        <input
+          class="input input-sm input-bordered join-item w-20 text-center"
+          type="number"
+          :min="1"
+          :max="totalPages"
+          v-model.number="pageInput"
+          @keyup.enter="jumpToPage"
+          placeholder="Page"
+        />
+        <button
+          class="btn btn-sm join-item"
+          :disabled="pageInput == null"
+          @click="jumpToPage"
+        >
+          Go
+        </button>
+        <button
+          class="btn btn-sm join-item"
+          :disabled="page >= totalPages"
+          @click="changePage(page + 1)"
+        >
+          Next
+        </button>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -107,24 +150,51 @@ type PatternItem = {
   id: number;
   title: string;
   cover_image: string | null;
-  updated_at: string; // 后端 Date 序列化后是 ISO 字符串
+  updated_at: string;
+};
+
+type PatternPageData = {
+  patterns: PatternItem[];
+  total: number;
+  page: number;
+  pageSize: number;
 };
 
 const list = ref<PatternItem[]>([]);
 const loading = ref(false);
 const error = ref<string | null>(null);
 
+// 分页状态
+const page = ref(1);
+const pageSize = ref(10);
+const total = ref(0);
+const totalPages = computed(() =>
+  Math.max(1, Math.ceil(total.value / pageSize.value))
+);
+
+// 直达页输入与跳转
+const pageInput = ref<number | null>(null);
+const jumpToPage = () => {
+  if (pageInput.value == null) return;
+  const target = Math.min(totalPages.value, Math.max(1, Math.floor(pageInput.value)));
+  changePage(target);
+  pageInput.value = null;
+};
 const formatDate = (iso: string) => new Date(iso).toLocaleString();
 
 const load = async () => {
   loading.value = true;
   error.value = null;
   try {
-    const res = await $fetch<ApiResponse<PatternItem[]>>("/api/pattern/list", {
-      method: "GET",
-    });
-    if (res?.success && Array.isArray(res.data)) {
-      list.value = res.data;
+    const res = await $fetch<ApiResponse<PatternPageData>>(
+      `/api/pattern/list?page=${page.value}&pageSize=${pageSize.value}`,
+      { method: "GET" }
+    );
+    if (res?.success && res.data) {
+      list.value = Array.isArray(res.data.patterns) ? res.data.patterns : [];
+      total.value = Number(res.data.total) || 0;
+      page.value = Number(res.data.page) || 1;
+      pageSize.value = Number(res.data.pageSize) || pageSize.value;
     } else {
       error.value = res?.message || "Unexpected response";
     }
@@ -133,6 +203,12 @@ const load = async () => {
   } finally {
     loading.value = false;
   }
+};
+
+const changePage = async (p: number) => {
+  if (p === page.value || p < 1 || p > totalPages.value) return;
+  page.value = p;
+  await load();
 };
 
 onMounted(load);
@@ -153,8 +229,7 @@ const removeItem = async (id: number) => {
   deletingIds.value.add(id);
   try {
     await $fetch(`/api/pattern/remove/${id}`, { method: "POST" });
-    // 本地移除
-    list.value = list.value.filter((i: any) => i.id !== id);
+    await load(); // 删除后刷新当前页数据
   } catch (e) {
     console.error("Delete failed:", e);
   } finally {

@@ -11,6 +11,7 @@ export const publicRoutes: string[] = [
   // 例如: '/api/public/some-data'
   '/api/pattern',
   '/api/auth/upload/imagekit',
+  '/api/dict',
 
   
 ];
