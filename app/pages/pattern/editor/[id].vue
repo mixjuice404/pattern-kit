@@ -48,6 +48,10 @@ import Eidtor from '~/components/editor/index.vue'
 import { PatternInfo } from '~/types/PatternInfo'
 import { useAppToast } from '~/composables/useAppToast';
 
+definePageMeta({
+  layout: 'empty'
+})
+
 const route = useRoute()
 const router = useRouter()
 const toast = useAppToast()
@@ -124,7 +128,7 @@ const onPreview = async () => {
   const savedId = await onUpload()
   const targetId = savedId ?? patternId.value
   if (targetId) {
-    router.push(`/preview/${targetId}`)
+    router.push(`/pattern/preview/${targetId}`)
   } else {
     console.warn('Preview aborted: no pattern id available.')
   }

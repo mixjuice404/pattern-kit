@@ -1,49 +1,71 @@
 <template>
-  <div>
-    <h3 class="text-lg font-bold mb-4">提示词模板设置</h3>
+  <div class="default-container">
+    <PageHeader
+      title="Prompts Builder"
+      :breadcrumbs="breadcrumbs">
+       <button class="btn btn-sm btn-neutral">
+        <icon name="solar:add-circle-bold" size="18" />
+        <span>New Prompt</span>
+      </button>
+    </PageHeader>
 
-    <!-- tabs 分成两个 一个是图解生成模板 一个是数据标准化模板 -->
-    <div class="flex items-center gap-4 mb-4" style="font-size: 12px; font-weight: 500;">
-        <div 
-            v-for="tabItem in tabs" 
-            :key="tabItem.key"
-            style="padding: 5px 0; cursor: pointer;"
-            :class="{'border-blue-500 border-b-2': tab === tabItem.key}" 
-            @click="tab = tabItem.key">
-            {{ tabItem.label }}
+    <div>
+      <div style="display: grid; grid-template-columns: 160px auto; gap: 20px;">
+        <!-- tabs 分成两个 一个是图解生成模板 一个是数据标准化模板 -->
+        <div class="sidebar-menus">
+            <div 
+                v-for="tabItem in tabs" 
+                :key="tabItem.key"
+                class="menus-item"
+                :class="{'active text-primary': tab === tabItem.key}" 
+                @click="tab = tabItem.key">
+                <icon :name="tabItem.icon" size="16" />
+                <div>{{ tabItem.label }}</div>
+            </div>
         </div>
-    </div>
 
-    <div class="prompt-editor">
-      <label class="block text-sm font-medium mb-2">{{ tab === 'graph' ? '图解生成模板' : '数据标准化模板' }}</label>
-      <div 
-        ref="promptEditor"
-        contenteditable="true"
-        class="editable-div"
-        @input="onPromptChange"
-        @blur="savePrompt"
-      ></div>
-      <div class="mt-2 text-xs text-gray-500">
-        支持 HTML 格式，按 Ctrl+S 或失去焦点时自动保存；<strong>&#123;&#123; 变量名 &#125;&#125;</strong>  为占位符，用于动态替换
+        <div class="prompt-editor">
+          <!-- <label class="block text-sm font-medium mb-2">{{ tab === 'graph' ? '图解生成模板' : '数据标准化模板' }}</label> -->
+          <div 
+            ref="promptEditor"
+            contenteditable="true"
+            class="editable-div"
+            @input="onPromptChange"
+            @blur="savePrompt"
+          ></div>
+          <div class="mt-2 text-xs text-gray-500">
+            支持 HTML 格式，按 Ctrl+S 或失去焦点时自动保存；<strong>&#123;&#123; 变量名 &#125;&#125;</strong>  为占位符，用于动态替换
+          </div>
+        </div>
       </div>
     </div>
-  </div>
+</div>
 </template>
 <script setup lang="ts">
+definePageMeta({
+  layout: 'default'
+})
+
+const breadcrumbs = [
+  { label: 'Home', to: '/', icon: 'solar:home-2-outline' },
+  { label: 'AI Config', icon: 'hugeicons:ai-brain-03' },
+  { label: 'Prompts', icon: 'hugeicons:command-line' }
+]
+
 const tab = ref('pattern') // 默认选中图解生成模板
 const promptEditor = ref<HTMLElement>()
 const promptTemplate = ref('')
 const templateId = ref<number | null>(null)
 
 const tabs = [
-  { key: 'pattern', label: '图解生成模板' },
-  { key: 'normalize', label: '数据标准化模板' }
+  { key: 'pattern', label: '图解生成模板', icon: 'solar:emoji-funny-circle-outline' },
+  { key: 'normalize', label: '数据标准化模板', icon: 'hugeicons:ai-folder-02' }
 ]
 
 // 从服务器获取模板
 const loadTemplate = async (alias: string) => {
   try {
-    const { data } = await $fetch(`/api/pattern/prompt/${alias}`)
+    const { data } = await $fetch<any>(`/api/pattern/prompt/${alias}`)
     if (data?.template) {
       promptTemplate.value = data.template.template
       templateId.value = data.template.id
@@ -115,7 +137,7 @@ onMounted(() => {
 .prompt-editor {
   .editable-div {
     min-height: 300px;
-    max-height: 58vh;
+    max-height: 65vh;
     padding: 12px;
     border: 1px solid #d1d5db;
     border-radius: 6px;

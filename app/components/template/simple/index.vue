@@ -69,8 +69,8 @@
             </table>
         </div>
         <div v-if="patternData.techniques.text || patternData.techniques.list.length > 0">
-            <h4>{{ L.specialTech }}</h4>
-            <div>{{ patternData.techniques.text }}</div>
+            <!-- <h4>{{ L.specialTech }}</h4> -->
+            <h4>{{ patternData.techniques.text }}</h4>
             <ul>
                 <li v-for="(technique, index) in patternData.techniques.list" :key="index">
                     <template v-if="typeof technique === 'string' && technique.includes(':')">

@@ -78,6 +78,10 @@ import SimpleTemplate from '~/components/template/simple/index.vue'
 import { PatternInfo } from '~/types/PatternInfo'
 import { generateWithGemini } from '~/utils/gemini'
 
+definePageMeta({
+  layout: 'empty'
+})
+
 useHead({
   title: '',
   meta: [{ name: 'robots', content: 'noindex, nofollow' }]

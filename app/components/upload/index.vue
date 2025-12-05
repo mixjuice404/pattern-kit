@@ -154,6 +154,7 @@ const props = withDefaults(defineProps<Props>(), {
 })
 
 const emit = defineEmits<Emits>()
+const toast = useAppToast()
 
 // 响应式数据
 const fileInputRef = ref<HTMLInputElement>()
@@ -322,14 +323,18 @@ const uploadFile = async (index: number) => {
   await handleSingleFileUpload(previewImage.file, index, true)
 }
 
+
 // 同时修改handleFiles中的上传调用
 const handleFiles = async (files: FileList | File[]) => {
+  console.log('handleFiles', files)
   const fileArray = Array.from(files)
   const validFiles: File[] = []
   
   for (const file of fileArray) {
     const error = validateFile(file)
+    console.log('validateFile', error)  
     if (error) {
+      toast.error(error)
       emit('error', error)
       continue
     }
@@ -350,6 +355,7 @@ const handleFiles = async (files: FileList | File[]) => {
     emit('error', `最多只能上传 ${props.maxCount} 个文件`)
   }
   
+  
   updatePreviewImages(newFiles)
   emit('update:modelValue', newFiles)
   emit('change', newFiles)
@@ -368,6 +374,7 @@ const handleFiles = async (files: FileList | File[]) => {
 
 // 文件输入框变化
 const handleFileChange = (event: Event) => {
+  console.log('handleFileChange', event)
   const target = event.target as HTMLInputElement
   if (target.files && target.files.length > 0) {
     handleFiles(target.files)
@@ -390,6 +397,7 @@ const handleDragLeave = (event: DragEvent) => {
 }
 
 const handleDrop = (event: DragEvent) => {
+  console.log('handleDrop', event)
   event.preventDefault()
   isDragOver.value = false
   
