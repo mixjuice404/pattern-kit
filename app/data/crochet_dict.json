@@ -237,10 +237,10 @@
                 {
                     "chinese": "长针减针",
                     "notation_cn": "FA",
-                    "us": "double crochet 2 together",
+                    "us": "double crochet 2 together (dc dec)",
                     "us_abbrev": "dc2tog",
                     "us_description": "Two double crochets joined together into one decrease.",
-                    "uk": "treble crochet 2 together",
+                    "uk": "treble crochet 2 together (dc dec)",
                     "uk_abbrev": "tr2tog",
                     "description": "将两针长针合并为一针，收窄织物。"
                 },

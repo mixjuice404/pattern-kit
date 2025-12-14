@@ -88,9 +88,6 @@
         <div class="divider-title">
             {{ L.materialsTitle }}
         </div>
-        <div v-if="patternData.materialsDesc">
-            <div class="rich-text" v-html="patternData.materialsDesc"></div>
-        </div>
         <div v-if="patternData.yarn || patternData.brands">
             <h4>{{ L.yarnRequirements }}</h4>
             <div>
@@ -132,6 +129,9 @@
                     {{ supply }}
                 </li>
             </ul>
+        </div>
+        <div v-if="patternData.materialsDesc">
+            <div class="rich-text" v-html="patternData.materialsDesc"></div>
         </div>
     </div>
 
