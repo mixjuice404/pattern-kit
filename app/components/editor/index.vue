@@ -106,7 +106,6 @@
             class="textarea"
             placeholder="Bio"
             style="width: 100%"
-            rows="6"
             v-model="patternInfo.inspiration"
           ></textarea>
         </div>
@@ -131,25 +130,25 @@
           <div class="input-label" style="margin-bottom: 15px">
             ESTIMATED TIME
           </div>
-          <input
+          <textarea
             type="text"
-            class="input"
+            class="textarea"
             style="width: 100%"
             placeholder="6-8 hours"
             v-model="patternInfo.estimatedTime"
-          />
+          ></textarea>
         </div>
         <div class="input-item">
           <div class="input-label" style="margin-bottom: 15px">
             FINISHED SIZE
           </div>
-          <input
+          <textarea
             type="text"
-            class="input"
+            class="textarea"
             style="width: 100%"
             placeholder="Approximately 12cm tall (using 3.5mm hook)"
             v-model="patternInfo.finishedSize"
-          />
+          ></textarea>
         </div>
       </div>
       <div class="input-set" data-nav="introduction">

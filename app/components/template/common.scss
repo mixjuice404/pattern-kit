@@ -87,6 +87,11 @@
 
         .item-value {
             font-weight: 600;
+            word-break: break-word;
+
+            li {
+                margin: 0 !important;
+            }
         }
     }
 }

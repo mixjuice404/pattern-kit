@@ -1,7 +1,7 @@
 import { createRouter, useBase, readBody } from 'h3'
 import { defineApiHandler } from '../../utils/defineApiHandler'
 import { useApiResponse } from '../../utils/apiResponse'
-import { addStitchLanguage, deleteStitchLanguage, queryStitchLanguages } from '~~/server/services/stitch.service'
+import { addStitchLanguage, deleteStitchLanguage, queryStitchLanguages, importStitches } from '~~/server/services/stitch.service'
 
 const router = createRouter()
 
@@ -29,6 +29,14 @@ router.get('/stitch/language/:code', defineApiHandler(async (event) => {
 router.post('/stitch/language', defineApiHandler(async (event) => {
   const body = await readBody(event)
   const result = await addStitchLanguage(body.languageCode, body.flag, body.name)
+  return useApiResponse({ result })
+}));
+
+
+// 批量导入 stitch
+router.post('/stitch/import', defineApiHandler(async (event) => {
+  const body = await readBody(event)
+  const result = await importStitches(body)
   return useApiResponse({ result })
 }));
 

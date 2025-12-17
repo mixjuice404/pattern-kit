@@ -21,7 +21,7 @@
             </div>
             <div class="box-item">
                 <div class="item-label">{{ L.estimatedTimeLabel }}</div>
-                <div class="item-value" :class="{'gray-scale': !patternData.estimatedTime}">{{ patternData.estimatedTime ? patternData.estimatedTime : 'Required' }}</div>
+                <div class="item-value" :class="{'gray-scale': !patternData.estimatedTime}" v-html="patternData.estimatedTime ? patternData.estimatedTime : 'Required'"></div>
             </div>
             <div class="box-item">
                 <div class="item-label">{{ L.languageLabel }}</div>
@@ -29,7 +29,7 @@
             </div>
             <div class="box-item" style="grid-column: span 2;">
                 <div class="item-label">{{ L.finishedSizeLabel }}</div>
-                <div class="item-value" :class="{'gray-scale': !patternData.finishedSize}">{{ patternData.finishedSize ? patternData.finishedSize : 'Required' }}</div>
+                <div class="item-value" :class="{'gray-scale': !patternData.finishedSize}" v-html="patternData.finishedSize ? patternData.finishedSize : 'Required'"></div>
             </div>
             <div class="box-item" style="grid-column: span 2;">
                 <div class="item-label">{{ L.patternTypeLabel }}</div>
