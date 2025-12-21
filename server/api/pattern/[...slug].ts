@@ -20,7 +20,6 @@ const router = createRouter()
 // 创建Crochet Pattern
 router.post('/edit', defineApiHandler(async (event) => {
   const body = await readBody(event)
-  console.log(`收到请求:`, body)
   const { id, ...data } = body
   const patternId = await createOrUpdateCrochetPattern(id, data)
   return useApiResponse({  id: patternId })
@@ -28,7 +27,6 @@ router.post('/edit', defineApiHandler(async (event) => {
 
 // 获取Crochet Pattern列表
 router.get('/list', defineApiHandler(async (event) => {
-  console.log(`收到请求:`, getQuery(event))
   const { page = 1, pageSize = 10 } = getQuery(event)
   const result = await getCrochetPatternList(Number(page), Number(pageSize))
   return useApiResponse(result)
@@ -61,7 +59,6 @@ router.post('/remove/:id', defineApiHandler(async (event) => {
 // 创建或更新提示词模板
 router.post('/prompt/edit', defineApiHandler(async (event) => {
   const body = await readBody(event)
-  console.log(`收到请求:`, body)
   const { id, ...data } = body
   const templateId = await createOrUpdatePromptTemplate(id, data)
   return useApiResponse({  id: templateId })
@@ -81,7 +78,6 @@ router.get('/prompt/:alias', defineApiHandler(async (event) => {
  */
 
 router.get('/testing', defineApiHandler(async () => {
-
   // 查询所有 Patterns
   const patterns = await prisma.crochetPattern.findMany({
     where: { deleted: 0 },

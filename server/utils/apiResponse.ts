@@ -19,6 +19,6 @@ export function useApiError(info: string, errorCode = 9999, errorData?: any) {
     success: false,
     message: info,
     errorCode: errorCode, // 在响应体中包含状态码，方便前端处理
-    ...(errorData && { errorData }) // 可选地包含 H3Error 中的 data
+    ...(errorData && { errorData }) // 可选地包含 H3Error 中的 data 字段
   };
 }

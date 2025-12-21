@@ -1,7 +1,7 @@
 import { createRouter, useBase, readBody } from 'h3'
 import { defineApiHandler } from '../../utils/defineApiHandler'
 import { useApiResponse } from '../../utils/apiResponse'
-import { addStitchLanguage, deleteStitchLanguage, queryStitchLanguages, importStitches } from '~~/server/services/stitch.service'
+import { addStitchLanguage, deleteStitchLanguage, queryStitchLanguages, importStitches, getStitchList } from '~~/server/services/stitch.service'
 
 const router = createRouter()
 
@@ -32,6 +32,18 @@ router.post('/stitch/language', defineApiHandler(async (event) => {
   return useApiResponse({ result })
 }));
 
+/**
+ * ======================================================================
+ * Stitch Dictionary 统一处理路由
+ * - 批量导入 stitch
+ * - 删除 stitch
+ * - 查询 stitch list
+ * - 查询 stitch detail
+ * - 添加 stitch
+ * - 更新 stitch
+ * - 删除 stitch
+ * ======================================================================
+ */
 
 // 批量导入 stitch
 router.post('/stitch/import', defineApiHandler(async (event) => {
@@ -41,7 +53,18 @@ router.post('/stitch/import', defineApiHandler(async (event) => {
 }));
 
 
-
+// 查询 stitch list
+router.get('/stitch/list', defineApiHandler(async (event) => {
+  const query = getQuery(event);
+  const { page = 1, pageSize = 20 } = getQuery(event)
+  const result = await getStitchList({
+    page: Number(page),
+    pageSize: Number(pageSize),
+    defaultName: query.keyword as string | null,
+    type: query.type as string || ''
+  })
+  return useApiResponse({ result })
+}));
 
 
 export default useBase('/api/dict', router.handler)

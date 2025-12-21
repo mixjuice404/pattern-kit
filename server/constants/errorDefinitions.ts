@@ -40,6 +40,7 @@ export const ERROR_DEFINITIONS = {
   INVALID_PROMPT_VALUE:     { code: 6004, info: '无效的 Prompt 值' },
   PARAMETER_NOT_SUPPORTED_IN_VERSION: { code: 6005, info: '当前版本不支持该参数' },
   INVALID_TASK_TYPE:        { code: 6006, info: '无效的任务类型' },
+  BUSINESS_EXCEPTION:       { code: 6007, info: '业务异常' },
 
   // ... 在这里根据需要添加更多错误定义 ...
 

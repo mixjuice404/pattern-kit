@@ -77,6 +77,7 @@ import BaseTemplate from '~/components/template/base/index.vue'
 import SimpleTemplate from '~/components/template/simple/index.vue'
 import { PatternInfo } from '~/types/PatternInfo'
 import { generateWithGemini } from '~/utils/gemini'
+import type { ApiResponse } from "~/types/ApiResponse"
 
 definePageMeta({
   layout: 'empty'
@@ -86,13 +87,6 @@ useHead({
   title: '',
   meta: [{ name: 'robots', content: 'noindex, nofollow' }]
 })
-
-type ApiResponse<T> = {
-  success: boolean
-  errorCode: string | null
-  data: T
-  message: string
-}
 
 const route = useRoute()
 const loading = ref(true)

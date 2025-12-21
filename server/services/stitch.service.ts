@@ -58,6 +58,8 @@ export async function createOrUpdateStitch(id: number | null, data: {
 export async function getStitchList(query: {
   defaultName?: string | null;
   type?: string | null;
+  page?: number;
+  pageSize?: number;
 }) {
   try {
     const languages = await prisma.stitchLanguage.findMany({
@@ -65,24 +67,53 @@ export async function getStitchList(query: {
       select: { code: true, flag: true },
     });
 
-    const stitches = await prisma.stitch.findMany({
-      where: {
-        deleted: 0,
-        ...(query.defaultName?.trim()
-          ? { defaultName: { contains: query.defaultName.trim(), mode: 'insensitive' } }
-          : {}),
-        ...(query.type?.trim() ? { type: query.type.trim() } : {}),
-      },
-      include: {
-        localizations: {
-          where: { deleted: 0 },
-          select: { languageCode: true, name: true, description: true },
-        },
-      },
-      orderBy: { created_at: 'desc' },
-    });
+    const where = {
+      deleted: 0,
+      ...(query.defaultName?.trim()
+        ? { defaultName: { contains: query.defaultName.trim(), mode: 'insensitive' as const } }
+        : {}),
+      ...(query.type?.trim() ? { type: query.type.trim() } : {}),
+    };
 
-    return stitches.map((s) => {
+    const paginate = query.page != null || query.pageSize != null;
+    const page = Math.max(1, Number(query.page) || 1);
+    const pageSize = Math.min(100, Math.max(1, Number(query.pageSize) || 20));
+
+    const [total, stitches] = paginate
+      ? await prisma.$transaction([
+          prisma.stitch.count({ where }),
+          prisma.stitch.findMany({
+            where,
+            include: {
+              localizations: {
+                where: { deleted: 0 },
+                select: { languageCode: true, name: true, description: true, abbrev: true },
+              },
+            },
+            orderBy: { created_at: 'desc' },
+            skip: (page - 1) * pageSize,
+            take: pageSize,
+          }),
+        ])
+      : [
+          undefined,
+          await prisma.stitch.findMany({
+            where,
+            include: {
+              localizations: {
+                where: { deleted: 0 },
+                select: { languageCode: true, name: true, description: true, abbrev: true },
+              },
+            },
+            orderBy: { created_at: 'desc' },
+          }),
+        ];
+
+    const list = stitches.map((s) => {
+      const usDescription =
+        s.localizations.find((l) => (l.languageCode ?? '').toUpperCase() === 'US')
+          ?.description ?? null;
+
       const locMap = new Map(s.localizations.map((l) => [l.languageCode, l]));
       const localizations = languages.map((lang) => {
         const l = locMap.get(lang.code);
@@ -90,14 +121,14 @@ export async function getStitchList(query: {
           languageCode: lang.code,
           flag: lang.flag,
           name: l?.name ?? null,
-          description: l?.description ?? null,
+          abbrev: l?.abbrev ?? null
         };
       });
 
       return {
         id: s.id,
         defaultName: s.defaultName,
-        description: s.description ?? null,
+        description: usDescription ?? s.description ?? null,
         type: s.type,
         level: s.level,
         localizations,
@@ -105,6 +136,8 @@ export async function getStitchList(query: {
         updatedAt: s.updated_at,
       };
     });
+
+    return paginate ? { list, total, page, pageSize } : list;
   } catch (error) {
     console.error('查询 Stitch 列表失败:', error);
     throw new BasicError('RESOURCE_NOT_FOUND', { statusCode: 404, message: 'Stitch 列表不存在或查询失败' });
@@ -132,41 +165,89 @@ export async function importStitches(jsonData: any[]) {
       where: { deleted: 0 },
       select: { code: true },
     });
-    const validCodes = new Set(languages.map(l => l.code));
+    const validCodes = new Set(languages.map(l => l.code.toUpperCase()));
+
+    const items = Array.isArray(jsonData) ? jsonData : [];
+    const inputDefaultNames = Array.from(
+      new Set(items.map(i => (i?.defaultName ?? '').trim()).filter(Boolean))
+    );
+
+    const existingStitches = inputDefaultNames.length
+      ? await prisma.stitch.findMany({
+          where: { deleted: 0, defaultName: { in: inputDefaultNames } },
+          select: { id: true, defaultName: true },
+        })
+      : [];
+
+    const stitchIdByDefaultName = new Map(existingStitches.map(s => [s.defaultName, s.id]));
+    const seenDefaultNames = new Set<string>();
 
     let count = 0;
-    for (const item of jsonData ?? []) {
-      const locs: Array<{ languageCode: string; name: string; description: string; abbrev?: string }> =
-        Array.isArray(item?.localizations) ? item.localizations : [];
-      if (!locs.length) {
-        throw new BasicError('UNKNOWN_ERROR', { statusCode: 400, message: '缺少 localizations（至少 1 个）' });
-      }
-      if (locs.some(l => !l?.languageCode || !l?.name || !l?.description)) {
-        throw new BasicError('UNKNOWN_ERROR', { statusCode: 400, message: 'localization 字段不完整（需 languageCode/name/description）' });
-      }
-      const invalid = locs.map(l => l.languageCode).filter(code => !validCodes.has(code));
-      if (invalid.length) {
-        throw new BasicError('UNKNOWN_ERROR', { statusCode: 400, message: `无效 languageCode: ${invalid.join(', ')}` });
-      }
+    for (let start = 0; start < items.length; start += 20) {
+      const batch = items.slice(start, start + 20);
+      for (const item of batch) {
+        const defaultName = (item?.defaultName ?? '').trim();
+        if (!defaultName) {
+          throw new BasicError('BUSINESS_EXCEPTION', { statusCode: 400, message: '缺少 defaultName' });
+        }
+        if (seenDefaultNames.has(defaultName)) continue;
+        seenDefaultNames.add(defaultName);
 
-      const stitchId = await createOrUpdateStitch(item.id ?? null, {
-        defaultName: item.defaultName,
-        description: item.description,
-        type: item.type,
-        level: item.level,
-      });
+        const rawLocs = Array.isArray(item?.localizations) ? item.localizations : [];
+        if (!rawLocs.length) {
+          throw new BasicError('BUSINESS_EXCEPTION', { statusCode: 400, message: '缺少 localizations（至少 1 个）' });
+        }
 
-      await prisma.$transaction(
-        locs.map(l =>
-          prisma.stitchLocalization.upsert({
-            where: { stitchId_languageCode: { stitchId, languageCode: l.languageCode } },
-            update: { name: l.name, description: l.description, abbrev: l.abbrev ?? undefined },
-            create: { stitchId, languageCode: l.languageCode, name: l.name, description: l.description, abbrev: l.abbrev ?? undefined },
-          })
-        )
-      );
+        const normalizedLocs = rawLocs.map((l: any) => ({
+          languageCode: (l?.languageCode ?? '').trim().toUpperCase(),
+          name: (l?.name ?? '').trim(),
+          description: (l?.description ?? '').trim(),
+          abbrev: typeof l?.abbrev === 'string' && l.abbrev.trim() ? l.abbrev.trim() : undefined,
+        }));
 
-      count++;
+        if (normalizedLocs.some((l: any) => !l.languageCode || !l.name || !l.description)) {
+          throw new BasicError('BUSINESS_EXCEPTION', { statusCode: 400, message: 'localization 字段不完整（需 languageCode/name/description）' });
+        }
+
+        const invalid = Array.from(
+          new Set(normalizedLocs.map((l: any) => l.languageCode).filter((code: string) => !validCodes.has(code)))
+        );
+        if (invalid.length) {
+          throw new BasicError('BUSINESS_EXCEPTION', { statusCode: 400, message: `无效 languageCode: ${invalid.join(', ')}` });
+        }
+
+        const locByCode = new Map(normalizedLocs.map((l: any) => [l.languageCode, l]));
+        const locs = Array.from(locByCode.values());
+
+        const stitchId = await createOrUpdateStitch(item.id ?? stitchIdByDefaultName.get(defaultName) ?? null, {
+          defaultName,
+          description: item.description,
+          type: item.type,
+          level: item.level,
+        });
+        stitchIdByDefaultName.set(defaultName, stitchId);
+
+        const existing = await prisma.stitchLocalization.findMany({
+          where: { deleted: 0, stitchId, languageCode: { in: locs.map((l: any) => l.languageCode) } },
+          select: { languageCode: true, name: true },
+        });
+        const existingNameByCode = new Map(existing.map((l: any) => [l.languageCode, l.name]));
+
+        const toUpsert = locs.filter((l: any) => existingNameByCode.get(l.languageCode) !== l.name);
+        if (toUpsert.length) {
+          await prisma.$transaction(
+            toUpsert.map((l: any) =>
+              prisma.stitchLocalization.upsert({
+                where: { stitchId_languageCode: { stitchId, languageCode: l.languageCode } },
+                update: { name: l.name, description: l.description, abbrev: l.abbrev ?? undefined },
+                create: { stitchId, languageCode: l.languageCode, name: l.name, description: l.description, abbrev: l.abbrev ?? undefined },
+              })
+            )
+          );
+        }
+
+        count++;
+      }
     }
     return count;
   } catch (error) {

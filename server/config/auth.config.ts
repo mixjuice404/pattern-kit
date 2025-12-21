@@ -12,6 +12,4 @@ export const publicRoutes: string[] = [
   '/api/pattern',
   '/api/auth/upload/imagekit',
   '/api/dict',
-
-  
 ];

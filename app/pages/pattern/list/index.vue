@@ -91,60 +91,21 @@
       </div>
     </div>
 
-    <!-- Pagination -->
-    <div
+    <Pagination
       v-if="!loading && total > 0"
-      class="mt-6 flex items-center justify-between"
-    >
-      <div class="text-sm opacity-70">Total {{ total }} items</div>
-      <div class="join">
-        <button
-          class="btn btn-sm join-item"
-          :disabled="page <= 1"
-          @click="changePage(page - 1)"
-        >
-          Prev
-        </button>
-        <button class="btn btn-sm join-item" disabled>
-          Page {{ page }} / {{ totalPages }}
-        </button>
-        <input
-          class="input input-sm input-bordered join-item w-20 text-center"
-          type="number"
-          :min="1"
-          :max="totalPages"
-          v-model.number="pageInput"
-          @keyup.enter="jumpToPage"
-          placeholder="Page"
-        />
-        <button
-          class="btn btn-sm join-item"
-          :disabled="pageInput == null"
-          @click="jumpToPage"
-        >
-          Go
-        </button>
-        <button
-          class="btn btn-sm join-item"
-          :disabled="page >= totalPages"
-          @click="changePage(page + 1)"
-        >
-          Next
-        </button>
-      </div>
-    </div>
+      :total="total"
+      :page="page"
+      :total-pages="totalPages"
+      class="mt-6"
+      @change="changePage"
+    />
   </div>
 </template>
 
 <script setup lang="ts">
 import Empty from "@/components/common/empty/index.vue";
-
-type ApiResponse<T> = {
-  success: boolean;
-  errorCode: string | null;
-  data: T;
-  message: string;
-};
+import Pagination from "@/components/common/pagination/index.vue";
+import type { ApiResponse } from "~/types/ApiResponse";
 
 type PatternItem = {
   id: number;
@@ -172,14 +133,6 @@ const totalPages = computed(() =>
   Math.max(1, Math.ceil(total.value / pageSize.value))
 );
 
-// 直达页输入与跳转
-const pageInput = ref<number | null>(null);
-const jumpToPage = () => {
-  if (pageInput.value == null) return;
-  const target = Math.min(totalPages.value, Math.max(1, Math.floor(pageInput.value)));
-  changePage(target);
-  pageInput.value = null;
-};
 const formatDate = (iso: string) => new Date(iso).toLocaleString();
 
 const load = async () => {

@@ -36,7 +36,7 @@ export function defineApiHandler(handler: ApiHandlerLogic) {
         // 如果是 BasicError，使用其状态码和消息
         statusCode = error.statusCode;
         errorCode = error.errorCode;
-        message = error.errorInfo;
+        message = error.message || error.errorInfo;
         console.log(`Caught BasicError: ${statusCode} - ${message}`);
       } else if (error && typeof error === 'object' && 'statusCode' in error) {
         // 兼容其他带有 statusCode 的错误对象 (确保 error 不是 null 或 undefined)
