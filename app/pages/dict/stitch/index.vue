@@ -9,7 +9,7 @@
                 <icon name="hugeicons:global" size="16" />
                 <span>Localization</span>
             </button>
-            <button class="btn btn-sm btn-neutral">
+            <button class="btn btn-sm btn-neutral" @click="openCreateModal">
                 <icon name="hugeicons:plus-sign-square" size="16" />
                 <span>Add Stitch</span>
             </button>
@@ -18,7 +18,7 @@
         <div class="stitch-container">
             <div class="container-header">
                 <div class="stitch-types">
-                    <div v-for="type in stitchTypes" :key="type" class="stitch-type-item" :class="{'active': type === activeType}" @click="activeType = type">{{ type }}</div>
+                    <div v-for="type in stitchTypes" :key="type" class="stitch-type-item" :class="{'active': type === activeType}" @click="setActiveType(type)">{{ type }}</div>
                 </div>
                 <div class="search-bar">
                     <div class="search-input">
@@ -50,7 +50,11 @@
                     <div class="stitch-abbrev-list">
                         <div v-for="abbrev in item.abbrev" :key="abbrev.flag" class="stitch-abbrev-item"> 
                             <div class="item_lang">{{ abbrev.flag + " " + abbrev.lang }}</div>
-                            <div class="item_abbrev">{{ abbrev.abbrev }}</div>
+                            <div class="tooltip" :data-tip="abbrev.name">
+                                <div class="item_abbrev">
+                                    {{ abbrev.abbrev }}
+                                </div>
+                            </div>
                         </div>
                     </div> 
                     <div class="card-actions">
@@ -58,7 +62,11 @@
                             <icon name="hugeicons:edit-02" />
                             <div>Edit</div>
                         </div>
-                        <div class="card-action-item card-action__delete">  
+                        <div
+                            class="card-action-item card-action__delete"
+                            :class="{ 'opacity-50 pointer-events-none': deletingIds.has(item.id) }"
+                            @click.stop="removeItem(item.id)"
+                        >  
                             <icon name="hugeicons:delete-02" />
                             <div>Delete</div>
                         </div>
@@ -80,26 +88,42 @@
 
 
         <LocalizationModal ref="localModalRef" @close="closeLocalModal" />
-        <EditStitchModal ref="editModalRef" />
+        <EditStitchModal ref="editModalRef" @save="handleSaveStitch" />
 
     </div>
 </template>
 <script setup lang="ts">
+// =============================================================================
+// Stitch Dictionary Page
+// - List/search/filter/pagination
+// - Create/Edit stitch (with localizations)
+// - Delete stitch
+// =============================================================================
+
+// Imports
 import Empty from "@/components/common/empty/index.vue";
 import Pagination from "@/components/common/pagination/index.vue";
 import type { ApiResponse } from "~/types/ApiResponse";
+import { useAppToast } from "~/composables/useAppToast";
 import LocalizationModal from '~/components/modal/stitch/localization/index.vue'
 import EditStitchModal from '~/components/modal/stitch/edit/index.vue'
 
+// UI refs / notifications
 const editModalRef = ref<any>(null) as any
+const toast = useAppToast()
 
-// default values
+// Request guards
+const saving = ref(false)
+const deletingIds = ref<Set<number>>(new Set())
+
+// Page header
 const breadcrumbs = [
   { label: "Home", to: "/", icon: "solar:home-2-outline" },
   { label: "Dictionary", icon: "solar:emoji-funny-circle-outline" },
   { label: "Stitch" },
 ];
 
+// Filters
 const stitchTypes = [
     "All",
     "Basic",
@@ -112,6 +136,7 @@ const stitchTypes = [
 ]
 const activeType = ref("All");
 
+// API DTOs / View models
 type StitchLocalizationDto = {
     languageCode: string;
     flag: string;
@@ -136,6 +161,21 @@ type StitchPageResult = {
     pageSize: number;
 };
 
+type StitchUpsertPayload = {
+    id: number | null;
+    defaultName: string;
+    description: string;
+    type: string;
+    level: string;
+    localizations?: Array<{
+        languageCode: string;
+        flag: string;
+        name: string;
+        abbrev: string;
+        description: string;
+    }>;
+};
+
 type StitchCard = {
     id: number;
     category: string;
@@ -143,17 +183,23 @@ type StitchCard = {
     alias: string;
     level: string;
     description: string | null;
-    abbrev: Array<{ flag: string; lang: string; abbrev: string }>;
+    abbrev: Array<{ flag: string; lang: string; abbrev: string, name: string }>;
 };
 
+// List state
 const stitchItem = ref<StitchCard[]>([]);
 const loading = ref(false);
+
+// Search & pagination
 const keyword = ref("");
 const page = ref(1);
 const pageSize = ref(20);
 const total = ref(0);
+
+// Derived
 const totalPages = computed(() => Math.max(1, Math.ceil(total.value / pageSize.value)));
 
+// Mapping: API DTO -> card view
 const toCard = (s: StitchDto): StitchCard => {
     const us = s.localizations.find(l => (l.languageCode ?? '').toUpperCase() === 'US');
     const title = (us?.name ?? s.defaultName).trim();
@@ -163,11 +209,12 @@ const toCard = (s: StitchDto): StitchCard => {
         .map(l => {
             const name = (l.name ?? '').trim();
             const ab = (l.abbrev ?? '').trim();
-            const text = ab ? `${name || l.languageCode} (${ab})` : name;
+            // const text = ab ? `${name || l.languageCode} (${ab})` : name;
             return {
                 flag: l.flag,
                 lang: l.languageCode,
-                abbrev: text.trim(),
+                abbrev: ab?.trim(),
+                name: name?.trim(),
             };
         })
         .filter(x => x.abbrev);
@@ -179,10 +226,11 @@ const toCard = (s: StitchDto): StitchCard => {
         alias,
         level: s.level,
         description: s.description ?? null,
-        abbrev,
+        abbrev: abbrev,
     };
 };
 
+// Data loading
 const load = async () => {
     loading.value = true;
     try {
@@ -191,6 +239,7 @@ const load = async () => {
             pageSize: String(pageSize.value),
         });
         if (keyword.value) params.set("keyword", keyword.value);
+        if (activeType.value && activeType.value !== "All") params.set("type", activeType.value);
 
         const res = await $fetch<ApiResponse<{ result: StitchPageResult }>>(
             `/api/dict/stitch/list?${params.toString()}`,
@@ -211,7 +260,15 @@ const load = async () => {
     }
 };
 
+// List interactions
 const search = async () => {
+    page.value = 1;
+    await load();
+};
+
+const setActiveType = async (type: string) => {
+    if (type === activeType.value) return;
+    activeType.value = type;
     page.value = 1;
     await load();
 };
@@ -222,14 +279,103 @@ const changePage = async (p: number) => {
     await load();
 };
 
+// Lifecycle
 onMounted(load);
 
-// edit modal function
-const openEditModal = (item: any) => {
-    item.active = true
+// Create / Edit
+const openEditModal = async (item: any) => {
+    const id = Number(item?.id)
+    if (!id || Number.isNaN(id)) return
+    try {
+        const res = await $fetch<ApiResponse<{ result: StitchDto }>>(`/api/dict/stitch/${id}`, {
+            method: 'GET'
+        })
+        const detail = res?.data?.result
+        if (!res?.success || !detail) {
+            throw new Error(res?.message || 'Failed to fetch stitch detail')
+        }
+        editModalRef.value?.setStitch(detail)
+        editModalRef.value?.open()
+    } catch (e: any) {
+        toast.error(e?.message || 'Failed to fetch stitch detail')
+    }
+}
+
+const openCreateModal = () => {
+    editModalRef.value?.setStitch({
+        id: null,
+        defaultName: '',
+        description: '',
+        type: 'Basic',
+        level: 'beginner',
+    })
     editModalRef.value?.open()
 }
 
+const handleSaveStitch = async (payload: StitchUpsertPayload) => {
+    if (saving.value) return
+    const name = (payload?.defaultName ?? '').trim()
+    if (!name) {
+        toast.error('Stitch name is required')
+        return
+    }
+
+    saving.value = true
+    try {
+        const desc = (payload?.description ?? '').trim()
+        const body = {
+            id: payload?.id ?? null,
+            defaultName: name,
+            type: payload?.type ?? 'Basic',
+            level: payload?.level ?? 'beginner',
+            description: desc ? desc : null,
+            localizations: Array.isArray(payload?.localizations) ? payload.localizations : undefined,
+        }
+        const res = await $fetch<ApiResponse<{ result: number }>>('/api/dict/stitch', {
+            method: 'POST',
+            body,
+        })
+        if (!res?.success) {
+            throw new Error(res?.message || 'Save failed')
+        }
+        toast.success('Stitch saved successfully!')
+        editModalRef.value?.close()
+        await load()
+    } catch (e: any) {
+        toast.error(e?.message || 'Save failed')
+    } finally {
+        saving.value = false
+    }
+}
+
+// Delete
+const removeItem = async (id: number) => {
+    if (!id || deletingIds.value.has(id)) return
+    const ok = confirm('确定删除该 Stitch 吗？此操作不可撤销。')
+    if (!ok) return
+
+    deletingIds.value.add(id)
+    try {
+        const res = await $fetch<ApiResponse<{ result: number }>>(`/api/dict/stitch/${id}`, {
+            method: 'DELETE',
+        })
+        if (!res?.success) {
+            throw new Error(res?.message || 'Delete failed')
+        }
+        toast.success('Stitch deleted successfully!')
+        await load()
+        if (page.value > 1 && stitchItem.value.length === 0) {
+            page.value = page.value - 1
+            await load()
+        }
+    } catch (e: any) {
+        toast.error(e?.message || 'Delete failed')
+    } finally {
+        deletingIds.value.delete(id)
+    }
+}
+
+// Localization settings modal
 const closeLocalModal = () => {
     const modal = document.getElementById('local_modal') as HTMLDialogElement
     modal.close()
@@ -347,6 +493,8 @@ const openLocalModal = () => {
         box-shadow: 0 0 10px 0 oklch(92.8% 0.006 264.531 / 0.2);
         cursor: pointer;
         transition: all 0.2s ease-in-out;
+        display: flex;
+        flex-direction: column;
 
         &:hover {
             box-shadow: var(--shadow-md);
@@ -372,6 +520,7 @@ const openLocalModal = () => {
             font-size: 12px;
             height: 62px;
             
+            
             overflow: hidden;
             text-overflow: ellipsis;
             display: -webkit-box;
@@ -383,11 +532,13 @@ const openLocalModal = () => {
         }
 
         .card-actions {
+            flex-grow: 1;
             display: flex;
             gap: 5px;
             font-size: 12px;
             font-weight: 500;
             justify-content: flex-end;
+            align-items: end;
 
             .card-action-item {
                 display: flex;
@@ -435,7 +586,7 @@ const openLocalModal = () => {
                 padding-top: 4px;
                 padding-bottom: 7px;
                 border-bottom: 0.5px dashed var(--color-gray-200);
-                gap: 10px;
+                gap: 15px;
 
                 &:last-child {
                     border-bottom: none;
@@ -448,7 +599,6 @@ const openLocalModal = () => {
                 }
                 .item_abbrev {
                     color: var(--color-gray-700);
-                    font-weight: 500;
                     overflow: hidden;
                     text-overflow: ellipsis;
                     white-space: nowrap;

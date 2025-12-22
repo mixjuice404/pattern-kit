@@ -1,7 +1,9 @@
 import { createRouter, useBase, readBody } from 'h3'
 import { defineApiHandler } from '../../utils/defineApiHandler'
 import { useApiResponse } from '../../utils/apiResponse'
-import { addStitchLanguage, deleteStitchLanguage, queryStitchLanguages, importStitches, getStitchList } from '~~/server/services/stitch.service'
+import { addStitchLanguage, 
+  deleteStitchLanguage, queryStitchLanguages, 
+  importStitches, getStitchList, getStitchDetail, createOrUpdateStitch, deleteStitch } from '~~/server/services/stitch.service'
 
 const router = createRouter()
 
@@ -63,6 +65,27 @@ router.get('/stitch/list', defineApiHandler(async (event) => {
     defaultName: query.keyword as string | null,
     type: query.type as string || ''
   })
+  return useApiResponse({ result })
+}));
+
+// 查询 stitch detail
+router.get('/stitch/:id', defineApiHandler(async (event) => {
+  const { id } = getRouterParams(event)
+  const result = await getStitchDetail(Number(id))
+  return useApiResponse({ result })
+}));
+
+// 创建或编辑 stitch
+router.post('/stitch', defineApiHandler(async (event) => {
+  const body = await readBody(event)
+  const result = await createOrUpdateStitch(body.id, body)
+  return useApiResponse({ result })
+}));
+
+// 删除 stitch
+router.delete('/stitch/:id', defineApiHandler(async (event) => {
+  const { id } = getRouterParams(event)
+  const result = await deleteStitch(Number(id))
   return useApiResponse({ result })
 }));
 

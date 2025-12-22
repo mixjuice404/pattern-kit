@@ -112,7 +112,7 @@ const goto = (item: any) => {
 .main-body {
   height: calc(100vh - 64px);
   display: grid;
-  grid-template-columns: 260px 1fr;
+  grid-template-columns: 240px auto;
 
   aside {
     background-color: white;

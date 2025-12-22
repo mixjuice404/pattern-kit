@@ -3,7 +3,7 @@
     <div class="modal-box custom-modal-box" style="max-width: 56rem;">
       <div class="modal-header">
         <div>
-          <div class="modal-header__title">Edit Stitch</div>
+          <div class="modal-header__title">{{ isEdit ? 'Edit Stitch' : 'Add Stitch' }}</div>
           <div class="modal-header__subtitle">
             Manage definition and multi-language terminology
           </div>
@@ -39,6 +39,7 @@
                     </div>
                     <input
                       id="stitch-name"
+                      v-model.trim="stitch.defaultName"
                       type="text"
                       placeholder="e.g. Single Crochet"
                       class="input"
@@ -52,14 +53,8 @@
                     >
                       Category
                     </div>
-                    <select id="stitch-category" class="select">
-                      <option selected>Basic</option>
-                      <option>Textured</option>
-                      <option>Lace</option>
-                      <option>Cable</option>
-                      <option>Colorwork</option>
-                      <option>Tunisian</option>
-                      <option>Flower/Motif</option>
+                    <select id="stitch-category" v-model="stitch.type" class="select">
+                      <option v-for="t in typeOptions" :key="t" :value="t">{{ t }}</option>
                     </select>
                   </div>
 
@@ -71,10 +66,15 @@
                       Difficulty
                     </div>
                     <div class="grid grid-cols-4 gap-2">
-                      <div class="stitch-level active">Beginner</div>
-                      <div class="stitch-level">Intermediate</div>
-                      <div class="stitch-level">Advanced</div>
-                      <div class="stitch-level">Expert</div>
+                      <div
+                        v-for="l in levelOptions"
+                        :key="l.key"
+                        class="stitch-level"
+                        :class="{ active: stitch.level === l.key }"
+                        @click="setLevel(l.key)"
+                      >
+                        {{ l.label }}
+                      </div>
                     </div>
                   </div>
 
@@ -86,6 +86,7 @@
                       Description
                     </div>
                     <textarea
+                      v-model="stitch.description"
                       class="textarea w-full"
                       placeholder="Brief description of the stitch ..."
                     />
@@ -125,41 +126,71 @@
             </div>
 
             <div class="stitch-term-group" style="margin-bottom: 10px;">
-              <div class="stitch-term">
+              <div
+                v-for="term in termItems"
+                :key="term.key"
+                class="stitch-term"
+                @click="startEdit(term.key)"
+              >
                 <div class="flex items-center gap-2 justify-between">
                   <div style="font-size: 12px;" class="font-bold text-gray-500/80">
-                    US Terms
+                    {{ term.label }}
                   </div>
-                  <div style="font-size: 16px;">🇺🇸</div>
+                  <div style="font-size: 16px;">{{ term.flag }}</div>
                 </div>
-                <div class="stitch-term-name text-neutral-900">
-                  Single Crochet (sc)
-                </div>
-                <div></div>
-              </div>
 
-              <div class="stitch-term">
-                <div class="flex items-center gap-2 justify-between">
-                  <div style="font-size: 12px;" class="font-bold text-gray-500/80">
-                    UK Terms
+                <div style="display: flex; align-items: center; justify-content: between;">
+                  <div class="stitch-term-name text-neutral-900" style="flex-grow: 1;">
+                    <div
+                      v-if="isEditing(term.key)"
+                      :ref="(el) => setNameRef(term.key, el)"
+                      contenteditable="true"
+                      data-placeholder="Term name"
+                      @click.stop
+                      @input="onNameInput"
+                      @keydown.enter.prevent
+                    />
+                    <template v-else>
+                      {{ term.name || '-' }}
+                    </template>
                   </div>
-                  <div style="font-size: 16px;">🇬🇧</div>
+                  <div style="font-size: 12px; flex-shrink: 0; line-height: 1; padding: 4px 8px; border-radius: 4px; font-weight: 500;" class="text-gray-800 bg-gray-100">
+                    <div
+                      v-if="isEditing(term.key)"
+                      :ref="(el) => setAbbrevRef(term.key, el)"
+                      contenteditable="true"
+                      data-placeholder="Abbrev"
+                      @click.stop
+                      @input="onAbbrevInput"
+                      @keydown.enter.prevent
+                    />
+                    <template v-else>
+                      {{ term.abbrev || '-' }}
+                    </template>
+                  </div>
                 </div>
-                <div class="stitch-term-name text-neutral-900">
-                  Double Crochet (dc)
-                </div>
-                <div></div>
-              </div>
+                
 
-              <div class="stitch-term">
-                <div class="flex items-center gap-2 justify-between">
-                  <div style="font-size: 12px;" class="font-bold text-gray-500/80">
-                    Japanese
-                  </div>
-                  <div style="font-size: 16px;">🇯🇵</div>
+                <div
+                  v-if="isEditing(term.key)"
+                  :ref="(el) => setDescRef(term.key, el)"
+                  contenteditable="true"
+                  class="stitch-term-description mt-1"
+                  data-placeholder="Description"
+                  @click.stop
+                  @input="onDescInput"
+                />
+
+                <div
+                  v-if="isEditing(term.key)"
+                  class="mt-3 flex items-center justify-end gap-2"
+                  @click.stop
+                >
+                  <button class="btn btn-xs btn-neutral" @click="confirmEdit">
+                    Confirm
+                  </button>
+                  <button class="btn btn-xs" @click="cancelEdit">Cancel</button>
                 </div>
-                <div class="stitch-term-name text-neutral-900">X (Coma)</div>
-                <div></div>
               </div>
             </div>
 
@@ -174,9 +205,9 @@
       </div>
 
       <div class="modal-footer">
-        <button class="btn btn-neutral">
+        <button class="btn btn-neutral" :disabled="!stitch.defaultName.trim()" @click="handleSave">
           <icon name="hugeicons:cloud-upload" size="16" />
-          <span>Save Stitch</span>
+          <span>{{ isEdit ? 'Save Stitch' : 'Create Stitch' }}</span>
         </button>
       </div>
     </div>
@@ -184,12 +215,216 @@
 </template>
 
 <script setup lang="ts">
+type StitchForm = {
+  id: number | null
+  defaultName: string
+  description: string
+  type: string
+  level: string
+}
+
 const dialogRef = ref<HTMLDialogElement | null>(null)
+
+const typeOptions = [
+  "Basic",
+  "Textured",
+  "Lace",
+  "Cable",
+  "Colorwork",
+  "Tunisian",
+  "Flower/Motif",
+] as const
+
+const levelOptions = [
+  { key: "beginner", label: "Beginner" },
+  { key: "intermediate", label: "Intermediate" },
+  { key: "advanced", label: "Advanced" },
+  { key: "expert", label: "Expert" },
+] as const
+
+type StitchLocalizationForm = {
+  languageCode: string
+  flag: string
+  name: string
+  abbrev: string
+  description: string
+}
+
+type TermItem = {
+  key: string
+  label: string
+  flag: string
+  name: string
+  description: string
+  abbrev: string
+}
+
+const normalizeCode = (code: any) => String(code ?? "").toUpperCase()
+
+const localizations = ref<StitchLocalizationForm[]>([])
+
+const termItems = computed<TermItem[]>(() =>
+  localizations.value.map((l) => ({
+    key: normalizeCode(l.languageCode),
+    label: `${normalizeCode(l.languageCode)} Terms`,
+    flag: l.flag,
+    name: l.name,
+    description: l.description,
+    abbrev: l.abbrev,
+  }))
+)
+
+const editingKey = ref<string | null>(null)
+const draftName = ref("")
+const draftAbbrev = ref("")
+const draftDescription = ref("")
+
+const nameRefMap = new Map<string, HTMLDivElement>()
+const abbrevRefMap = new Map<string, HTMLDivElement>()
+const descRefMap = new Map<string, HTMLDivElement>()
+
+const setNameRef = (key: string, el: any) => {
+  const k = normalizeCode(key)
+  if (el) nameRefMap.set(k, el as HTMLDivElement)
+  else nameRefMap.delete(k)
+}
+
+const setAbbrevRef = (key: string, el: any) => {
+  const k = normalizeCode(key)
+  if (el) abbrevRefMap.set(k, el as HTMLDivElement)
+  else abbrevRefMap.delete(k)
+}
+
+const setDescRef = (key: string, el: any) => {
+  const k = normalizeCode(key)
+  if (el) descRefMap.set(k, el as HTMLDivElement)
+  else descRefMap.delete(k)
+}
+
+const isEditing = (key: string) => editingKey.value === normalizeCode(key)
+
+const onNameInput = (e: Event) => {
+  draftName.value = (e.target as HTMLElement)?.textContent ?? ""
+}
+
+const onAbbrevInput = (e: Event) => {
+  draftAbbrev.value = (e.target as HTMLElement)?.textContent ?? ""
+}
+
+const onDescInput = (e: Event) => {
+  draftDescription.value = (e.target as HTMLElement)?.textContent ?? ""
+}
+
+const startEdit = async (key: string) => {
+  const code = normalizeCode(key)
+  const l = localizations.value.find((x) => normalizeCode(x.languageCode) === code)
+  if (!l) return
+  editingKey.value = code
+  draftName.value = l.name
+  draftAbbrev.value = l.abbrev
+  draftDescription.value = l.description
+
+  await nextTick()
+  const nameEl = nameRefMap.get(code)
+  if (nameEl) {
+    nameEl.textContent = draftName.value
+    nameEl.focus()
+  }
+  const abbrevEl = abbrevRefMap.get(code)
+  if (abbrevEl) {
+    abbrevEl.textContent = draftAbbrev.value
+  }
+  const descEl = descRefMap.get(code)
+  if (descEl) {
+    descEl.textContent = draftDescription.value
+  }
+}
+
+const confirmEdit = () => {
+  const code = editingKey.value
+  if (!code) return
+  const l = localizations.value.find((x) => normalizeCode(x.languageCode) === code)
+  if (!l) return
+  l.name = draftName.value.trim()
+  l.abbrev = draftAbbrev.value.trim()
+  l.description = draftDescription.value.trim()
+  editingKey.value = null
+}
+
+const cancelEdit = () => {
+  editingKey.value = null
+}
+
+const defaultForm = (): StitchForm => ({
+  id: null,
+  defaultName: "",
+  description: "",
+  type: "Basic",
+  level: "beginner",
+})
+
+const stitch = ref<StitchForm>(defaultForm())
+
+const isEdit = computed(
+  () => typeof stitch.value.id === "number" && !Number.isNaN(stitch.value.id)
+)
+
+const emit = defineEmits<{
+  (e: "save", payload: StitchForm & { localizations: StitchLocalizationForm[] }): void
+}>()
 
 const open = () => dialogRef.value?.showModal()
 const close = () => dialogRef.value?.close()
 
-defineExpose({ open, close })
+const setStitch = (data: any) => {
+  const base = defaultForm()
+  stitch.value = {
+    ...base,
+    ...(data ?? {}),
+    id: typeof data?.id === "number" && !Number.isNaN(Number(data.id)) ? Number(data.id) : null,
+    defaultName: typeof data?.defaultName === "string" ? data.defaultName : base.defaultName,
+    description: data?.description == null ? "" : String(data.description),
+    type: typeof data?.type === "string" ? data.type : base.type,
+    level: typeof data?.level === "string" ? data.level : base.level,
+  }
+
+  const rawLocs = Array.isArray(data?.localizations) ? data.localizations : []
+  localizations.value = rawLocs
+    .map((l: any) => ({
+      languageCode: normalizeCode(l?.languageCode),
+      flag: String(l?.flag ?? ""),
+      name: l?.name == null ? "" : String(l.name),
+      abbrev: l?.abbrev == null ? "" : String(l.abbrev),
+      description: l?.description == null ? "" : String(l.description),
+    }))
+    .filter((l: StitchLocalizationForm) => l.languageCode)
+
+  editingKey.value = null
+}
+
+const setLevel = (level: string) => {
+  stitch.value.level = level
+}
+
+const handleSave = () => {
+  const locs = localizations.value
+    .map((l) => ({
+      languageCode: normalizeCode(l.languageCode),
+      flag: l.flag,
+      name: l.name.trim(),
+      abbrev: l.abbrev.trim(),
+      description: l.description.trim(),
+    }))
+    .filter((l) => l.languageCode && l.name && l.description)
+
+  emit("save", {
+    ...stitch.value,
+    defaultName: stitch.value.defaultName.trim(),
+    localizations: locs,
+  })
+}
+
+defineExpose({ open, close, setStitch })
 </script>
 
 <style scoped lang="scss">
@@ -285,15 +520,31 @@ defineExpose({ open, close })
         padding: 10px 16px;
         border-radius: 6px;
         border: 0.5px solid var(--color-indigo-100);
+        position: relative;
 
         &:hover {
           border: 0.5px solid var(--color-indigo-300);
         }
 
+        [contenteditable][data-placeholder]:empty:before {
+          content: attr(data-placeholder);
+          opacity: 0.5;
+        }
+
+        [contenteditable]:focus {
+          outline: none;
+        }
+
         .stitch-term-name {
-          font-size: 14px;
+          font-size: 12px;
           font-weight: 500;
           color: var(--color-neutral-900);
+        }
+
+        .stitch-term-description {
+          font-size: 12px;
+          font-weight: 400;
+          color: var(--color-neutral-500);
         }
       }
     }

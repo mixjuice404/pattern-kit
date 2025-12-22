@@ -6,7 +6,7 @@ import prisma from '../utils/prisma';
 /**
  * =======================================================
  * 1. 创建或更新钩织针法
- * 2. 获取钩织针法详情(默认1个) - 待定
+ * 2. 获取钩织针法详情
  * 3. 删除钩织针法
  * 4. 查询钩织针法List（条件查询）
  * 5. 批量导入针法（JSON）
@@ -14,12 +14,21 @@ import prisma from '../utils/prisma';
  */
 
 // 创建或更新钩织针法
-export async function createOrUpdateStitch(id: number | null, data: {
-  defaultName: string;
-  description?: string | null;
-  type: string;
-  level: string;
-}) {
+export async function createOrUpdateStitch(
+  id: number | null,
+  data: {
+    defaultName: string;
+    description?: string | null;
+    type: string;
+    level: string;
+    localizations?: Array<{
+      languageCode: string;
+      name?: string | null;
+      abbrev?: string | null;
+      description?: string | null;
+    }>;
+  }
+) {
   try {
     const stitchData = {
       defaultName: data.defaultName,
@@ -28,19 +37,74 @@ export async function createOrUpdateStitch(id: number | null, data: {
       level: data.level,
     };
 
-    if (id === null) {
-      const created = await prisma.stitch.create({ data: stitchData });
-      return created.id;
+    const rawLocs = Array.isArray(data.localizations) ? data.localizations : [];
+    const normalizedLocs = rawLocs
+      .map((l) => ({
+        languageCode: String(l?.languageCode ?? '').trim().toUpperCase(),
+        name: String(l?.name ?? '').trim(),
+        abbrev: String(l?.abbrev ?? '').trim(),
+        description: String(l?.description ?? '').trim(),
+      }))
+      .filter((l) => l.languageCode);
+
+    if (normalizedLocs.some((l) => (l.name || l.abbrev || l.description) && (!l.name || !l.description))) {
+      throw new BasicError('BUSINESS_EXCEPTION', {
+        statusCode: 400,
+        message: 'localizations 中存在不完整项（需要 languageCode/name/description）',
+      });
     }
 
-    const result = await prisma.stitch.upsert({
-      where: { id },
-      update: stitchData,
-      create: stitchData,
+    const locByCode = new Map<string, typeof normalizedLocs[number]>();
+    for (const l of normalizedLocs) locByCode.set(l.languageCode, l);
+    const locs = Array.from(locByCode.values()).filter((l) => l.name && l.description);
+
+    return await prisma.$transaction(async (tx) => {
+      const stitch = id === null
+        ? await tx.stitch.create({ data: stitchData })
+        : await tx.stitch.upsert({ where: { id }, update: stitchData, create: stitchData });
+
+      if (!locs.length) return stitch.id;
+
+      const languages = await tx.stitchLanguage.findMany({
+        where: { deleted: 0 },
+        select: { code: true },
+      });
+      const validCodes = new Set(languages.map((x) => String(x.code).toUpperCase()));
+
+      const invalid = locs.map((l) => l.languageCode).filter((code) => !validCodes.has(code));
+      if (invalid.length) {
+        throw new BasicError('BUSINESS_EXCEPTION', {
+          statusCode: 400,
+          message: `无效 languageCode: ${Array.from(new Set(invalid)).join(', ')}`,
+        });
+      }
+
+      await Promise.all(
+        locs.map((l) =>
+          tx.stitchLocalization.upsert({
+            where: { stitchId_languageCode: { stitchId: stitch.id, languageCode: l.languageCode } },
+            update: {
+              name: l.name,
+              description: l.description,
+              abbrev: l.abbrev || undefined,
+              deleted: 0,
+            },
+            create: {
+              stitchId: stitch.id,
+              languageCode: l.languageCode,
+              name: l.name,
+              description: l.description,
+              abbrev: l.abbrev || undefined,
+            },
+          })
+        )
+      );
+
+      return stitch.id;
     });
-    return result.id;
   } catch (error) {
     console.error('创建/更新 Stitch 失败:', error);
+    if (error instanceof BasicError) throw error;
     if (id === null) {
       throw new BasicError('RESOURCE_CREATION_FAILED', { statusCode: 500 });
     }
@@ -48,6 +112,73 @@ export async function createOrUpdateStitch(id: number | null, data: {
   }
 }
 
+
+/** 查询钩织针法详情
+ * @param id 钩织针法ID
+ * @returns 针法详情对象(包含 id, defaultName, description, type, level, localizations(语言代码, 名称, 描述, flag), createdAt, updatedAt)
+ */
+export async function getStitchDetail(id: number) {
+  try {
+    const [languages, stitch] = await prisma.$transaction([
+      prisma.stitchLanguage.findMany({
+        where: { deleted: 0 },
+        select: { code: true, flag: true },
+      }),
+      prisma.stitch.findFirst({
+        where: { id, deleted: 0 },
+        select: {
+          id: true,
+          defaultName: true,
+          description: true,
+          type: true,
+          level: true,
+          created_at: true,
+          updated_at: true,
+          localizations: {
+            where: { deleted: 0 },
+            select: {
+              languageCode: true,
+              name: true,
+              description: true,
+              abbrev: true,
+            },
+          },
+        },
+      }),
+    ]);
+
+    if (!stitch) {
+      throw new BasicError('RESOURCE_NOT_FOUND', { statusCode: 404 });
+    }
+
+    const locByCode = new Map(
+      stitch.localizations.map((l) => [String(l.languageCode).toUpperCase(), l])
+    );
+
+    return {
+      id: stitch.id,
+      defaultName: stitch.defaultName,
+      description: stitch.description,
+      type: stitch.type,
+      level: stitch.level,
+      createdAt: stitch.created_at,
+      updatedAt: stitch.updated_at,
+      localizations: languages.map((lang) => {
+        const l = locByCode.get(String(lang.code).toUpperCase());
+        return {
+          languageCode: lang.code,
+          flag: lang.flag,
+          name: l?.name ?? null,
+          abbrev: l?.abbrev ?? null,
+          description: l?.description ?? null,
+        };
+      }),
+    };
+  } catch (error) {
+    console.error('查询 Stitch 详情失败:', error);
+    throw new BasicError('RESOURCE_NOT_FOUND', { statusCode: 404 });
+  }
+}
 
 
 /**
@@ -141,6 +272,25 @@ export async function getStitchList(query: {
   } catch (error) {
     console.error('查询 Stitch 列表失败:', error);
     throw new BasicError('RESOURCE_NOT_FOUND', { statusCode: 404, message: 'Stitch 列表不存在或查询失败' });
+  }
+}
+
+
+/**
+ * 删除 Stitch
+ * @param id Stitch 主键ID
+ * @returns 删除成功的 Stitch 主键ID
+ */
+export async function deleteStitch(id: number) {
+  try {
+    const result = await prisma.stitch.update({
+      where: { id, deleted: 0 },
+      data: { deleted: 1 },
+    });
+    return result.id;
+  } catch (error) {
+    console.error('删除 Stitch 失败:', error);
+    throw new BasicError('BUSINESS_EXCEPTION', { statusCode: 400, message: '删除 Stitch 失败' });
   }
 }
 
