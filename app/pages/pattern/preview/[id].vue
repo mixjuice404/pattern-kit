@@ -76,7 +76,6 @@
 import BaseTemplate from '~/components/template/base/index.vue'
 import SimpleTemplate from '~/components/template/simple/index.vue'
 import { PatternInfo } from '~/types/PatternInfo'
-import { generateWithGemini } from '~/utils/gemini'
 import type { ApiResponse } from "~/types/ApiResponse"
 
 definePageMeta({
@@ -92,7 +91,6 @@ const route = useRoute()
 const loading = ref(true)
 const error = ref<string | null>(null)
 const patternInfo = reactive(new PatternInfo())
-const promptResult = ref<HTMLPreElement>()
 
 const load = async () => {
   loading.value = true
@@ -245,52 +243,24 @@ const promptLoading = ref(false)
 
 // 执行 prompt builder 功能
 const buildPrompt = async () => {
+  promptLoading.value = true
   try {
-    promptLoading.value = true
-    // 1. 获取 normalize 模板
-    const response = await $fetch('/api/pattern/prompt/normalize')
-    
-    if (!response?.success || !response?.data?.template) {
-      throw new Error('获取 normalize 模板失败')
-    }
-    const template = response.data.template.template
-    if (!template) {
-      throw new Error('normalize 模板为空')
-    }
-    // 2. 替换模板中的 {{content}}
-    const content = JSON.stringify(patternInfo, null, 2)
-    const result = template.replace(/\{\{content\}\}/g, content)
+    const res = await $fetch<any>('/api/pattern/prompt/build', {
+      method: 'POST',
+      body: { content: patternInfo },
+    })
 
-    // 3. 调用 Gemini API 执行 prompt 并获取结果
-    try {
-      // 从运行时配置获取 API Key
-      const config = useRuntimeConfig()
-      const apiKey = config.public.geminiApiKey
-      
-      if (!apiKey || apiKey === 'your-gemini-api-key') {
-        throw new Error('请配置有效的 Gemini API Key')
-      }
-      
-      const geminiResult = await generateWithGemini(result, apiKey)
-
-      // 1. 查询 alias = pattern 的模板
-      const patternTemplateResponse = await $fetch('/api/pattern/prompt/pattern')
-      const patternTemplate = patternTemplateResponse.data.template.template
-      
-      // 2. 用 geminiResult 替换模板中的 {{json}} 字段
-      const finalResult = patternTemplate.replace(/\{\{json\}\}/g, geminiResult)
-
-      // 3. 合并后的字段赋值给 builtPrompt.value
-      builtPrompt.value = finalResult
-    } catch (geminiError: any) {
-      console.error('Gemini API 调用失败:', geminiError)
-      // 如果 Gemini 调用失败，显示原始 prompt
-      builtPrompt.value = `❌ Gemini API 调用失败: ${geminiError.message}\n\n原始 Prompt:\n${result}`
-    } finally {
-      promptLoading.value = false
+    const prompt = res?.data?.prompt
+    if (!res?.success || !prompt) {
+      throw new Error(res?.message || '构建 prompt 失败')
     }
-  } catch (error: any) {
-    console.error('构建 prompt 失败:', error)
+
+    builtPrompt.value = prompt
+  } catch (e: any) {
+    console.error('构建 prompt 失败:', e)
+    builtPrompt.value = `❌ 构建 prompt 失败: ${e?.message || 'Unknown error'}`
+  } finally {
+    promptLoading.value = false
   }
 }
 

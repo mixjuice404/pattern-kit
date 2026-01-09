@@ -389,6 +389,16 @@
             "rows":
             [
                 {
+                    "chinese": "短针加针",
+                    "notation_cn": "V",
+                    "us": "single crochet 2 increase (same as: inc)",
+                    "us_abbrev": "inc",
+                    "us_description": "Work two single crochets in one stitch to increase width. Increase (2 sc in 1 st)",
+                    "uk": "double crochet 2 increase",
+                    "uk_abbrev": "dc inc",
+                    "description": "在同一针目里钩两次短针，用于增加针数。"
+                },
+                {
                     "chinese": "减针（并针）",
                     "notation_cn": "减针 / 并针",
                     "us": "decrease",

@@ -409,6 +409,146 @@ export async function importStitches(jsonData: any[]) {
 
 
 /**
+ * 查询 所有 simple stitch
+ * 入参：languageCode 语言代码
+ * return data 结构：
+ */
+export async function getSimpleStitchSections(languageCode: string) {
+  try {
+    const code = String(languageCode ?? '').trim().toUpperCase();
+    if (!code) {
+      throw new BasicError('UNKNOWN_ERROR', { statusCode: 400, message: 'languageCode 为必填' });
+    }
+
+    const exists = await prisma.stitchLanguage.findFirst({
+      where: { deleted: 0, code },
+      select: { code: true },
+    });
+    if (!exists) {
+      throw new BasicError('UNKNOWN_ERROR', { statusCode: 400, message: `languageCode 不支持：${code}` });
+    }
+
+    const stitches = await prisma.stitch.findMany({
+      where: { deleted: 0 },
+      select: {
+        id: true,
+        defaultName: true,
+        description: true,
+        level: true,
+        localizations: {
+          where: { deleted: 0, languageCode: code },
+          select: { name: true, abbrev: true, description: true },
+        },
+      },
+      orderBy: [{ level: 'asc' }, { defaultName: 'asc' }],
+    });
+
+    const levelLabel: Record<string, string> = {
+      beginner: 'Beginner',
+      intermediate: 'Intermediate',
+      advanced: 'Advanced',
+      expert: 'Expert',
+    };
+    const levelOrder = ['beginner', 'intermediate', 'advanced', 'expert'];
+
+    const sectionMap = new Map<string, { id: string; name: string; terms: Record<string, any> }>();
+
+    for (const s of stitches) {
+      const level = String(s.level ?? '').trim() || 'unknown';
+      const loc = Array.isArray(s.localizations) ? s.localizations[0] : undefined;
+      const name = String((loc as any)?.name ?? s.defaultName ?? '').trim();
+      const abbrev = String((loc as any)?.abbrev ?? '').trim();
+      const desc = String((loc as any)?.description ?? s.description ?? '').trim();
+
+      const section = sectionMap.get(level) ?? {
+        id: level,
+        name: levelLabel[level] ?? level,
+        terms: {},
+      };
+
+      const key = name || String(s.id);
+      section.terms[key] = {
+        chinese: '',
+        notation_cn: '',
+        us_abbrev: abbrev,
+        us: name,
+        us_description: desc,
+        description: desc,
+      };
+
+      sectionMap.set(level, section);
+    }
+
+    return Array.from(sectionMap.values()).sort((a, b) => {
+      const ai = levelOrder.indexOf(a.id);
+      const bi = levelOrder.indexOf(b.id);
+      if (ai !== -1 || bi !== -1) return (ai === -1 ? 999 : ai) - (bi === -1 ? 999 : bi);
+      return String(a.name).localeCompare(String(b.name));
+    });
+  } catch (error) {
+    console.error('查询 simple stitch 失败:', error);
+    if (error instanceof BasicError) throw error;
+    throw new BasicError('UNKNOWN_ERROR', { statusCode: 500, message: '查询 simple stitch 失败' });
+  }
+}
+
+// 根据 languageCode 查询所有 Stitch 对应的 name 和 abbrev
+export async function getStitchNamesAndAbbrevs(languageCode: string) {
+  try {
+    const code = String(languageCode ?? '').trim().toUpperCase();
+    if (!code) {
+      throw new BasicError('UNKNOWN_ERROR', { statusCode: 400, message: 'languageCode 为必填' });
+    }
+
+    const exists = await prisma.stitchLanguage.findFirst({
+      where: { deleted: 0, code },
+      select: { code: true },
+    });
+    if (!exists) {
+      throw new BasicError('UNKNOWN_ERROR', { statusCode: 400, message: `languageCode 不支持：${code}` });
+    }
+
+    const stitches = await prisma.stitch.findMany({
+      where: { deleted: 0 },
+      select: {
+        id: true,
+        defaultName: true,
+        localizations: {
+          where: { deleted: 0, languageCode: code },
+          select: { name: true, abbrev: true },
+        },
+      },
+      orderBy: { defaultName: 'asc' },
+    });
+
+    return stitches.map((s) => {
+      const loc = Array.isArray(s.localizations) ? s.localizations[0] : undefined;
+      const name = String((loc as any)?.name ?? s.defaultName ?? '').trim();
+      const abbrev = String((loc as any)?.abbrev ?? '').trim();
+      return {
+        id: s.id,
+        name,
+        abbrev: abbrev || null,
+      };
+    });
+  } catch (error) {
+    console.error('查询 Stitch name/abbrev 失败:', error);
+    if (error instanceof BasicError) throw error;
+    throw new BasicError('UNKNOWN_ERROR', { statusCode: 500, message: '查询 Stitch name/abbrev 失败' });
+  }
+}
+
+
+/**
+ * =======================================================
+ * language 支持
+ * - 添加一个 language支持
+ * - 删除一个 language支持
+ * - 查询所有 language支持
+ * =======================================================
+ */
+
+/**
  * 添加一个 language支持
  * @param languageCode 语言代码
  * @param flag 语言标志

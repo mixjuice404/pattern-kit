@@ -46,7 +46,8 @@ const menuItems = [
     summary: 'Patterns',
     children: [
       { label: 'Listings', path: '/pattern/list', icon: 'hugeicons:archive-02' },
-      { label: 'Templates', path: null, icon: 'hugeicons:folder-02' }
+      { label: 'Templates', path: null, icon: 'hugeicons:folder-02' },
+      { label: 'Drafts', path: '/pattern/draft', icon: 'hugeicons:document-attachment' },
     ]
   },
   {

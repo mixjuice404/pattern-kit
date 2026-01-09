@@ -286,7 +286,7 @@
                     class="grid-btn"
                     :class="{ selected: isTermSelected(termData.us_abbrev) }"
                     @click="toggleTerm(termData.us_abbrev)"
-                    :title="`${termData.chinese} (${termData.notation_cn}) - ${termData.description}`"
+                    :title="`${termData.chinese} (${termData.notation_cn})`"
                     >
                     {{ termData.us_abbrev || usName }}
                   </div>
@@ -899,9 +899,7 @@ const crochetSections = computed(() => {
         chinese: row.chinese,
         notation_cn: row.notation_cn,
         us_abbrev: row.us_abbrev,
-        us: row.us, // 添加这一行
-        us_description: row.us_description, // 添加这一行
-        description: row.description,
+        description: row.us_description || row.description,
       };
       return acc;
     }, {} as Record<string, any>),
@@ -928,22 +926,21 @@ const toggleTerm = (abbrev: string) => {
     props.patternInfo.terms.splice(existingIndex, 1);
   } else {
     // 在所有 sections 中查找对应的术语
-    let termData = null;
+    let found: [string, any] | null = null;
     for (const section of crochetSections.value) {
-      const foundTerm = Object.values(section.terms).find(
-        (term) => term.us_abbrev === abbrev
-      );
-      if (foundTerm) {
-        termData = foundTerm;
+      const entry = Object.entries(section.terms).find(([, term]) => term.us_abbrev === abbrev);
+      if (entry) {
+        found = entry as any;
         break;
       }
     }
 
-    if (termData) {
+    if (found) {
+      const [usName, termData] = found;
       props.patternInfo.terms.push({
         alias: abbrev, // 使用 us_abbrev 作为 alias
-        full_text: termData.us || abbrev, // 使用完整的 us 名称
-        description: termData.us_description || termData.description,
+        full_text: usName || abbrev,
+        description: termData.description,
       });
     }
   }

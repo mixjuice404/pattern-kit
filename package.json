@@ -17,13 +17,13 @@
     "@prisma/client": "^6.15.0",
     "@tailwindcss/typography": "^0.5.16",
     "@tailwindcss/vite": "^4.1.12",
-    "@tiptap/vue-3": "^2.1.13",
-    "@tiptap/starter-kit": "^2.1.13",
-    "@tiptap/extension-text-style": "^2.1.13",
+    "@tiptap/extension-bullet-list": "^2.1.13",
     "@tiptap/extension-color": "^2.1.13",
     "@tiptap/extension-list-item": "^2.1.13",
-    "@tiptap/extension-bullet-list": "^2.1.13",
     "@tiptap/extension-ordered-list": "^2.1.13",
+    "@tiptap/extension-text-style": "^2.1.13",
+    "@tiptap/starter-kit": "^2.1.13",
+    "@tiptap/vue-3": "^2.1.13",
     "bcrypt": "^6.0.0",
     "html2canvas": "^1.4.1",
     "imagekit": "^6.0.0",
@@ -31,6 +31,7 @@
     "imagekitio-vue": "^3.1.0",
     "jsonwebtoken": "^9.0.2",
     "jspdf": "^3.0.2",
+    "markdown-it": "^14.1.0",
     "nuxt": "^4.0.3",
     "puppeteer": "^24.19.0",
     "vue": "^3.5.20",
@@ -49,6 +50,7 @@
     "postcss": "^8.5.6",
     "prisma": "^6.15.0",
     "sass": "^1.92.0",
-    "tailwindcss": "^4.1.12"
+    "tailwindcss": "^4.1.12",
+    "undici": "^7.16.0"
   }
 }

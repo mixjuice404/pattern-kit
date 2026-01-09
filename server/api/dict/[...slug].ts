@@ -3,7 +3,9 @@ import { defineApiHandler } from '../../utils/defineApiHandler'
 import { useApiResponse } from '../../utils/apiResponse'
 import { addStitchLanguage, 
   deleteStitchLanguage, queryStitchLanguages, 
-  importStitches, getStitchList, getStitchDetail, createOrUpdateStitch, deleteStitch } from '~~/server/services/stitch.service'
+  importStitches, getStitchList, getStitchDetail, createOrUpdateStitch, deleteStitch, 
+  getSimpleStitchSections,
+  getStitchNamesAndAbbrevs} from '~~/server/services/stitch.service'
 
 const router = createRouter()
 
@@ -89,5 +91,20 @@ router.delete('/stitch/:id', defineApiHandler(async (event) => {
   return useApiResponse({ result })
 }));
 
+// 查询所有 simple stitch 
+router.get('/stitch/sections', defineApiHandler(async (event) => {
+  const query = getQuery(event);
+  const languageCode = query.languageCode as string | null
+  const result = await getSimpleStitchSections(languageCode || '')
+  return useApiResponse({ result })
+}));
+
+// 查询所有 Stitch 对应的 name 和 abbrev
+router.get('/stitch/names', defineApiHandler(async (event) => {
+  const query = getQuery(event);
+  const languageCode = query.languageCode as string | null
+  const result = await getStitchNamesAndAbbrevs(languageCode || '')
+  return useApiResponse({ data: result })
+}));
 
 export default useBase('/api/dict', router.handler)

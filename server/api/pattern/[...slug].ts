@@ -3,7 +3,8 @@ import { defineApiHandler } from '../../utils/defineApiHandler'
 import { useApiResponse } from '../../utils/apiResponse'
 import { createOrUpdateCrochetPattern, 
   getCrochetPatternList, getCrochetPattern, deleteCrochetPattern, 
-  createOrUpdatePromptTemplate, getPromptTemplateByAlias } from '../../services/pattern.service'
+  createOrUpdatePromptTemplate, getPromptTemplateByAlias, buildPatternPrompt,
+  createPatternDraft, getPatternDraftList, getPatternDraftDetail, updatePatternDraft } from '../../services/pattern.service'
 
 const router = createRouter()
 
@@ -39,7 +40,6 @@ router.get('/:id', defineApiHandler(async (event) => {
   return useApiResponse({ pattern })
 }));
 
-
 // 删除 Crochet Pattern
 router.post('/remove/:id', defineApiHandler(async (event) => {
   const { id } = getRouterParams(event)
@@ -70,6 +70,49 @@ router.get('/prompt/:alias', defineApiHandler(async (event) => {
   const template = await getPromptTemplateByAlias(alias) 
   return useApiResponse({ template })
 }));
+
+router.post('/prompt/build', defineApiHandler(async (event) => {
+  const body = await readBody(event)
+  const prompt = await buildPatternPrompt(body?.content ?? body)
+  return useApiResponse({ prompt })
+}));
+
+/**
+ * ======================================================================
+ * Crochet Pattern Draft 统一处理路由
+ * ======================================================================
+ */
+
+// 创建Crochet Pattern Draft
+router.post('/draft/create', defineApiHandler(async (event) => {
+  const body = await readBody(event)
+  const { data } = body
+  const draftId = await createPatternDraft(data)
+  return useApiResponse({  id: draftId })
+}));
+
+// 获取Crochet Pattern Draft list
+router.get('/draft/list', defineApiHandler(async (event) => {
+  const { page = 1, pageSize = 10 } = getQuery(event)
+  const result = await getPatternDraftList(Number(page), Number(pageSize))
+  return useApiResponse(result)
+}));
+
+// 获取Crochet Pattern Draft detail
+router.get('/draft/:id', defineApiHandler(async (event) => {
+  const { id } = getRouterParams(event)
+  const draft = await getPatternDraftDetail(Number(id))
+  return useApiResponse({ draft })
+}));
+
+// 更新Crochet Pattern Draft
+router.post('/draft/update', defineApiHandler(async (event) => {
+  const body = await readBody(event)
+  const { id, ...data } = body
+  const draftId = await updatePatternDraft(Number(id), data)
+  return useApiResponse({  id: draftId })
+}));
+
 
 /**
  * ======================================================================
