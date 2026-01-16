@@ -4,7 +4,9 @@ import { useApiResponse } from '../../utils/apiResponse'
 import { createOrUpdateCrochetPattern, 
   getCrochetPatternList, getCrochetPattern, deleteCrochetPattern, 
   createOrUpdatePromptTemplate, getPromptTemplateByAlias, buildPatternPrompt,
-  createPatternDraft, getPatternDraftList, getPatternDraftDetail, updatePatternDraft } from '../../services/pattern.service'
+  getPatternDraftList, getPatternDraftDetail, updatePatternDraft, 
+  getPromptTemplateList, getPromptTemplateById, preprocessPatternDraft, normalizeContent,
+  examiningPatternDraft,confirmReviewed} from '../../services/pattern.service'
 
 const router = createRouter()
 
@@ -71,10 +73,24 @@ router.get('/prompt/:alias', defineApiHandler(async (event) => {
   return useApiResponse({ template })
 }));
 
+// 获取提示词模板详情 id
+router.get('/prompt/id/:id', defineApiHandler(async (event) => {
+  const { id } = getRouterParams(event)
+  const template = await getPromptTemplateById(Number(id)) 
+  return useApiResponse({ template })
+}));
+
 router.post('/prompt/build', defineApiHandler(async (event) => {
   const body = await readBody(event)
   const prompt = await buildPatternPrompt(body?.content ?? body)
   return useApiResponse({ prompt })
+}));
+
+// 获取提示词模板列表(分页)
+router.get('/prompt/list', defineApiHandler(async (event) => {
+  const { page = 1, pageSize = 10 } = getQuery(event)
+  const result = await getPromptTemplateList(Number(page), Number(pageSize))
+  return useApiResponse(result)
 }));
 
 /**
@@ -86,8 +102,8 @@ router.post('/prompt/build', defineApiHandler(async (event) => {
 // 创建Crochet Pattern Draft
 router.post('/draft/create', defineApiHandler(async (event) => {
   const body = await readBody(event)
-  const { data } = body
-  const draftId = await createPatternDraft(data)
+  const { title, description } = body
+  const draftId = await preprocessPatternDraft(title, description)
   return useApiResponse({  id: draftId })
 }));
 
@@ -113,6 +129,31 @@ router.post('/draft/update', defineApiHandler(async (event) => {
   return useApiResponse({  id: draftId })
 }));
 
+// 更新Crochet Pattern Draft Status
+router.post('/draft/status/update', defineApiHandler(async (event) => {
+  const body = await readBody(event)
+  const { id, content } = body
+  await confirmReviewed(Number(id), content)
+  return useApiResponse({  id: Number(id) })
+}));
+
+
+
+// 标准化Crochet Pattern Draft 内容
+router.post('/draft/normalize', defineApiHandler(async (event) => {
+  const body = await readBody(event)
+  const { id } = body
+  const normalized = await normalizeContent(Number(id))
+  return useApiResponse({ normalized })
+}));
+
+// 审核Crochet Pattern Draft
+router.post('/draft/review', defineApiHandler(async (event) => {
+  const body = await readBody(event)
+  const { id } = body
+  const text = await examiningPatternDraft(Number(id))
+  return useApiResponse({ text })
+}));
 
 /**
  * ======================================================================

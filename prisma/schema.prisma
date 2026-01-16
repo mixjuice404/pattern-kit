@@ -166,9 +166,11 @@ model StitchLanguage {
 model PatternDraft {
   id              Int      @id @default(autoincrement())
   title           String
+  description     String?
   raw_content     String?  @db.Text
   revised_content String?  @db.Text
   result_content  String?  @db.Text
+  info            Json?
   meta            Json?
   status          String   @default("pending")
   version         Int      @default(1)

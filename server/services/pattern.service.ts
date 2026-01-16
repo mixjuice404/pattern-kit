@@ -221,6 +221,37 @@ export async function createOrUpdatePromptTemplate(id: number | null, data: {
   }
 }
 
+// 获取提示词模板详情 id
+export async function getPromptTemplateById(id: number) {
+  try {
+    // 根据 id 获取指定模板
+    const template = await prisma.promptTemplate.findFirst({
+      where: { id, deleted: 0 },
+      select: {
+        id: true,
+        name: true,
+        alias: true,
+        template: true,
+        description: true,
+        created_at: true,
+        updated_at: true,
+      },
+    });
+    if (!template) {
+      throw new BasicError('RESOURCE_NOT_FOUND', { statusCode: 404, message: '提示词模板不存在' });
+    }
+    console.log(`获取提示词模板成功: ${template.name}`);
+    return template;
+  } catch (error) {
+    console.error('获取提示词模板失败:', error);
+    if (error instanceof BasicError) {
+      throw error;
+    }
+    throw new BasicError('UNKNOWN_ERROR', { statusCode: 500, message: '获取提示词模板失败' });
+  }
+}
+
+
 // 获取提示词模板详情(默认获取第一个)
 export async function getPromptTemplateByAlias(alias?: string) {
   try {
@@ -258,6 +289,53 @@ export async function getPromptTemplateByAlias(alias?: string) {
   }
 }
 
+
+// 查询 prompt 模板列表
+// 获取提示词模板列表(分页)
+export async function getPromptTemplateList(page: number = 1, pageSize: number = 10) {
+  try {
+    const templates = await prisma.promptTemplate.findMany({
+      where: { deleted: 0 },
+      select: {
+        id: true,
+        name: true,
+        alias: true,
+        updated_at: true,
+      },
+      orderBy: { id: 'desc' },
+      skip: (page - 1) * pageSize,
+      take: pageSize,
+    });
+
+    return {
+      list: templates,
+      total: await prisma.promptTemplate.count({ where: { deleted: 0 } }),
+      page,
+      pageSize,
+    };
+  } catch (error) {
+    console.error('获取提示词模板列表失败:', error);
+    throw new BasicError('UNKNOWN_ERROR', { statusCode: 500, message: '获取提示词模板列表失败' });
+  }
+}
+
+
+/**
+ * ====================================================================
+ * 构建 和 执行 AI Pattern 预处理
+ * 1.拆分内容（基础信息 & pattern detail）
+ * 2.基础信息校验
+ *   - 结构化
+ *   - 内容补全（AI，统一生成）
+ * 3. pattern detail 校验
+ *   - 结构化
+ *   - AI 初审 & 统计针法
+ * 4. 翻译转换
+ *   - 组装 针法 prompt & 执行翻译结果
+ * ====================================================================
+ */
+
+
 export async function buildPatternPrompt(patternInfo: any) {
   try {
     const normalizeTemplate = await getPromptTemplateByAlias('normalize');
@@ -280,6 +358,123 @@ export async function buildPatternPrompt(patternInfo: any) {
     if (error instanceof BasicError) throw error;
     throw new BasicError('UNKNOWN_ERROR', { statusCode: 500, message: '构建 Pattern Prompt 失败' });
   }
+}
+
+
+export async function preprocessPatternDraft(title: string, description: string) {
+  try {
+    const cleanTitle = String(title ?? '').trim()
+    if (!cleanTitle) {
+      throw new BasicError('INPUT_REQUIRED', { statusCode: 400, message: 'title 为必填' });
+    }
+    // 创建新的 patternDraft 记录
+    const draft = await prisma.patternDraft.create({
+      data: {
+        title: cleanTitle,
+        description: String(description ?? '').trim(),
+        status: 'pending',
+      },
+    });
+    return draft.id;
+  } catch (error) {
+    console.error('预处理 Pattern Draft 失败:', error);
+    if (error instanceof BasicError) throw error;
+    throw new BasicError('UNKNOWN_ERROR', { statusCode: 500, message: '预处理 Pattern Draft 失败' });
+  }
+}
+
+
+export async function normalizeContent(draftId: number) {
+  try {
+    // 根据draftId 判断是否存在 & status 是否为 pending
+    const draft = await prisma.patternDraft.findFirst({
+      where: { id: draftId, deleted: 0 },
+    });
+    if (!draft) {
+      throw new BasicError('RESOURCE_NOT_FOUND', { statusCode: 404, message: 'Pattern Draft 不存在或已处理' });
+    }
+    // 开始 归一化处理
+    const normalizeTemplate = await getPromptTemplateByAlias('pattern_draft_structure');
+    const normalizePrompt = String(normalizeTemplate.template ?? '').replace(/\{\{content\}\}/g, draft.raw_content ?? '');
+    if (!normalizePrompt.trim()) {
+      throw new BasicError('INVALID_PROMPT', { statusCode: 400, message: 'normalize 模板为空' });
+    }
+    const text = await aiGenerateText({
+      prompt: normalizePrompt,
+      model: 'gemini-3-flash-preview',
+    });
+    // todo 解析 text & 保存内容到 patternDraft 表
+    // 更新 patternDraft 中status - 流转到下一阶段 normalized
+    await prisma.patternDraft.update({
+      where: { id: draftId },
+      data: { status: 'normalized', revised_content: text },
+    });
+    // 返回成功 - 由前端发起下一步指令（分散执行时间）
+    return text;
+   } catch (error) {
+    console.error('构建 Pattern Prompt 失败:', error);
+    if (error instanceof BasicError) throw error;
+    throw new BasicError('UNKNOWN_ERROR', { statusCode: 500, message: '构建 Pattern Prompt 失败' });
+  }
+}
+
+export async function examiningPatternDraft(draftId: number) {
+  try {
+    // 根据draftId 判断是否存在 & status 是否为 normalized
+    const draft = await prisma.patternDraft.findFirst({
+      where: { id: draftId, deleted: 0 },
+    });
+    if (!draft) {
+      throw new BasicError('RESOURCE_NOT_FOUND', { statusCode: 404, message: 'Pattern Draft 不存在或已处理' });
+    }
+    // 校验 revised_content 是否存在
+    if (!draft.revised_content) {
+      throw new BasicError('INPUT_REQUIRED', { statusCode: 400, message: 'revised_content 为必填' });
+    }
+
+    // todo call ai - gemini-pro-3.0 审核 revised_content
+    const reviewTemplate = await getPromptTemplateByAlias('pattern_draft_ai_review');
+    const examinePrompt = String(reviewTemplate.template ?? '').replace(/\{\{content\}\}/g, draft.revised_content);
+    if (!examinePrompt.trim()) {
+      throw new BasicError('INVALID_PROMPT', { statusCode: 400, message: 'review 模板为空' });
+    }
+    console.log(examinePrompt)
+    const text = await aiGenerateText({
+      prompt: examinePrompt,
+      model: 'gemini-3-flash-preview',
+    });
+
+    let info: any
+    try {
+      info = JSON.parse(text)
+    } catch {
+      info = { text }
+    }
+
+    await prisma.patternDraft.update({
+      where: { id: draftId },
+      data: { status: 'manual_review', info },
+    });
+    return info;
+  } catch (error) {
+    console.error('审核 Pattern Draft 失败:', error);
+    if (error instanceof BasicError) throw error;
+    throw new BasicError('UNKNOWN_ERROR', { statusCode: 500, message: '审核 Pattern Draft 失败' });
+  }
+}
+    
+
+export async function reviewdPatternDraft(draftId: number, content: string) {
+  // 1.更新 revised_content
+  await prisma.patternDraft.update({
+    where: { id: draftId },
+    data: { revised_content: content },
+  });
+  // 2.设置 status 为 ready
+  await prisma.patternDraft.update({
+    where: { id: draftId },
+    data: { status: 'ready' },
+  });
 }
 
 
@@ -349,6 +544,7 @@ export async function getPatternDraftList(page: number = 1, pageSize: number = 1
       select: {
         id: true,
         title: true,
+        description: true,
         status: true,
         version: true,
         created_at: true,
@@ -379,6 +575,7 @@ export async function getPatternDraftDetail(draftId: number) {
         revised_content: true,
         result_content: true,
         meta: true,
+        info: true,
         status: true,
         version: true,
         created_at: true,
@@ -389,6 +586,7 @@ export async function getPatternDraftDetail(draftId: number) {
       throw new BasicError('RESOURCE_NOT_FOUND', { statusCode: 404, message: 'Pattern 草稿不存在' });
     }
     console.log(`查询 Pattern 草稿 ${draftId} 详情成功`);
+    // 需要把 info 格式化为 json 格式
     return draft;
   } catch (error) {
     console.error(`查询 Pattern 草稿 ${draftId} 详情失败:`, error);
@@ -396,6 +594,31 @@ export async function getPatternDraftDetail(draftId: number) {
     throw new BasicError('UNKNOWN_ERROR', { statusCode: 500, message: '查询 Pattern 草稿详情失败' });
   }
 }
+
+
+// 更新 Pattern 草稿状态
+export async function confirmReviewed(draftId: number, content: string) {
+  try {
+    const exists = await prisma.patternDraft.findFirst({
+      where: { id: draftId, deleted: 0 },
+      select: { id: true },
+    });
+    if (!exists) {
+      throw new BasicError('RESOURCE_NOT_FOUND', { statusCode: 404, message: 'Pattern 草稿不存在' });
+    }
+    // 2.更新 status
+    await prisma.patternDraft.update({
+      where: { id: draftId },
+      data: { status: "info_completion", revised_content: content },
+    });
+  } catch (error) {
+    console.error(`更新 Pattern 草稿 ${draftId} 状态失败:`, error);
+    if (error instanceof BasicError) throw error;
+    throw new BasicError('UNKNOWN_ERROR', { statusCode: 500, message: '更新 Pattern 草稿状态失败' });
+  }
+
+}
+
 
 
 // 更新 Pattern 草稿
@@ -407,6 +630,8 @@ export async function updatePatternDraft(
     revised_content?: string | null;
     result_content?: string | null;
     meta?: any | null;
+    status?: string | null;
+    info?: any | null;
   }
 ) {
   try {
@@ -423,6 +648,11 @@ export async function updatePatternDraft(
 
     const result = typeof draftData?.result_content === 'string' ? draftData.result_content : null;
     if (result != null && result.trim()) data.result_content = result;
+
+    const status = typeof draftData?.status === 'string' ? draftData.status.trim() : '';
+    if (status) data.status = status;
+
+    if (draftData?.info != null) data.info = draftData.info;
 
     if (draftData?.meta != null) data.meta = draftData.meta;
 
@@ -448,6 +678,7 @@ export async function updatePatternDraft(
         revised_content: true,
         result_content: true,
         meta: true,
+        info: true,
         status: true,
         version: true,
         created_at: true,

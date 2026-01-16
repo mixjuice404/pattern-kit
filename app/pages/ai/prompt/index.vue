@@ -3,17 +3,46 @@
     <PageHeader
       title="Prompts Builder"
       :breadcrumbs="breadcrumbs">
-       <button class="btn btn-sm btn-neutral">
+       <button class="btn btn-sm btn-neutral" @click="openPromptTplModal">
         <icon name="solar:add-circle-bold" size="18" />
         <span>New Prompt</span>
       </button>
     </PageHeader>
 
-    <div>
-      <div style="display: grid; grid-template-columns: 160px auto; gap: 20px;">
-        <!-- tabs 分成两个 一个是图解生成模板 一个是数据标准化模板 -->
+    <div style=" background-color: #fff; border-radius: 8px; padding: 10px;">
+      <table class="table">
+        <!-- head -->
+        <thead>
+          <tr>
+            <th></th>
+            <th>Title</th>
+            <th>Alias</th>
+            <th>Description</th>
+            <th>Last Updated</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr v-if="listLoading">
+            <td colspan="6">Loading...</td>
+          </tr>
+          <tr v-else-if="!templates.length">
+            <td colspan="6">No Data</td>
+          </tr>
+          <tr v-else v-for="(t, idx) in templates" :key="t.id" class="hover:bg-base-200 hover:cursor-pointer" @click="openEditPrompt(t.id)">
+            <th>{{ idx + 1 }}</th>
+            <td>{{ t.name }}</td>
+            <td>{{ t.alias }}</td>
+            <td>-</td>
+            <td>{{ formatUpdatedAt(t.updated_at) }}</td>
+          </tr>
+        </tbody>
+      </table>
+
+
+      <!-- <div style="display: grid; grid-template-columns: 160px auto; gap: 20px;">
+        
         <div class="sidebar-menus">
-            <div 
+
                 v-for="tabItem in tabs" 
                 :key="tabItem.key"
                 class="menus-item"
@@ -25,7 +54,6 @@
         </div>
 
         <div class="prompt-editor">
-          <!-- <label class="block text-sm font-medium mb-2">{{ tab === 'graph' ? '图解生成模板' : '数据标准化模板' }}</label> -->
           <div 
             ref="promptEditor"
             contenteditable="true"
@@ -37,11 +65,27 @@
             支持 HTML 格式，按 Ctrl+S 或失去焦点时自动保存；<strong>&#123;&#123; 变量名 &#125;&#125;</strong>  为占位符，用于动态替换
           </div>
         </div>
-      </div>
+      </div> -->
     </div>
+
+
+    <PromptTemplateModal
+      ref="promptTplModalRef"
+      :title="editId ? 'Edit Prompt' : 'Add Prompt'"
+      subtitle="Manage definition and multi-language terminology"
+      v-model:name="editName"
+      v-model:alias="editAlias"
+      v-model:template="editTemplate"
+      @update="saveEditPrompt"
+    />
+
 </div>
 </template>
 <script setup lang="ts">
+import Pagination from "@/components/common/pagination/index.vue";
+import PromptTemplateModal from "@/components/modal/prompt/template/index.vue";
+import type { ApiResponse } from "~/types/ApiResponse";
+
 definePageMeta({
   layout: 'default'
 })
@@ -51,6 +95,129 @@ const breadcrumbs = [
   { label: 'AI Config', icon: 'hugeicons:ai-brain-03' },
   { label: 'Prompts', icon: 'hugeicons:command-line' }
 ]
+
+type PromptTemplateListItem = {
+  id: number
+  name: string
+  alias: string
+  updated_at: string | Date
+}
+
+const templates = ref<PromptTemplateListItem[]>([])
+const listLoading = ref(false)
+
+const formatUpdatedAt = (v: any) => {
+  const d = v instanceof Date ? v : new Date(v)
+  return Number.isNaN(d.getTime()) ? '' : d.toLocaleString()
+}
+
+type PromptTemplateModalExpose = {
+  open: () => void
+  close: () => void
+}
+
+const promptTplModalRef = ref<PromptTemplateModalExpose | null>(null)
+
+type PromptTemplateDetail = {
+  id: number
+  name: string
+  alias: string
+  template: string
+}
+
+const editId = ref<number | null>(null)
+const editName = ref('')
+const editAlias = ref('')
+const editTemplate = ref('')
+
+const resetEditForm = () => {
+  editId.value = null
+  editName.value = ''
+  editAlias.value = ''
+  editTemplate.value = ''
+}
+
+const openPromptTplModal = () => {
+  resetEditForm()
+  promptTplModalRef.value?.open()
+}
+
+const openEditPrompt = async (id: number) => {
+  editId.value = id
+  editName.value = ''
+  editAlias.value = ''
+  editTemplate.value = ''
+  promptTplModalRef.value?.open()
+
+  try {
+    const res = await $fetch<ApiResponse<{ template: PromptTemplateDetail }>>(`/api/pattern/prompt/id/${id}`, {
+      method: 'GET',
+    })
+
+    if (!res?.success || !res?.data?.template) {
+      throw new Error(res?.message || '加载详情失败')
+    }
+
+    editId.value = res.data.template.id
+    editName.value = res.data.template.name || ''
+    editAlias.value = res.data.template.alias || ''
+    editTemplate.value = res.data.template.template || ''
+  } catch (error) {
+    console.error('加载 Prompt 详情失败:', error)
+  }
+}
+
+const saveEditPrompt = async () => {
+  const name = editName.value.trim()
+  const alias = editAlias.value.trim()
+  const template = editTemplate.value.trim()
+
+  if (!name || !alias || !template) return
+
+  try {
+    const res = await $fetch<ApiResponse<{ id: number }>>('/api/pattern/prompt/edit', {
+      method: 'POST',
+      body: {
+        ...(editId.value != null ? { id: editId.value } : {}),
+        name,
+        alias,
+        template,
+      },
+    })
+
+    if (!res?.success) {
+      throw new Error(res?.message || '保存失败')
+    }
+
+    promptTplModalRef.value?.close()
+    await loadTemplateList()
+  } catch (error) {
+    console.error('保存 Prompt 失败:', error)
+  }
+}
+
+const loadTemplateList = async () => {
+  listLoading.value = true
+  try {
+    const res = await $fetch<
+      ApiResponse<{ list: PromptTemplateListItem[]; total: number; page: number; pageSize: number }>
+    >('/api/pattern/prompt/list', {
+      method: 'GET',
+      query: { page: 1, pageSize: 50 },
+    })
+
+    if (!res?.success) {
+      throw new Error(res?.message || '加载列表失败')
+    }
+
+    templates.value = Array.isArray(res.data?.list) ? res.data.list : []
+  } catch (error) {
+    console.error('加载 Prompt 列表失败:', error)
+    templates.value = []
+  } finally {
+    listLoading.value = false
+  }
+}
 
 const tab = ref('pattern') // 默认选中图解生成模板
 const promptEditor = ref<HTMLElement>()
@@ -104,6 +271,7 @@ const savePrompt = async () => {
 
 // 页面加载时从服务器读取
 onMounted(() => {
+  loadTemplateList()
   loadTemplate(tab.value)
 })
 

@@ -24,6 +24,7 @@
     "@tiptap/extension-text-style": "^2.1.13",
     "@tiptap/starter-kit": "^2.1.13",
     "@tiptap/vue-3": "^2.1.13",
+    "@vueuse/core": "^14.1.0",
     "bcrypt": "^6.0.0",
     "html2canvas": "^1.4.1",
     "imagekit": "^6.0.0",
