@@ -30,7 +30,7 @@
                   :disabled="!draftId || savingStatus"
                   @click="goToInfoCompletion"
                 >
-                    {{ savingStatus ? '处理中...' : '下一步：信息补全' }}
+                    {{ savingStatus ? '处理中...' : '保存 & 下一步：信息补全' }}
                 </button>
             </div>
         </div>
@@ -554,7 +554,6 @@ watch(
   grid-template-columns: 1fr 1fr;
   height: 100%;
   width: 100%;
-  gap: 10px;
   position: relative;
 }
 
@@ -607,7 +606,7 @@ watch(
     background-color: var(--color-neutral-700);
   }
   .preview-header {
-     padding: 10px 15px;
+    padding: 10px 15px;
     height: 100%;
     display: flex;
     align-items: center;

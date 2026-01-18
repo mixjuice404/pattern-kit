@@ -516,6 +516,7 @@ export async function createPatternDraft(draftData: {
       select: {
         id: true,
         title: true,
+        description: true,
         raw_content: true,
         revised_content: true,
         result_content: true,
@@ -574,6 +575,7 @@ export async function getPatternDraftDetail(draftId: number) {
         raw_content: true,
         revised_content: true,
         result_content: true,
+        description: true,
         meta: true,
         info: true,
         status: true,
@@ -620,12 +622,12 @@ export async function confirmReviewed(draftId: number, content: string) {
 }
 
 
-
 // 更新 Pattern 草稿
 export async function updatePatternDraft(
   draftId: number,
   draftData: {
     title?: string | null;
+    description?: string | null;
     raw_content?: string | null;
     revised_content?: string | null;
     result_content?: string | null;
@@ -639,6 +641,9 @@ export async function updatePatternDraft(
 
     const title = typeof draftData?.title === 'string' ? draftData.title.trim() : '';
     if (title) data.title = title;
+
+    const description = typeof draftData?.description === 'string' ? draftData.description.trim() : '';
+    if (description) data.description = description;
 
     const raw = typeof draftData?.raw_content === 'string' ? draftData.raw_content : null;
     if (raw != null && raw.trim()) data.raw_content = raw;
@@ -674,6 +679,7 @@ export async function updatePatternDraft(
       select: {
         id: true,
         title: true,
+        description: true,
         raw_content: true,
         revised_content: true,
         result_content: true,
@@ -691,5 +697,104 @@ export async function updatePatternDraft(
     console.error(`更新 Pattern 草稿 ${draftId} 失败:`, error);
     if (error instanceof BasicError) throw error;
     throw new BasicError('UNKNOWN_ERROR', { statusCode: 500, message: '更新 Pattern 草稿失败' });
+  }
+}
+
+// removePatternDraft
+export async function removePatternDraft(draftId: number) {
+  try {
+    const exists = await prisma.patternDraft.findFirst({
+      where: { id: draftId, deleted: 0 },
+      select: { id: true },
+    });
+    if (!exists) {
+      throw new BasicError('RESOURCE_NOT_FOUND', { statusCode: 404, message: 'Pattern 草稿不存在' });
+    }
+    // 2.更新 deleted
+    await prisma.patternDraft.update({
+      where: { id: draftId },
+      data: { deleted: 1 },
+    });
+  } catch (error) {
+    console.error(`删除 Pattern 草稿 ${draftId} 失败:`, error);
+    if (error instanceof BasicError) throw error;
+    throw new BasicError('UNKNOWN_ERROR', { statusCode: 500, message: '删除 Pattern 草稿失败' });
+  }
+}
+
+
+
+// 翻译 Pattern Draft（注入 stitch_dictionary）
+export async function translatePatternDraft(draftId: number) {
+  try {
+    const draft = await prisma.patternDraft.findFirst({
+      where: { id: draftId, deleted: 0 },
+      select: {
+        id: true,
+        raw_content: true,
+        revised_content: true,
+        info: true,
+      },
+    });
+
+    if (!draft) {
+      throw new BasicError('RESOURCE_NOT_FOUND', { statusCode: 404, message: 'Pattern Draft 不存在' });
+    }
+
+    const translateTemplate = await getPromptTemplateByAlias('pattern_draft_translate');
+
+    // stitch_dictionary 组装（兼容 abbrev / 误拼 abbbrev / 字符串 JSON）
+    const rawInfo: any = (draft as any).info;
+    let infoObj: any = rawInfo;
+    if (typeof rawInfo === 'string') {
+      try {
+        infoObj = JSON.parse(rawInfo);
+      } catch {
+        infoObj = null;
+      }
+    }
+
+    const abbrevList: any[] = Array.isArray(infoObj?.abbrev)
+      ? infoObj.abbrev
+      : Array.isArray(infoObj?.abbbrev)
+        ? infoObj.abbbrev
+        : [];
+
+    const stitchDictionaryStr = abbrevList
+      .map((it: any) => {
+        const alias = String(it?.alias ?? '').trim();
+        const enAlias = String(it?.en_alias ?? '').trim();
+        const name = String(it?.name ?? '').trim();
+        const nameZh = String(it?.name_zh ?? '').trim();
+
+        const displayName = nameZh ? `${name}(${nameZh})` : name;
+        const line = `${alias} - ${enAlias} - ${displayName}`.trim();
+        return line === '- -' ? '' : line;
+      })
+      .filter(Boolean)
+      .join('\n');
+
+    const content = String(draft.revised_content ?? draft.raw_content ?? '');
+    const prompt = String(translateTemplate.template ?? '')
+      .replace(/\{\{content\}\}/g, content)
+      .replace(/\{\{stitch_dictionary\}\}/g, stitchDictionaryStr);
+
+    if (!prompt.trim()) {
+      throw new BasicError('INVALID_PROMPT', { statusCode: 400, message: 'translate 模板为空' });
+    }
+
+    const text = await aiGenerateText({
+      prompt,
+      model: 'gemini-3-flash-preview',
+    });
+
+    await prisma.patternDraft.update({
+      where: { id: draftId },
+      data: { status: 'translation_review', result_content: text },
+    });
+  } catch (error) {
+    console.error('翻译 Pattern Draft 失败:', error);
+    if (error instanceof BasicError) throw error;
+    throw new BasicError('UNKNOWN_ERROR', { statusCode: 500, message: '翻译 Pattern Draft 失败' });
   }
 }

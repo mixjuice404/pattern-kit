@@ -1,7 +1,12 @@
 <template>
   <div class="draft-container">
     <div class="draft-header">
-      <div class="header-title">Draft Detail</div>
+      <div class="header-title">
+        <div class="go-back-btn" @click="goBack">
+          <icon name="solar:square-alt-arrow-left-broken" size="18" />
+        </div>
+        <div>图解预处理</div>
+      </div>
       <div>
         <div class="custom-steps">
           <div
@@ -16,7 +21,7 @@
         </div>
       </div>
       <div class="header-button">
-        <!-- <div class="header-button__preview">Preview</div> -->
+        
       </div>
     </div>
 
@@ -28,8 +33,16 @@
         v-model:markdown="markdown"
         @goToInfoCompletion="onGoToInfoCompletion"
       />
-      <InfoCompletion v-show="activeStep === 2" :markdown="markdown" :info="draft?.info" />
-      <div v-show="activeStep === 3" class="draft-panel">翻译校对</div>
+      <InfoCompletion
+        v-show="activeStep === 2"
+        :markdown="markdown"
+        :info="draft?.info"
+        :title="draft?.title"
+        :description="draft?.description || ''"
+      />
+      <Translate
+        v-show="activeStep === 3"
+        :draft="draft" />
     </div>
  
   </div>
@@ -39,6 +52,7 @@
 import MarkdownEditor from '@/components/editor/markdown/index.vue'
 import Preprocess from '@/pages/pattern/draft/detail/preprocess/index.vue'
 import InfoCompletion from '@/pages/pattern/draft/detail/info/index.vue'
+import Translate from '@/pages/pattern/draft/detail/translate/index.vue'
 import type { ApiResponse } from '~/types/ApiResponse'
 
 definePageMeta({
@@ -50,6 +64,7 @@ type DraftStatus = 'pending' | 'normalized' | 'manual_review' | 'info_completion
 type PatternDraftDetail = {
   id: number
   title: string
+  description?: string | null
   status: DraftStatus | string
   raw_content: string | null
   revised_content: string | null
@@ -91,6 +106,8 @@ const onGoToInfoCompletion = () => {
   activeStep.value = 2
 }
 
+const goBack = () => navigateTo('/pattern/draft')
+
 const loadDraft = async () => {
   if (!draftId.value) return
 
@@ -119,6 +136,22 @@ watch(draftId, loadDraft)
 </script>
 <style scoped lang="scss">
 
+  .go-back-btn {
+    cursor: pointer;
+    transition: all 0.2s ease;
+    height: 30px;
+    width: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+
+    &:hover {
+      background-color: var(--color-neutral-100);
+    }
+
+  }
+
   .draft-container {
     height: 100vh;
     width: 100vw;
@@ -136,6 +169,9 @@ watch(draftId, loadDraft)
       .header-title {
         font-size: 16px;
         font-weight: 600;
+        display: flex;
+        align-items: center;
+        gap: 10px;
       }
     }
 

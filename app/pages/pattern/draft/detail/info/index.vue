@@ -5,10 +5,35 @@
       <div v-else class="prose prose-sm max-w-none" v-html="previewHtml"></div>
     </div>
     <div class="info-content">
-      <div class="mb-4 info-content-card">
+      <div style="text-align: right; padding: 15px;">
+        <button class="btn btn-sm btn-neutral">确认，下一步：标准翻译</button>
+      </div>
+      <div class="info-content-card mb-2">
         <div class="font-bold mb-4 flex items-center justify-between">
+            <div>基本信息</div>
+            <button
+              class="btn btn-sm btn-neutral btn-soft"
+              :disabled="!draftId || savingBasic || !localTitle.trim()"
+              @click="saveBasic"
+            >
+              {{ savingBasic ? 'Saving...' : 'Update' }}
+            </button>
+        </div>
+        <div>
+          <div class="mb-2">
+            <div class="input-label__title">TITLE</div>
+            <input class="input input-bordered input-sm w-full" v-model="localTitle" @input="dirtyBasic = true" />
+          </div>
+          <div>
+            <div class="input-label__title">DESCRIPTION</div>
+            <textarea class="textarea textarea-bordered textarea-sm w-full" v-model="localDescription" @input="dirtyBasic = true"></textarea>
+          </div>
+        </div>
+      </div>
+      <div class="mb-4 info-content-card">
+        <div class="font-bold mb-2 flex items-center justify-between">
             <div>钩织针法</div>
-            <button class="btn btn-sm btn-neutral" :disabled="!draftId || savingInfo" @click="saveInfo">
+            <button class="btn btn-sm btn-soft" :disabled="!draftId || savingInfo" @click="saveInfo">
               {{ savingInfo ? 'Saving...' : 'Update' }}
             </button>
         </div>
@@ -40,13 +65,7 @@
           </tbody>
         </table>
       </div>
-      <!-- <div class="info-content-card">
-        <div class="font-bold mb-4 flex items-center justify-between">
-            <div>图解信息</div>
-            <button class="btn btn-sm btn-neutral">Update</button>
-        </div>
-        <div class="text-neutral-500 text-sm">开发中 ...</div>
-      </div> -->
+      
     </div>
   </div>
 </template>
@@ -68,6 +87,14 @@ const props = defineProps({
     type: [Object, String, Array] as any,
     default: null,
   },
+  title: {
+    type: String,
+    default: '',
+  },
+  description: {
+    type: String,
+    default: '',
+  },
 })
 
 const route = useRoute()
@@ -79,6 +106,49 @@ const draftId = computed(() => {
 const markdownText = computed(() => String(props.markdown ?? '').trim())
 
 const toText = (v: any) => (v == null ? '' : typeof v === 'string' ? v : String(v))
+
+const savingBasic = ref(false)
+const dirtyBasic = ref(false)
+const localTitle = ref('')
+const localDescription = ref('')
+
+watch(
+  () => [props.title, props.description],
+  () => {
+    if (dirtyBasic.value) return
+    localTitle.value = toText(props.title)
+    localDescription.value = toText(props.description)
+  },
+  { immediate: true }
+)
+
+const saveBasic = async () => {
+  if (!draftId.value || savingBasic.value) return
+
+  savingBasic.value = true
+  try {
+    const res = await $fetch<ApiResponse<{ id: any }>>('/api/pattern/draft/update', {
+      method: 'POST',
+      body: {
+        id: draftId.value,
+        title: localTitle.value,
+        description: localDescription.value,
+      },
+    })
+
+    if (!res?.success) {
+      throw new Error(res?.message || '更新失败')
+    }
+
+    dirtyBasic.value = false
+    toast.success('更新成功')
+  } catch (e) {
+    console.error('更新 title/description 失败:', e)
+    toast.error('更新失败')
+  } finally {
+    savingBasic.value = false
+  }
+}
 
 const normalizedInfo = computed<any | null>(() => {
   const v = (props as any).info
@@ -154,14 +224,24 @@ const md = new MarkdownIt({
 const previewHtml = computed(() => md.render(String(props.markdown ?? '')))
 </script>
 <style scoped lang="scss">
+
+.input-label__title {
+  font-weight: 600; 
+  margin-bottom: 3px; 
+  color: var(--color-neutral-400); 
+  font-size: 14px;
+
+}
+
 .info-container {
     height: 100%;
     display: grid;
     grid-template-columns: 1fr 1fr;
+    background-color: #ffffff;
 
     .info-preview {
         height: 100%;
-        border: none;
+        border-right: 1px solid var(--color-neutral-100);
         outline: none;
         padding: 16px;
         overflow: auto;
@@ -186,12 +266,9 @@ const previewHtml = computed(() => md.render(String(props.markdown ?? '')))
         height: 100%;
         border: none;
         outline: none;
-        padding: 10px;
         overflow: auto;
-
         .info-content-card {
-          border-radius: 5px;
-          padding: 10px;
+          padding: 15px;
           background-color: #ffffff;
         }
     }
