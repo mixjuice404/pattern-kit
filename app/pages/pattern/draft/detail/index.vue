@@ -50,6 +50,7 @@
           :info="draft?.info"
           :title="draft?.title"
           :description="draft?.description || ''"
+          :supplies="draft?.supplies"
           @updated="loadDraft"
         />
       </KeepAlive>
@@ -57,6 +58,15 @@
       <KeepAlive>
         <Translate
           v-if="activeStep === 3"
+          :key="draftId"
+          :draft="draft"
+          @updated="loadDraft"
+        />
+      </KeepAlive>
+
+      <KeepAlive>
+        <Complete
+          v-if="activeStep === 4"
           :key="draftId"
           :draft="draft"
           @updated="loadDraft"
@@ -72,6 +82,7 @@ import MarkdownEditor from '@/components/editor/markdown/index.vue'
 import Preprocess from '@/pages/pattern/draft/detail/preprocess/index.vue'
 import InfoCompletion from '@/pages/pattern/draft/detail/info/index.vue'
 import Translate from '@/pages/pattern/draft/detail/translate/index.vue'
+import Complete from '@/pages/pattern/draft/detail/complete/index.vue'
 import type { ApiResponse } from '~/types/ApiResponse'
 
 definePageMeta({
@@ -82,6 +93,7 @@ type PatternDraftDetail = {
   id: number
   title: string
   description?: string | null
+  supplies?: any | null
   status: string
   state: number
   raw_content: string | null
@@ -100,7 +112,7 @@ const draftId = computed(() => {
 
 const draft = ref<PatternDraftDetail | null>(null)
 
-const steps = ['预处理', '人工审核中', '信息补全', '翻译校对'] as const
+const steps = ['预处理', '人工审核中', '信息补全', '翻译校对', '完成'] as const
 const activeStep = ref(0)
 
 const getStepByState = (state: number) => {
@@ -108,6 +120,7 @@ const getStepByState = (state: number) => {
   if (state === 4) return 1
   if (state === 5) return 2
   if (state === 6) return 3
+  if (state === 7) return 4
   return 0
 }
 

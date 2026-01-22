@@ -657,6 +657,151 @@ export async function translatePatternDraft(draftId: number) {
   }
 }
 
+// 生成 英文标题 和 内容  pattern_draft_ai_description
+export async function genPatternDraftContent(draftId: number, title: string , description: string) {
+
+  try {
+    // 先将 title 和 description 保存到 patternDraft 表
+    await prisma.patternDraft.update({
+      where: { id: draftId },
+      data: { title, description },
+    });
+    // 调用 AI 生成英文标题和内容
+    const translateTemplate = await getPromptTemplateByAlias('pattern_draft_ai_description');
+    const prompt = String(translateTemplate.template ?? '')
+      .replace(/\{\{title\}\}/g, title)
+      .replace(/\{\{description\}\}/g, description);
+
+    if (!prompt.trim()) {
+      throw new BasicError('INVALID_PROMPT', { statusCode: 400, message: 'pattern_draft_ai_description 模板为空' });
+    }
+
+    const text = await aiGenerateText({
+      prompt,
+      model: 'gemini-3-flash-preview',
+    });
+
+    // text 格式：{ "title": "英文标题", "description": "英文描述" } 转换为 json 对象
+    let infoObj: any = {};
+    try {
+      infoObj = JSON.parse(text);
+    } catch {
+      infoObj = {};
+    }
+
+    await prisma.patternDraft.update({
+      where: { id: draftId },
+      data: { info: infoObj },
+    });
+
+    return infoObj;
+  } catch (error) {
+    console.error(`生成 Pattern 草稿 ${draftId} 内容失败:`, error);
+    if (error instanceof BasicError) throw error;
+    throw new BasicError('UNKNOWN_ERROR', { statusCode: 500, message: '生成 Pattern 草稿内容失败' });
+  }
+}
+
+
+// 图解 supplies 信息ai规范化 pattern_draft_supplies
+export async function normalizeSuppliesInfo(draftId: number, supplies: string) {
+  try {
+    
+    // 调用 AI 生成标准化的 supplies 信息
+    const translateTemplate = await getPromptTemplateByAlias('pattern_draft_supplies');
+    const prompt = String(translateTemplate.template ?? '')
+      .replace(/\{\{info\}\}/g, supplies);
+
+    if (!prompt.trim()) {
+      throw new BasicError('INVALID_PROMPT', { statusCode: 400, message: 'pattern_draft_supplies 模板为空' });
+    }
+
+    const text = await aiGenerateText({
+      prompt,
+      model: 'gemini-3-flash-preview',
+    });
+    
+    // 保存标准化后的 supplies 信息到 patternDraft 表
+    await prisma.patternDraft.update({
+      where: { id: draftId },
+      data: { supplies: text },
+    });
+
+    return text;
+  } catch (error) {
+    console.error(`标准化 Pattern 草稿 ${draftId} supplies 信息失败:`, error);
+    if (error instanceof BasicError) throw error;
+    throw new BasicError('UNKNOWN_ERROR', { statusCode: 500, message: '标准化 Pattern 草稿 supplies 信息失败' });
+  }
+}
+
+// 完成 组装最终结果
+export async function assmblyPatternDraft(draftId: number) {
+
+  // 查询 patternDraft 表
+  const draft = await prisma.patternDraft.findFirst({
+    where: { id: draftId, deleted: 0 },
+    select: {
+      id: true,
+      title: true,
+      description: true,
+      raw_content: true,
+      revised_content: true,
+      result_content: true,
+      meta: true,
+      stitches: true,
+      supplies: true,
+      info: true,
+    },
+  });
+
+  if (!draft) {
+    throw new BasicError('RESOURCE_NOT_FOUND', { statusCode: 404, message: 'Pattern 草稿不存在' });
+  }
+  // 先解析 info 为英文标题和描述 markdown 格式 string
+  const infoObj = draft.info ?? {}
+  const title = isRecord(infoObj) ? String(infoObj.title ?? '').trim() : ''
+  const description = isRecord(infoObj) ? String(infoObj.description ?? '').trim() : ''
+
+  // 获取 supplies 信息
+  const supplies = draft.supplies ?? ''
+
+  // 获取 stitches 信息
+  const stitchesInfo = draft.stitches ?? {}
+  const items = isRecord(stitchesInfo) && Array.isArray(stitchesInfo.items) ? stitchesInfo.items : []
+  const stitchesMarkdown = items.map(item => {
+
+    console.log('item:', item)
+    // item: unknown
+    if (!isRecord(item)) return '';
+    const enAlias = String(item.us_terms ?? '').trim()
+    const name = String(item.title ?? '').trim()
+    return `**${enAlias}**: ${name}`
+  }).join('\n')
+
+  
+  // 组装最终结果
+  const base = [
+    `## ${title}`,
+    description,
+    '## 材料',
+    String(supplies ?? ''),
+    '## 针脚',
+    stitchesMarkdown,
+  ]
+    .map((v) => String(v ?? '').trim())
+    .filter(Boolean)
+    .join('\n\n')
+
+  const tail = String(draft.result_content ?? '').trim()
+  const result = tail ? `${base}\n\n${tail}` : base
+
+  return result;
+}
+
+function isRecord(v: unknown): v is Record<string, unknown> {
+  return !!v && typeof v === 'object' && !Array.isArray(v)
+}
 
 // 更新 pattern draft status
 export async function updatePatternDraftState(draftId: number, state: number) {

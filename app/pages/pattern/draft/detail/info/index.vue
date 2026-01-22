@@ -23,7 +23,13 @@
               >
                 {{ savingBasic ? 'Saving...' : '保存' }}
               </button>
-              <button class="btn btn-sm btn-neutral">执行</button>
+              <button
+                class="btn btn-sm btn-neutral"
+                :disabled="!draftId || generatingText || !localTitle.trim()"
+                @click="runGenText"
+              >
+                {{ generatingText ? '处理中...' : '执行' }}
+              </button>
             </div>
           </div>
           <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
@@ -38,10 +44,9 @@
               </div>
             </div>
             <div>
-              <textarea class="preview-textarea" rows="2" placeholder="无内容（图解标题）" />
-              <textarea class="preview-textarea" rows="6" placeholder="无内容（图解描述）" />
+              <textarea class="preview-textarea" rows="2" :value="infoPreviewTitle" readonly placeholder="无内容（图解标题）" />
+              <textarea class="preview-textarea" rows="8" :value="infoPreviewDescription" readonly placeholder="无内容（图解描述）" />
             </div>
-            
           </div>
         </div>
         <div class="info-content-card mb-2">
@@ -49,14 +54,23 @@
             <div style="font-size: 14px;font-weight: 500;">图解配件与材料</div>
             <div style="display: flex; gap: 5px; align-items: center;">
               <button class="btn btn-sm btn-neutral btn-soft">保存</button>
-              <button class="btn btn-sm btn-neutral">执行</button>
+              <button
+                class="btn btn-sm btn-neutral"
+                :disabled="!draftId || normalizingSupplies"
+                @click="runNormalizeSupplies"
+              >
+                {{ normalizingSupplies ? '处理中...' : '执行' }}
+              </button>
             </div>
           </div>
-          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
-            <div>
-              <textarea style="min-height: 200px;" class="textarea textarea-bordered textarea-sm w-full" placeholder="输入图解配件与材料原文" />
-            </div>
-            <textarea class="preview-textarea" rows="12" placeholder="无内容，图解配件与材料译文" />
+          <div>
+            <textarea
+              v-model="suppliesText"
+              style="min-height: 200px;"
+              class="textarea textarea-bordered textarea-sm w-full"
+              placeholder="输入图解配件与材料原文（执行后会替换为规范化结果，可继续编辑）"
+              @input="dirtySupplies = true"
+            />
           </div>
         </div>
       </div>
@@ -91,6 +105,10 @@ const props = defineProps({
     type: String,
     default: '',
   },
+  supplies: {
+    type: [String, Object, Array] as any,
+    default: '',
+  },
 })
 
 const route = useRoute()
@@ -107,6 +125,22 @@ const savingBasic = ref(false)
 const dirtyBasic = ref(false)
 const localTitle = ref('')
 const localDescription = ref('')
+
+const generatingText = ref(false)
+const generatedInfo = ref<{ title: string; description: string } | null>(null)
+
+const dirtySupplies = ref(false)
+const suppliesText = ref('')
+const normalizingSupplies = ref(false)
+
+watch(
+  () => props.supplies,
+  () => {
+    if (dirtySupplies.value) return
+    suppliesText.value = toText(props.supplies)
+  },
+  { immediate: true }
+)
 
 watch(
   () => [props.title, props.description],
@@ -172,6 +206,100 @@ const saveBasic = async () => {
   }
 }
 
+const normalizeInfo = (v: any) => {
+  if (v == null) return null
+  if (typeof v === 'string') {
+    const s = v.trim()
+    if (!s) return null
+    try {
+      return JSON.parse(s)
+    } catch {
+      return null
+    }
+  }
+  if (typeof v === 'object') return v
+  return null
+}
+
+const infoPreview = computed(() => {
+  const g = generatedInfo.value
+  if (g) return g
+  const raw = normalizeInfo(props.info)
+  const title = toText((raw as any)?.title).trim()
+  const description = toText((raw as any)?.description).trim()
+  if (!title && !description) return null
+  return { title, description }
+})
+
+const infoPreviewTitle = computed(() => String(infoPreview.value?.title ?? ''))
+const infoPreviewDescription = computed(() => String(infoPreview.value?.description ?? ''))
+
+const runGenText = async () => {
+  if (!draftId.value || generatingText.value || !localTitle.value.trim()) return
+
+  generatingText.value = true
+  try {
+    const res = await $fetch<ApiResponse<{ info: any }>>('/api/pattern/draft/gen/text', {
+      method: 'POST',
+      body: {
+        id: draftId.value,
+        title: localTitle.value,
+        description: localDescription.value,
+      },
+    })
+
+    const info = (res as any)?.data?.info
+    if (!res?.success || !info) {
+      throw new Error(res?.message || '生成失败')
+    }
+
+    generatedInfo.value = {
+      title: toText(info?.title).trim(),
+      description: toText(info?.description).trim(),
+    }
+
+    toast.success('已生成')
+  } catch (e: any) {
+    console.error('生成图解信息失败:', e)
+    toast.error(e?.message || '生成失败')
+  } finally {
+    generatingText.value = false
+  }
+}
+
+const runNormalizeSupplies = async () => {
+  if (!draftId.value || normalizingSupplies.value) return
+
+  const supplies = String(suppliesText.value ?? '').trim()
+  if (!supplies) {
+    toast.warning('请输入图解配件与材料原文')
+    return
+  }
+
+  normalizingSupplies.value = true
+  try {
+    const res = await $fetch<ApiResponse<{ normalized: any }>>('/api/pattern/draft/normalize/supplies', {
+      method: 'POST',
+      body: {
+        id: draftId.value,
+        supplies,
+      },
+    })
+
+    const normalized = (res as any)?.data?.normalized
+    if (!res?.success || normalized == null) {
+      throw new Error(res?.message || '生成失败')
+    }
+
+    suppliesText.value = toText(normalized)
+    toast.success('已生成')
+  } catch (e: any) {
+    console.error('生成图解配件与材料失败:', e)
+    toast.error(e?.message || '生成失败')
+  } finally {
+    normalizingSupplies.value = false
+  }
+}
 
 const md = new MarkdownIt({
   html: true,

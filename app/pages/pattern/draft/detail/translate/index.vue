@@ -23,13 +23,10 @@
       <div class="output-header">
         <div class="output-title">翻译预览</div>
         <div>
-          <button
-            class="btn btn-sm btn-neutral"
-            :disabled="exportingDocx"
-            @click="exportDocx"
-          >
-            {{ exportingDocx ? 'Exporting...' : '导出可编辑文档' }}
+          <button class="btn btn-sm btn-neutral" :disabled="!draftId || mergingResult" @click="mergeResult">
+            {{ mergingResult ? '处理中...' : '合并结果' }}
           </button>
+
         </div>
       </div>
       <div
@@ -68,7 +65,7 @@ const draftId = computed(() => Number(props.draft?.id) || 0)
 const content = ref('')
 const dirty = ref(false)
 const savingUpdate = ref(false)
-const exportingDocx = ref(false)
+const mergingResult = ref(false)
 
 watch(
   () => [props.draft?.id, props.draft?.result_content] as const,
@@ -107,39 +104,30 @@ const saveResultContent = async () => {
   }
 }
 
-const exportDocx = async () => {
-  if (!draftId.value || exportingDocx.value) return
+const mergeResult = async () => {
+  if (!draftId.value || mergingResult.value) return
 
-  exportingDocx.value = true
+  mergingResult.value = true
   try {
-    const bodyHtml = String(previewHtml.value ?? '')
+    const res = await $fetch<ApiResponse<{ id: any }>>('/api/pattern/draft/state/update', {
+      method: 'POST',
+      body: {
+        id: draftId.value,
+        state: 7,
+      },
+    })
 
-    const html = `<!DOCTYPE html><html><head><meta charset="UTF-8" />
-<style>
-  body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,"Noto Sans",sans-serif;line-height:1.6;padding:24px;}
-  img{max-width:100%;height:auto;}
-  table{border-collapse:collapse;width:100%;}
-  th,td{border:1px solid #ddd;padding:6px 8px;vertical-align:top;}
-  pre,code{font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono","Courier New",monospace;}
-</style></head><body>${bodyHtml}</body></html>`
+    if (!res?.success) {
+      throw new Error(res?.message || '合并失败')
+    }
 
-    const blob = new Blob([html], { type: 'application/msword;charset=utf-8' })
-
-    const url = URL.createObjectURL(blob)
-    const a = document.createElement('a')
-    a.href = url
-    a.download = `pattern-draft-${draftId.value}.doc`
-    document.body.appendChild(a)
-    a.click()
-    a.remove()
-    URL.revokeObjectURL(url)
-
-    toast.success('已导出')
+    toast.success('已合并')
+    emit('updated')
   } catch (e: any) {
-    console.error('导出失败:', e)
-    toast.error(e?.message || '导出失败')
+    console.error('合并结果失败:', e)
+    toast.error(e?.message || '合并失败')
   } finally {
-    exportingDocx.value = false
+    mergingResult.value = false
   }
 }
 

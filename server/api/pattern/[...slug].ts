@@ -13,7 +13,10 @@ import { createOrUpdateCrochetPattern,
   updateRawContent,
   updatePatternDraftState,
   getStitchMeta,
-  analyzePatternDraft} from '../../services/pattern.service'
+  analyzePatternDraft,
+  genPatternDraftContent,
+  normalizeSuppliesInfo,
+  assmblyPatternDraft} from '../../services/pattern.service'
 
 const router = createRouter()
 
@@ -190,36 +193,31 @@ router.post('/draft/translate', defineApiHandler(async (event) => {
   return useApiResponse({ prompt })
 }));
 
-router.post('/draft/export/docx', defineApiHandler(async (event) => {
+
+// 生成Crochet Pattern Draft 内容
+router.post('/draft/gen/text', defineApiHandler(async (event) => {
   const body = await readBody(event)
-  const html = String(body?.html ?? '')
-  if (!html.trim()) {
-    throw createError({ statusCode: 400, statusMessage: 'html 为必填' })
-  }
-
-  const rawName = String(body?.filename ?? body?.fileName ?? '').trim()
-  const baseName = (rawName || `pattern-draft-${String(body?.id ?? '').trim() || 'export'}`)
-    .replace(/[\\/:*?"<>|]+/g, '-')
-    .slice(0, 80)
-    .trim() || 'pattern-draft-export'
-
-  const docHtml = `<!DOCTYPE html><html><head><meta charset="UTF-8" /></head><body>${html}</body></html>`
-
-  const { default: HtmlToDocx } = await import('@turbodocx/html-to-docx')
-  const arrayBuffer = await HtmlToDocx(docHtml, null, { title: baseName })
-
-  const buffer = Buffer.from(arrayBuffer as ArrayBuffer)
-  const fileName = `${baseName}.docx`
-
-  setHeader(event, 'Content-Type', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document')
-  setHeader(
-    event,
-    'Content-Disposition',
-    `attachment; filename="${fileName}"; filename*=UTF-8''${encodeURIComponent(fileName)}`
-  )
-
-  return buffer
+  const { id, title, description } = body
+  const info = await genPatternDraftContent(Number(id), title, description)
+  return useApiResponse({ info })
 }));
+
+// 标准化Crochet Pattern Draft Supplies 信息
+router.post('/draft/normalize/supplies', defineApiHandler(async (event) => {
+  const body = await readBody(event)
+  const { id, supplies } = body
+  const normalized = await normalizeSuppliesInfo(Number(id), supplies)
+  return useApiResponse({ normalized })
+}));
+
+
+// assmblyPatternDraftContent
+router.post('/draft/assmbly/:id', defineApiHandler(async (event) => {
+  const { id } = getRouterParams(event)
+  const content = await assmblyPatternDraft(Number(id))
+  return useApiResponse({ content })
+}));
+
 
 // 更新Crochet Pattern Draft State
 router.post('/draft/state/update', defineApiHandler(async (event) => {
