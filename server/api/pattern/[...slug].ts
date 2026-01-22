@@ -1,14 +1,19 @@
-import { createRouter, useBase, readBody } from 'h3'
+import { createRouter, useBase, readBody, createError, setHeader } from 'h3'
 import { defineApiHandler } from '../../utils/defineApiHandler'
 import { useApiResponse } from '../../utils/apiResponse'
 import { createOrUpdateCrochetPattern, 
   getCrochetPatternList, getCrochetPattern, deleteCrochetPattern, 
   createOrUpdatePromptTemplate, getPromptTemplateByAlias, buildPatternPrompt,
   getPatternDraftList, getPatternDraftDetail, updatePatternDraft, 
-  getPromptTemplateList, getPromptTemplateById, preprocessPatternDraft, normalizeContent,
-  examiningPatternDraft,confirmReviewed,
+  getPromptTemplateList, getPromptTemplateById, preprocessPatternDraft, 
+  normalizeContent,
+  confirmReviewed,
   translatePatternDraft,
-  removePatternDraft} from '../../services/pattern.service'
+  removePatternDraft,
+  updateRawContent,
+  updatePatternDraftState,
+  getStitchMeta,
+  analyzePatternDraft} from '../../services/pattern.service'
 
 const router = createRouter()
 
@@ -138,12 +143,12 @@ router.post('/draft/remove/:id', defineApiHandler(async (event) => {
   return useApiResponse({ status: 'ok', data: {} })
 }));
 
-// 更新Crochet Pattern Draft Status
-router.post('/draft/status/update', defineApiHandler(async (event) => {
+// 上传 Crochet Pattern Draft raw_content
+router.post('/draft/init/upload', defineApiHandler(async (event) => {
   const body = await readBody(event)
   const { id, content } = body
-  await confirmReviewed(Number(id), content)
-  return useApiResponse({  id: Number(id) })
+  const normalized = await updateRawContent(Number(id), content)
+  return useApiResponse({ normalized })
 }));
 
 // 标准化Crochet Pattern Draft 内容
@@ -155,11 +160,26 @@ router.post('/draft/normalize', defineApiHandler(async (event) => {
 }));
 
 // 审核Crochet Pattern Draft
-router.post('/draft/review', defineApiHandler(async (event) => {
+router.post('/draft/analyze', defineApiHandler(async (event) => {
   const body = await readBody(event)
   const { id } = body
-  const text = await examiningPatternDraft(Number(id))
-  return useApiResponse({ text })
+  await analyzePatternDraft(Number(id))
+  return useApiResponse({  id: Number(id) })
+}));
+
+// getStitchMeta
+router.post('/draft/stitches/meta/:id', defineApiHandler(async (event) => {
+  const { id } = getRouterParams(event)
+  const info = await getStitchMeta(Number(id))
+  return useApiResponse({ info })
+}));
+
+// 更新Crochet Pattern Draft Status - 确认人工审核
+router.post('/draft/review/confirm', defineApiHandler(async (event) => {
+  const body = await readBody(event)
+  const { id, content } = body
+  await confirmReviewed(Number(id), content)
+  return useApiResponse({  id: Number(id) })
 }));
 
 // 翻译Crochet Pattern Draft
@@ -168,6 +188,45 @@ router.post('/draft/translate', defineApiHandler(async (event) => {
   const { id } = body
   const prompt = await translatePatternDraft(Number(id))
   return useApiResponse({ prompt })
+}));
+
+router.post('/draft/export/docx', defineApiHandler(async (event) => {
+  const body = await readBody(event)
+  const html = String(body?.html ?? '')
+  if (!html.trim()) {
+    throw createError({ statusCode: 400, statusMessage: 'html 为必填' })
+  }
+
+  const rawName = String(body?.filename ?? body?.fileName ?? '').trim()
+  const baseName = (rawName || `pattern-draft-${String(body?.id ?? '').trim() || 'export'}`)
+    .replace(/[\\/:*?"<>|]+/g, '-')
+    .slice(0, 80)
+    .trim() || 'pattern-draft-export'
+
+  const docHtml = `<!DOCTYPE html><html><head><meta charset="UTF-8" /></head><body>${html}</body></html>`
+
+  const { default: HtmlToDocx } = await import('@turbodocx/html-to-docx')
+  const arrayBuffer = await HtmlToDocx(docHtml, null, { title: baseName })
+
+  const buffer = Buffer.from(arrayBuffer as ArrayBuffer)
+  const fileName = `${baseName}.docx`
+
+  setHeader(event, 'Content-Type', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document')
+  setHeader(
+    event,
+    'Content-Disposition',
+    `attachment; filename="${fileName}"; filename*=UTF-8''${encodeURIComponent(fileName)}`
+  )
+
+  return buffer
+}));
+
+// 更新Crochet Pattern Draft State
+router.post('/draft/state/update', defineApiHandler(async (event) => {
+  const body = await readBody(event)
+  const { id, state } = body
+  await updatePatternDraftState(Number(id), Number(state))
+  return useApiResponse({  id: Number(id) })
 }));
 
 /**
@@ -201,8 +260,6 @@ router.get('/testing', defineApiHandler(async () => {
 
   return useApiResponse(list)
 }));
-
-
 
 
 export default useBase('/api/pattern', router.handler)

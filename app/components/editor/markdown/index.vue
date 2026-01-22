@@ -24,14 +24,14 @@
       <div class="markdown-header">
         <div class="preview-header">
             <div class="header-title">Preview</div>
-            <div class="flex items-center">
-                <button
-                  class="btn btn-neutral btn-sm"
-                  :disabled="!draftId || savingStatus"
-                  @click="goToInfoCompletion"
-                >
-                    {{ savingStatus ? '处理中...' : '保存 & 下一步：信息补全' }}
-                </button>
+            <div class="flex items-center gap-2">
+              <button class="btn btn-primary btn-sm" @click="stitchWindowOpen = true">针法元数据 <span v-if="!stitches?.length">⚠️</span></button>
+              <button
+                class="btn btn-neutral btn-sm"
+                :disabled="!draftId || savingStatus"
+                @click="goToInfoCompletion">
+                  {{ savingStatus ? '处理中...' : '保存 & 下一步：信息补全' }}
+              </button>
             </div>
         </div>
       </div>
@@ -43,59 +43,78 @@
       />
     </div>
 
-    <!-- 悬浮窗 -->
+    <!-- Report 悬浮窗 -->
+    <ReportWindow :items="reportItems" />
+
+    <!-- Stitch 悬浮窗 -->
     <div
-      ref="floatingEl"
-      class="floating-window"
+      v-if="stitchWindowOpen"
+      class="stitch-window shadow-lg"
       :style="{
         position: 'fixed',
-        right: `${ANCHOR}px`,
-        bottom: `${ANCHOR}px`,
-        transform: `translate3d(${dx}px, ${dy}px, 0)`,
-        userSelect: dragging ? 'none' : 'auto',
+        left: '50%',
+        top: '50%',
+        transform: `translate3d(calc(-50% + ${stitchDx}px), calc(-50% + ${stitchDy}px), 0)`,
+        userSelect: stitchDragging ? 'none' : 'auto',
       }"
-    >
-      <div>
-        <div>
-          <div
-            class="window-title"
-            :class="{ collapsed: !windowBodyOpen }"
-            @click="toggleWindowBody"
-            @pointerdown="onPointerDown"
-            @pointermove="onPointerMove"
-            @pointerup="onPointerUp"
-            @pointercancel="onPointerUp"
-          >
-            <div>🛠 校验与修正报告</div>
-            <div class="window-badge">{{ reportItems.length }}</div>
-          </div>
-          <div v-show="windowBodyOpen" class="window-body" style="max-height: 25vw; overflow-y: auto;">
-            <div v-if="!reportItems.length" class="body-empty">No report items</div>
-            <div v-else class="body-item" v-for="item in reportItems" :key="item.key">
-              <div class="item-title">
-                <div class="item-location">
-                  <icon name="solar:pin-circle-bold" size="18" />
-                  <div>{{ item.location }}</div>
-                </div>
-                <div class="badge badge-sm" :class="item.badgeClass">{{ item.badgeText }}</div>
-              </div>
-              <div class="item-content">
-                <div class="item-original">{{ item.original }}</div>
-                <div class="item-suggestion">{{ item.suggestion }}</div>
-              </div>
-            </div>
-          </div>
+      @pointerdown="onStitchPointerDown"
+      @pointermove="onStitchPointerMove"
+      @pointerup="onStitchPointerUp"
+      @pointercancel="onStitchPointerUp">
+      
+      <div class="window-header">
+        <div class="header-title">针法元数据校验</div>
+        <div class="flex items-center justify-center cursor-pointer" data-stitch-no-drag @click="stitchWindowOpen = false">
+          <icon name="solar:close-square-bold" size="22" />
         </div>
       </div>
+      <div style="padding: 10px; min-height: 260px;">
+        <table class="table table-sm">
+          <!-- head -->
+          <thead>
+            <tr>
+              <th>Alias</th>
+              <th>Us terms</th>
+              <th>Title</th>
+              <th>Description</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-if="!stitchRows.length">
+              <td colspan="4" style="text-align: center; padding: 30px 0;">
+                <div style="margin-bottom: 20px; opacity: 0.6; font-size: 14px;">暂无 Stitches 数据</div>
+                <button class="btn btn-primary btn-sm" :disabled="!draftId || extractingStitches" @click="extractStitches">
+                  {{ extractingStitches ? '提取中...' : '提取针法数据' }}
+                </button>
+              </td>
+            </tr>
+            <tr v-else v-for="it in stitchRows" :key="it.key">
+              <td>{{ it.alias }}</td>
+              <td><input v-model="it.usTerms" type="text" class="input input-sm" /></td>
+              <td>{{ it.title }}</td>
+              <td>{{ it.description }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="flex items-center gap-2 justify-end" style="padding: 10px;">
+        <button class="btn btn-soft" :disabled="!draftId || extractingStitches" @click="extractStitches">
+          {{ extractingStitches ? '提取中...' : '重试' }}
+        </button>
+        <button class="btn btn-neutral" :disabled="!draftId || savingStitches" @click="saveStitches">
+          {{ savingStitches ? '保存中...' : '保存并关闭' }}
+        </button>
+      </div>
     </div>
-    
+
 
   </div>
 </template>
 
 <script setup lang="ts">
-import { computed, ref, onBeforeUnmount, onMounted, watch } from "vue";
+import { computed, ref, watch } from "vue";
 import MarkdownIt from "markdown-it";
+import ReportWindow from '@/components/editor/window/report/index.vue'
 import type { ApiResponse } from "~/types/ApiResponse";
 import { useAppToast } from '~/composables/useAppToast';
 
@@ -122,6 +141,10 @@ const draftId = computed(() => {
 });
 
 const info = ref<any | null>(null);
+const stitches = ref<any | null>(null);
+const stitchWindowOpen = ref(false)
+const extractingStitches = ref(false)
+const savingStitches = ref(false)
 
 const toText = (v: any) => (v == null ? "" : typeof v === "string" ? v : String(v));
 
@@ -191,13 +214,149 @@ const reportItems = computed<ReportViewItem[]>(() => {
   });
 });
 
+type StitchRow = {
+  key: string
+  alias: string
+  usTerms: string
+  title: string
+  description: string
+}
+
+const stitchRows = ref<StitchRow[]>([])
+
+const normalizeStitchList = (v: any) => {
+  if (Array.isArray(v?.items)) return v.items
+  if (Array.isArray(v?.stitches)) return v.stitches
+  if (Array.isArray(v)) return v
+  return []
+}
+
+watch(
+  stitches,
+  () => {
+    const list = normalizeStitchList(stitches.value)
+    stitchRows.value = list.map((s: any, idx: number) => {
+      const alias = pickText(s, ['alias', 'abbrev', 'us_abbrev', 'notation', 'symbol']) || `#${idx + 1}`
+      const usTerms = pickText(s, ['us', 'us_terms', 'en', 'en_alias', 'term']) || '-'
+      const title = pickText(s, ['title', 'name', 'chinese', 'defaultName']) || '-'
+      const description = pickText(s, ['description', 'us_description', 'desc', 'detail']) || '-'
+      return { key: `${idx}-${alias}`, alias, usTerms, title, description }
+    })
+  },
+  { immediate: true }
+)
+
+const stitchDx = ref(0)
+const stitchDy = ref(0)
+const stitchDragging = ref(false)
+
+let stitchStart = { x: 0, y: 0, dx: 0, dy: 0 }
+let stitchPointerId: number | null = null
+let stitchMoved = false
+
+const onStitchPointerDown = (e: PointerEvent) => {
+  const target = e.target as HTMLElement | null
+  if (target?.closest('[data-stitch-no-drag], button, input, textarea, select, a')) return
+  if (stitchPointerId != null) return
+  stitchPointerId = e.pointerId
+  stitchMoved = false
+  stitchStart = { x: e.clientX, y: e.clientY, dx: stitchDx.value, dy: stitchDy.value }
+  ;(e.currentTarget as HTMLElement | null)?.setPointerCapture?.(e.pointerId)
+}
+
+const onStitchPointerMove = (e: PointerEvent) => {
+  if (stitchPointerId !== e.pointerId) return
+
+  const nextDx = stitchStart.dx + (e.clientX - stitchStart.x)
+  const nextDy = stitchStart.dy + (e.clientY - stitchStart.y)
+
+  if (!stitchMoved && Math.abs(nextDx - stitchStart.dx) + Math.abs(nextDy - stitchStart.dy) < 3) return
+
+  stitchMoved = true
+  stitchDragging.value = true
+  stitchDx.value = nextDx
+  stitchDy.value = nextDy
+  e.preventDefault()
+}
+
+const onStitchPointerUp = (e: PointerEvent) => {
+  if (stitchPointerId !== e.pointerId) return
+  stitchDragging.value = false
+  stitchPointerId = null
+}
+
+const extractStitches = async () => {
+  if (!draftId.value || extractingStitches.value) return
+
+  extractingStitches.value = true
+  try {
+    const res = await $fetch<ApiResponse<{ info: any }>>(`/api/pattern/draft/stitches/meta/${draftId.value}`, {
+      method: 'POST',
+    })
+
+    if (!res?.success) {
+      throw new Error(res?.message || '提取针法元数据失败')
+    }
+
+    stitches.value = (res as any)?.data?.info ?? null
+    toast.success('针法元数据已提取')
+  } catch (e) {
+    console.error('提取针法元数据失败:', e)
+    toast.error((e as any)?.message || '提取针法元数据失败')
+  } finally {
+    extractingStitches.value = false
+  }
+}
+
+const saveStitches = async () => {
+  if (!draftId.value || savingStitches.value) return
+
+  savingStitches.value = true
+  try {
+    const items = stitchRows.value.map((it) => ({
+      alias: it.alias,
+      us_terms: it.usTerms,
+      title: it.title,
+      description: it.description,
+    }))
+
+    const nextStitches = {
+      ...(typeof stitches.value === 'object' && stitches.value ? stitches.value : {}),
+      timestamp: Date.now(),
+      items,
+    }
+
+    const res = await $fetch<ApiResponse<{ id: any }>>('/api/pattern/draft/update', {
+      method: 'POST',
+      body: {
+        id: draftId.value,
+        stitches: nextStitches,
+      },
+    })
+
+    if (!res?.success) {
+      throw new Error(res?.message || '保存失败')
+    }
+
+    stitches.value = nextStitches
+    stitchWindowOpen.value = false
+    toast.success('已保存')
+  } catch (e) {
+    console.error('保存 stitches 失败:', e)
+    toast.error((e as any)?.message || '保存失败')
+  } finally {
+    savingStitches.value = false
+  }
+}
+
 const loadInfo = async () => {
   if (!draftId.value) {
     info.value = null;
+    stitches.value = null;
     return;
   }
 
-  const res = await $fetch<ApiResponse<{ draft: { info: any | null } }>>(`/api/pattern/draft/${draftId.value}`, {
+  const res = await $fetch<ApiResponse<{ draft: { info: any | null; stitches: any | null } }>>(`/api/pattern/draft/${draftId.value}`, {
     method: "GET",
   });
 
@@ -206,22 +365,39 @@ const loadInfo = async () => {
     return;
   }
 
-  const raw = (res as any)?.data?.draft?.info;
-  if (typeof raw === "string") {
-    const s = raw.trim();
-    if (!s) {
-      info.value = null;
-      return;
+  const draft = (res as any)?.data?.draft
+
+  const rawInfo = draft?.info
+  if (typeof rawInfo === "string") {
+    const s = rawInfo.trim();
+    if (s) {
+      try {
+        info.value = JSON.parse(s);
+      } catch {
+        info.value = { text: rawInfo };
+      }
+    } else {
+      info.value = null
     }
-    try {
-      info.value = JSON.parse(s);
-    } catch {
-      info.value = { text: raw };
-    }
-    return;
+  } else {
+    info.value = rawInfo ?? null;
   }
 
-  info.value = raw ?? null;
+  const rawStitches = draft?.stitches
+  if (typeof rawStitches === 'string') {
+    const s = rawStitches.trim()
+    if (s) {
+      try {
+        stitches.value = JSON.parse(s)
+      } catch {
+        stitches.value = null
+      }
+    } else {
+      stitches.value = null
+    }
+  } else {
+    stitches.value = rawStitches ?? null
+  }
 };
 
 watch(
@@ -231,112 +407,6 @@ watch(
   },
   { immediate: true }
 );
-
-const ANCHOR = 20
-
-const floatingEl = ref<HTMLElement | null>(null)
-const dx = ref(0)
-const dy = ref(0)
-const dragging = ref(false)
-const windowBodyOpen = ref(false)
-
-let justDragged = false
-const toggleWindowBody = () => {
-  if (justDragged) return
-  windowBodyOpen.value = !windowBodyOpen.value
-}
-
-const size = ref({ w: 0, h: 0 })
-const updateSize = () => {
-  const el = floatingEl.value
-  if (!el) return
-  size.value = { w: el.offsetWidth, h: el.offsetHeight }
-}
-
-const clamp = () => {
-  const w = size.value.w
-  const h = size.value.h
-  const vw = window.innerWidth
-  const vh = window.innerHeight
-
-  const minX = w + ANCHOR - vw
-  const maxX = ANCHOR
-  const minY = h + ANCHOR - vh
-  const maxY = ANCHOR
-
-  dx.value = Math.min(Math.max(dx.value, Math.min(minX, maxX)), Math.max(minX, maxX))
-  dy.value = Math.min(Math.max(dy.value, Math.min(minY, maxY)), Math.max(minY, maxY))
-}
-
-let start = { x: 0, y: 0, dx: 0, dy: 0 }
-let activePointerId: number | null = null
-let moved = false
-
-const onPointerDown = (e: PointerEvent) => {
-  if (activePointerId != null) return
-  activePointerId = e.pointerId
-  moved = false
-  start = { x: e.clientX, y: e.clientY, dx: dx.value, dy: dy.value }
-  ;(e.currentTarget as HTMLElement | null)?.setPointerCapture?.(e.pointerId)
-}
-
-const onPointerMove = (e: PointerEvent) => {
-  if (activePointerId !== e.pointerId) return
-
-  const nextDx = start.dx + (e.clientX - start.x)
-  const nextDy = start.dy + (e.clientY - start.y)
-
-  if (!moved && Math.abs(nextDx - start.dx) + Math.abs(nextDy - start.dy) < 3) return
-
-  moved = true
-  dragging.value = true
-  dx.value = nextDx
-  dy.value = nextDy
-  clamp()
-  e.preventDefault()
-}
-
-const onPointerUp = (e: PointerEvent) => {
-  if (activePointerId !== e.pointerId) return
-
-  if (moved) {
-    justDragged = true
-    setTimeout(() => {
-      justDragged = false
-    }, 0)
-  }
-
-  dragging.value = false
-  activePointerId = null
-}
-
-let ro: ResizeObserver | null = null
-const onViewportResize = () => {
-  updateSize()
-  clamp()
-}
-
-onMounted(() => {
-  updateSize()
-  clamp()
-
-  const el = floatingEl.value
-  if (el) {
-    ro = new ResizeObserver(() => {
-      updateSize()
-      clamp()
-    })
-    ro.observe(el)
-  }
-
-  window.addEventListener('resize', onViewportResize)
-})
-
-onBeforeUnmount(() => {
-  ro?.disconnect()
-  ro = null
-  window.removeEventListener('resize', onViewportResize)
-})
 
 let syncing = false;
 
@@ -372,7 +442,7 @@ const props = defineProps({
 
 const emit = defineEmits<{
   (e: "update:markdown", value: string): void
-  (e: "goToInfoCompletion"): void
+  (e: "updated"): void
 }>();
 
 const md = new MarkdownIt({
@@ -417,7 +487,7 @@ const goToInfoCompletion = async () => {
 
   savingStatus.value = true
   try {
-    const res = await $fetch<ApiResponse<{ id: any; status: any }>>('/api/pattern/draft/status/update', {
+    const res = await $fetch<ApiResponse<{ id: any; status: any }>>('/api/pattern/draft/review/confirm', {
       method: 'POST',
       body: {
         id: draftId.value,
@@ -430,7 +500,7 @@ const goToInfoCompletion = async () => {
     }
 
     toast.success('已进入信息补全')
-    emit('goToInfoCompletion')
+    emit('updated')
   } catch (e) {
     console.error('更新 status 失败:', e)
   } finally {
@@ -458,94 +528,24 @@ watch(
 </script>
 
 <style scoped lang="scss">
-.floating-window {
-  z-index: 1000;
+.stitch-window {
+  z-index: 900;
   background-color: #ffffff;
   border-radius: 6px;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+  width: 750px;
+  min-height: 260px;
   touch-action: none;
 
-  .window-badge {
-    font-size: 12px;
-    font-weight: 600;
-    color: #ffffff;
-    background-color: var(--color-success);
-    padding: 4px 6px;
-    line-height: 1;
-    border-radius: 4px;
-    font-weight: 400;
-  }
-
-  .window-title {
+  .window-header {
+    padding: 12px 15px;
     display: flex;
     align-items: center;
-    background-color: var(--color-primary);
-    border-radius: 6px 6px 0 0;
-    color: #ffffff;
     justify-content: space-between;
-    padding: 10px 15px;
-    gap: 10px;
+    border-radius: 6px 6px 0 0;
     font-size: 14px;
     font-weight: 600;
-    cursor: pointer;
-
-    &.collapsed {
-      border-radius: 6px;
-    }
-
-    &:active {
-      opacity: 0.9;
-    }
-  }
-
-  .window-body {
-    max-height: 35vw;
-    overflow-y: auto;
-    scrollbar-width: none;
-    -ms-overflow-style: none;
-    padding: 10px 0;
-
-    &::-webkit-scrollbar {
-      display: none;
-    }
-
-    .body-item {
-      font-size: 12px;
-      min-width: 320px;
-      max-width: 480px;
-      padding: 10px 15px;
-      font-weight: 400;
-      &:hover {
-        background-color: var(--color-neutral-100);
-      }
-
-      .item-title {
-        display: flex;
-        align-items: center;
-        gap: 10px;
-        font-weight: 600;
-        justify-content: space-between;
-        margin-bottom: 10px;
-
-        .item-location {
-          display: flex;
-          align-items: center;
-          gap: 5px;
-        }
-      }
-
-      .item-content {
-        border: 1px dashed var(--color-neutral-300);
-        padding: 5px 10px;
-        border-radius: 4px;
-      }
-
-      .item-original {
-        padding: 5px 0;
-        font-weight: 600;
-        font-style: italic;
-      }
-    }
+    background-color: var(--color-primary);
+    color: #ffffff;
   }
 }
 

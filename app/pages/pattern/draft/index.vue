@@ -27,7 +27,7 @@
             <td colspan="5">No Data</td>
           </tr>
           <tr v-else v-for="(d, idx) in drafts" :key="d.id">
-            <th>{{ idx + 1 }}</th>
+            <th>{{ d.id }}</th>
             <td>{{ d.title }}</td>
             <td>{{ d.description || '-' }}</td>
             <td><div class="badge badge-primary">{{ d.status }}</div></td>

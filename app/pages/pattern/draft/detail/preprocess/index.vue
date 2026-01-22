@@ -18,6 +18,7 @@
         v-model="content"
         class="preprocess-textarea"
         placeholder="请输入需要预处理的文本内容"
+        @input="dirty = true"
       ></textarea>
     </div>
     <div class="preprocess-data">
@@ -28,14 +29,14 @@
       <div class="preprocess-timeline">
         <div class="timeline-item">
           <div style="display: flex; align-items: center; gap: 10px;">
-            <div class="timeline-item__dot" :class="{ active: hasRawContent || step1Status === 'running' }"></div>
+            <div class="timeline-item__dot" :class="{ active: hasRawContent || steps[0].status === 'running' }"></div>
             <div class="timeline-item__title">原文本上传</div>
           </div>
           <div class="timeline-item-body">
             <div class="body__content">
-              <div v-if="step1Status === 'error'" class="text-error">执行异常，请重试：{{ step1Error }}</div>
+              <div v-if="steps[0].status === 'error'" class="text-error">执行异常，请重试：{{ steps[0].error }}</div>
               <div v-else-if="hasRawContent">已完成原文本上传。可点击 <a href="#" class="text-primary">查看详情</a> 在左侧查看和修改</div>
-              <div v-else-if="step1Status === 'running'" class="body__loading">
+              <div v-else-if="steps[0].status === 'running'" class="body__loading">
                 <icon name="line-md:uploading-loop" size="18" />
                 <div>任务执行中 ... ...</div>
               </div>
@@ -49,56 +50,52 @@
         </div>
         <div class="timeline-item">
           <div style="display: flex; align-items: center; gap: 10px;">
-            <div class="timeline-item__dot" :class="{ active: hasRevisedContent || step2Status === 'running' }"></div>
+            <div class="timeline-item__dot" :class="{ active: hasRevisedContent || steps[1].status === 'running' }"></div>
             <div class="timeline-item__title">标准格式化</div>
           </div>
           <div class="timeline-item-body">
             <div>
-              <div v-if="step2Status === 'running'" class="body__loading">
+              <div v-if="steps[1].status === 'running'" class="body__loading">
                 <icon name="line-md:uploading-loop" size="18" />
                 <div>任务执行中 ... ...</div>
               </div>
               <div v-else-if="hasRevisedContent">已完成图解标准化。可点击 <a href="#" class="text-primary">查看详情</a> 在左侧查看和修改</div>
-              <div v-else-if="step2Status === 'error'" class="text-error">执行异常，请重试：{{ step2Error }}</div>
+              <div v-else-if="steps[1].status === 'error'" class="text-error">执行异常，请重试：{{ steps[1].error }}</div>
               <div v-else>No task running</div>
             </div>
             
             <div v-if="hasRevisedContent" class="body__btn-group">
               <button class="btn btn-soft btn-xs" :disabled="processing" @click="runNormalize">重试</button>
-              <button class="btn btn-soft btn-xs" :disabled="processing || step3Status === 'running'" @click="runReview">下一步</button>
+              <button class="btn btn-soft btn-xs" :disabled="processing || steps[2].status === 'running'" @click="runReview">下一步</button>
             </div>
           </div>
         </div>
         <div class="timeline-item">
           <div style="display: flex; align-items: center; gap: 10px;">
-            <div class="timeline-item__dot" :class="{ active: isManualReviewDone || step3Status === 'running' }"></div>
+            <div class="timeline-item__dot" :class="{ active: isManualReviewDone || steps[2].status === 'running' }"></div>
             <div class="timeline-item__title">图解内容审查</div>
           </div>
           <div class="timeline-item-body">
-            <div v-if="step3Status === 'running'" class="body__loading">
+            <div v-if="steps[2].status === 'running'" class="body__loading">
               <icon name="line-md:uploading-loop" size="18" />
               <div>任务执行中 ... ...</div>
             </div>
             <div v-else-if="isManualReviewDone">
-              已完成图解内容审查。总计 {{ infoReportCount }} 项复查节点
+              <div>已完成图解内容审查。总计 <strong>{{ infoReportCount }}</strong> 项复查节点</div>
+              <div class="text-success">
+                文本预处理，已完成标准格式化和内容审查。请在下一步进行人工审核！
+              </div>
+              <button
+                class="btn btn-neutral btn-sm mt-4"
+                :disabled="savingNext || !draftId"
+                @click="goToVerified"
+              >
+                {{ savingNext ? 'Saving...' : '下一步：人工审核' }}
+              </button>
             </div>
-            <div v-else-if="step3Status === 'error'" class="text-error">执行异常，请重试：{{ step3Error }}</div>
+            <div v-else-if="steps[2].status === 'error'" class="text-error">执行异常，请重试：{{ steps[2].error }}</div>
             <div v-else>No task running</div>
           </div>
-        </div>
-        <div class="timeline-item">
-          <div style="display: flex; align-items: center; gap: 10px;">
-            <div class="timeline-item__dot"></div>
-            <div class="timeline-item__title">完成</div>
-          </div>  
-          <div class="timeline-item-body">
-            <div class="text-success">
-              文本预处理，已完成标准格式化和内容审查。请在下一步进行人工审核！
-            </div>
-            <button class="btn btn-neutral btn-sm mt-4">
-              下一步：人工审核
-            </button>
-          </div>      
         </div>
       </div>
     </div>
@@ -125,17 +122,20 @@ type PatternDraftDetail = {
   status: string
   raw_content: string | null
   revised_content: string | null
-  info: any | null
+  info?: any | null
 }
 
 // =====================
-// Route
+// Props
 // =====================
-const route = useRoute()
-const draftId = computed(() => {
-  const v = Number(route.query.id)
-  return Number.isFinite(v) && v > 0 ? v : 0
-})
+type Props = {
+  draft: PatternDraftDetail | null
+}
+
+const props = defineProps<Props>()
+const emit = defineEmits<{ (e: 'updated'): void }>()
+
+const draftId = computed(() => Number(props.draft?.id) || 0)
 
 // =====================
 // State
@@ -143,6 +143,7 @@ const draftId = computed(() => {
 const draft = ref<PatternDraftDetail | null>(null)
 const editingField = ref<'raw_content' | 'revised_content'>('raw_content')
 const content = ref('')
+const dirty = ref(false)
 
 // =====================
 // Helpers
@@ -155,11 +156,6 @@ const setDraftField = (field: 'raw_content' | 'revised_content', value: string) 
   }
 }
 
-const fetchDraftDetail = async () => {
-  return await $fetch<ApiResponse<{ draft: PatternDraftDetail }>>(`/api/pattern/draft/${draftId.value}`, {
-    method: 'GET',
-  })
-}
 
 const updateDraft = async (data: Record<string, any>) => {
   return await $fetch<ApiResponse<{ id: any }>>('/api/pattern/draft/update', {
@@ -172,7 +168,7 @@ const updateDraft = async (data: Record<string, any>) => {
 }
 
 // =====================
-// Data Loading
+// Data Binding
 // =====================
 const syncEditingFromDraft = () => {
   const revised = String(draft.value?.revised_content ?? '').trim()
@@ -186,27 +182,15 @@ const syncEditingFromDraft = () => {
   content.value = String(draft.value?.raw_content ?? '')
 }
 
-const loadDraft = async () => {
-  if (!draftId.value) return
-
-  try {
-    const res = await fetchDraftDetail()
-
-    if (!res?.success || !res.data?.draft) {
-      throw new Error(res?.message || '加载草稿失败')
-    }
-
-    draft.value = res.data.draft
+watch(
+  () => props.draft,
+  (d) => {
+    if (dirty.value) return
+    draft.value = d ? { ...(d as any) } : null
     syncEditingFromDraft()
-  } catch (e) {
-    console.error('加载 Draft 详情失败:', e)
-    draft.value = null
-    editingField.value = 'raw_content'
-    content.value = ''
-  }
-}
-
-watch(draftId, loadDraft)
+  },
+  { immediate: true }
+)
 
 // =====================
 // Manual Edit / Save
@@ -227,6 +211,8 @@ const saveCurrentContent = async () => {
     }
 
     setDraftField(editingField.value, content.value)
+    dirty.value = false
+    emit('updated')
   } catch (e) {
     console.error('保存 Draft 失败:', e)
   } finally {
@@ -234,18 +220,17 @@ const saveCurrentContent = async () => {
   }
 }
 
-onMounted(loadDraft)
-
 // =====================
 // Status & Derived
 // =====================
 const processing = ref(false)
-const step1Status = ref<StepStatus>('idle')
-const step1Error = ref('')
-const step2Status = ref<StepStatus>('idle')
-const step2Error = ref('')
-const step3Status = ref<StepStatus>('idle')
-const step3Error = ref('')
+
+type StepState = { status: StepStatus; error: string }
+const steps = reactive<[StepState, StepState, StepState]>([
+  { status: 'idle', error: '' },
+  { status: 'idle', error: '' },
+  { status: 'idle', error: '' },
+])
 
 const hasRawContent = computed(() => Boolean(String(draft.value?.raw_content ?? '').trim()))
 const hasRevisedContent = computed(() => Boolean(String(draft.value?.revised_content ?? '').trim()))
@@ -270,26 +255,41 @@ const infoReportCount = computed(() => {
   return Array.isArray(report) ? report.length : 0
 })
 
-const hasInfo = computed(() => {
-  const v = info.value
-  if (v == null) return false
-  if (typeof v === 'string') return Boolean(v.trim())
-  if (Array.isArray(v)) return v.length > 0
-  if (typeof v === 'object') return Object.keys(v).length > 0
-  return true
-})
-
-const isManualReviewDone = computed(() => String(draft.value?.status ?? '') === 'manual_review' && hasInfo.value)
+const isManualReviewDone = computed(() => hasRevisedContent.value)
 
 const headerTitle = computed(() => (hasRevisedContent.value ? '标准化' : '图解原文'))
 
 // =====================
 // Actions
 // =====================
+const savingNext = ref(false)
+
+const goToVerified = async () => {
+  if (!draftId.value || savingNext.value) return
+
+  savingNext.value = true
+  try {
+    const res = await $fetch<ApiResponse<{ id: any }>>('/api/pattern/draft/state/update', {
+      method: 'POST',
+      body: { id: draftId.value, state: 4 },
+    })
+
+    if (!res?.success) {
+      throw new Error(res?.message || '更新失败')
+    }
+
+    emit('updated')
+  } catch (e) {
+    console.error('更新 state 失败:', e)
+  } finally {
+    savingNext.value = false
+  }
+}
+
 const runNormalize = async () => {
   if (!draftId.value) return
-  step2Status.value = 'running'
-  step2Error.value = ''
+  steps[1].status = 'running'
+  steps[1].error = ''
 
   try {
     const res = await $fetch<ApiResponse<{ normalized: string }>>('/api/pattern/draft/normalize', {
@@ -305,20 +305,20 @@ const runNormalize = async () => {
     content.value = normalized
     editingField.value = 'revised_content'
     setDraftField('revised_content', normalized)
-    step2Status.value = 'idle'
+    steps[1].status = 'idle'
   } catch (e: any) {
-    step2Status.value = 'error'
-    step2Error.value = getErrorMessage(e)
+    steps[1].status = 'error'
+    steps[1].error = getErrorMessage(e)
   }
 }
 
 const runReview = async () => {
   if (!draftId.value) return
-  step3Status.value = 'running'
-  step3Error.value = ''
+  steps[2].status = 'running'
+  steps[2].error = ''
 
   try {
-    const res = await $fetch<ApiResponse<{ text: any }>>('/api/pattern/draft/review', {
+    const res = await $fetch<ApiResponse<{ text: any }>>('/api/pattern/draft/analyze', {
       method: 'POST',
       body: { id: draftId.value },
     })
@@ -333,10 +333,13 @@ const runReview = async () => {
       ;(draft.value as any).info = nextInfo
     }
 
-    step3Status.value = 'idle'
+    dirty.value = false
+    emit('updated')
+
+    steps[2].status = 'idle'
   } catch (e: any) {
-    step3Status.value = 'error'
-    step3Error.value = getErrorMessage(e)
+    steps[2].status = 'error'
+    steps[2].error = getErrorMessage(e)
   }
 }
 
@@ -346,10 +349,10 @@ const runPreprocess = async () => {
   if (!raw.trim()) return
 
   processing.value = true
-  step1Status.value = 'running'
-  step1Error.value = ''
-  step2Status.value = 'idle'
-  step2Error.value = ''
+  steps[0].status = 'running'
+  steps[0].error = ''
+  steps[1].status = 'idle'
+  steps[1].error = ''
 
   try {
     const res = await updateDraft({ raw_content: raw })
@@ -357,14 +360,13 @@ const runPreprocess = async () => {
     if (!res?.success) {
       throw new Error(res?.message || '保存失败')
     }
-
     setDraftField('raw_content', raw)
 
-    step1Status.value = 'success'
+    steps[0].status = 'success'
     await runNormalize()
   } catch (e: any) {
-    step1Status.value = 'error'
-    step1Error.value = getErrorMessage(e)
+    steps[0].status = 'error'
+    steps[0].error = getErrorMessage(e)
   } finally {
     processing.value = false
   }

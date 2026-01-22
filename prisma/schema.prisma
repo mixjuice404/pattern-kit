@@ -172,7 +172,11 @@ model PatternDraft {
   result_content  String?  @db.Text
   info            Json?
   meta            Json?
+  report          Json?
+  stitches        Json?
+  supplies        Json?
   status          String   @default("pending")
+  state           Int      @default(0)
   version         Int      @default(1)
   created_at      DateTime @default(now()) @map("created_at")
   updated_at      DateTime @updatedAt @map("updated_at")

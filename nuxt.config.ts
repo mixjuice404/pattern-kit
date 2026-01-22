@@ -19,6 +19,12 @@ export default defineNuxtConfig({
     plugins: [
       tailwindcss(),
     ],
+    optimizeDeps: {
+      exclude: ['sharp'],
+    },
+    ssr: {
+      external: ['sharp'],
+    },
     css: {
       preprocessorOptions: {
         scss: {

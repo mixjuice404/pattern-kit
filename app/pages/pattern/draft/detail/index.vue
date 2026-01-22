@@ -27,22 +27,41 @@
 
     <!-- 草稿内容操作区 -->
     <div class="draft-body">
-      <Preprocess v-show="activeStep === 0" />
-      <MarkdownEditor
-        v-show="activeStep === 1"
-        v-model:markdown="markdown"
-        @goToInfoCompletion="onGoToInfoCompletion"
+      <Preprocess
+        v-if="activeStep === 0"
+        :draft="draft"
+        @updated="loadDraft"
       />
-      <InfoCompletion
-        v-show="activeStep === 2"
-        :markdown="markdown"
-        :info="draft?.info"
-        :title="draft?.title"
-        :description="draft?.description || ''"
-      />
-      <Translate
-        v-show="activeStep === 3"
-        :draft="draft" />
+
+      <KeepAlive>
+        <MarkdownEditor
+          v-if="activeStep === 1"
+          :key="draftId"
+          v-model:markdown="markdown"
+          @updated="loadDraft"
+        />
+      </KeepAlive>
+
+      <KeepAlive>
+        <InfoCompletion
+          v-if="activeStep === 2"
+          :key="draftId"
+          :markdown="markdown"
+          :info="draft?.info"
+          :title="draft?.title"
+          :description="draft?.description || ''"
+          @updated="loadDraft"
+        />
+      </KeepAlive>
+
+      <KeepAlive>
+        <Translate
+          v-if="activeStep === 3"
+          :key="draftId"
+          :draft="draft"
+          @updated="loadDraft"
+        />
+      </KeepAlive>
     </div>
  
   </div>
@@ -59,13 +78,12 @@ definePageMeta({
   layout: 'empty'
 })
 
-type DraftStatus = 'pending' | 'normalized' | 'manual_review' | 'info_completion' | 'translation_review'
-
 type PatternDraftDetail = {
   id: number
   title: string
   description?: string | null
-  status: DraftStatus | string
+  status: string
+  state: number
   raw_content: string | null
   revised_content: string | null
   result_content: string | null
@@ -85,14 +103,15 @@ const draft = ref<PatternDraftDetail | null>(null)
 const steps = ['预处理', '人工审核中', '信息补全', '翻译校对'] as const
 const activeStep = ref(0)
 
-const getStepByStatus = (status: string) => {
-  if (status === 'manual_review') return 1
-  if (status === 'info_completion') return 2
-  if (status === 'translation_review') return 3
+const getStepByState = (state: number) => {
+  if (state >= 0 && state <= 3) return 0
+  if (state === 4) return 1
+  if (state === 5) return 2
+  if (state === 6) return 3
   return 0
 }
 
-const currentStep = computed(() => getStepByStatus(String(draft.value?.status ?? '')))
+const currentStep = computed(() => getStepByState(Number(draft.value?.state) || 0))
 
 const setActiveStep = (idx: number) => {
   if (idx < 0 || idx > currentStep.value) return
@@ -101,20 +120,21 @@ const setActiveStep = (idx: number) => {
 
 const markdown = ref('')
 
-const onGoToInfoCompletion = () => {
-  if (draft.value) draft.value.status = 'info_completion'
-  activeStep.value = 2
-}
-
 const goBack = () => navigateTo('/pattern/draft')
+
+let loadSeq = 0
 
 const loadDraft = async () => {
   if (!draftId.value) return
+
+  const seq = ++loadSeq
 
   try {
     const res = await $fetch<ApiResponse<{ draft: PatternDraftDetail }>>(`/api/pattern/draft/${draftId.value}`, {
       method: 'GET',
     })
+
+    if (seq !== loadSeq) return
 
     if (!res?.success || !res.data?.draft) {
       throw new Error(res?.message || '加载草稿失败')
@@ -124,6 +144,7 @@ const loadDraft = async () => {
     activeStep.value = currentStep.value
     markdown.value = String(draft.value.revised_content ?? draft.value.raw_content ?? '')
   } catch (e) {
+    if (seq !== loadSeq) return
     console.error('加载 Draft 详情失败:', e)
     draft.value = null
     activeStep.value = 0

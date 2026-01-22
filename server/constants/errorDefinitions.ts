@@ -41,6 +41,7 @@ export const ERROR_DEFINITIONS = {
   PARAMETER_NOT_SUPPORTED_IN_VERSION: { code: 6005, info: '当前版本不支持该参数' },
   INVALID_TASK_TYPE:        { code: 6006, info: '无效的任务类型' },
   BUSINESS_EXCEPTION:       { code: 6007, info: '业务异常' },
+  PARAM_INVALID:            { code: 6008, info: '参数无效' },
 
   // ... 在这里根据需要添加更多错误定义 ...
 

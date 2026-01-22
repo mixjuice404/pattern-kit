@@ -14,6 +14,7 @@
         ref="editorEl"
         v-model="content"
         class="input-textarea"
+        @input="dirty = true"
         @scroll="onScroll('editor')"
       />
     </div>
@@ -21,6 +22,15 @@
     <div class="translate-priview">
       <div class="output-header">
         <div class="output-title">翻译预览</div>
+        <div>
+          <button
+            class="btn btn-sm btn-neutral"
+            :disabled="exportingDocx"
+            @click="exportDocx"
+          >
+            {{ exportingDocx ? 'Exporting...' : '导出可编辑文档' }}
+          </button>
+        </div>
       </div>
       <div
         ref="previewEl"
@@ -32,7 +42,7 @@
   </div>
 </template>
 <script setup lang="ts">
-import { computed, onMounted, ref, watch } from 'vue'
+import { computed, ref, watch } from 'vue'
 import MarkdownIt from 'markdown-it'
 import type { ApiResponse } from '~/types/ApiResponse'
 import { useAppToast } from '~/composables/useAppToast'
@@ -44,16 +54,30 @@ type PatternDraftDetail = {
   result_content: string | null
 }
 
-const route = useRoute()
-const draftId = computed(() => {
-  const v = Number(route.query.id)
-  return Number.isFinite(v) && v > 0 ? v : 0
-})
+type Props = {
+  draft: PatternDraftDetail | null
+}
+
+const props = defineProps<Props>()
+const emit = defineEmits<{ (e: 'updated'): void }>()
 
 const toast = useAppToast()
 
+const draftId = computed(() => Number(props.draft?.id) || 0)
+
 const content = ref('')
+const dirty = ref(false)
 const savingUpdate = ref(false)
+const exportingDocx = ref(false)
+
+watch(
+  () => [props.draft?.id, props.draft?.result_content] as const,
+  () => {
+    if (dirty.value) return
+    content.value = String(props.draft?.result_content ?? '')
+  },
+  { immediate: true }
+)
 
 const saveResultContent = async () => {
   if (!draftId.value || savingUpdate.value) return
@@ -72,7 +96,9 @@ const saveResultContent = async () => {
       throw new Error(res?.message || '更新失败')
     }
 
+    dirty.value = false
     toast.success('更新成功')
+    emit('updated')
   } catch (e) {
     console.error('更新 result_content 失败:', e)
     toast.error('更新失败')
@@ -81,30 +107,41 @@ const saveResultContent = async () => {
   }
 }
 
-const load = async () => {
-  if (!draftId.value) {
-    content.value = ''
-    return
-  }
+const exportDocx = async () => {
+  if (!draftId.value || exportingDocx.value) return
 
+  exportingDocx.value = true
   try {
-    const res = await $fetch<ApiResponse<{ draft: PatternDraftDetail }>>(`/api/pattern/draft/${draftId.value}`, {
-      method: 'GET',
-    })
+    const bodyHtml = String(previewHtml.value ?? '')
 
-    if (!res?.success || !res.data?.draft) {
-      content.value = ''
-      return
-    }
+    const html = `<!DOCTYPE html><html><head><meta charset="UTF-8" />
+<style>
+  body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,"Noto Sans",sans-serif;line-height:1.6;padding:24px;}
+  img{max-width:100%;height:auto;}
+  table{border-collapse:collapse;width:100%;}
+  th,td{border:1px solid #ddd;padding:6px 8px;vertical-align:top;}
+  pre,code{font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono","Courier New",monospace;}
+</style></head><body>${bodyHtml}</body></html>`
 
-    content.value = String(res.data.draft.result_content ?? '')
-  } catch {
-    content.value = ''
+    const blob = new Blob([html], { type: 'application/msword;charset=utf-8' })
+
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `pattern-draft-${draftId.value}.doc`
+    document.body.appendChild(a)
+    a.click()
+    a.remove()
+    URL.revokeObjectURL(url)
+
+    toast.success('已导出')
+  } catch (e: any) {
+    console.error('导出失败:', e)
+    toast.error(e?.message || '导出失败')
+  } finally {
+    exportingDocx.value = false
   }
 }
-
-onMounted(load)
-watch(draftId, load)
 
 const md = new MarkdownIt({
   html: true,
