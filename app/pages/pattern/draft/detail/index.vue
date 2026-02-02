@@ -38,6 +38,7 @@
           v-if="activeStep === 1"
           :key="draftId"
           v-model:markdown="markdown"
+          :report="reportList"
           @updated="loadDraft"
         />
       </KeepAlive>
@@ -132,6 +133,12 @@ const setActiveStep = (idx: number) => {
 }
 
 const markdown = ref('')
+
+const reportList = computed<any[]>(() => {
+  const d: any = draft.value
+  const list = Array.isArray(d?.report?.list) ? d.report.list : []
+  return list
+})
 
 const goBack = () => navigateTo('/pattern/draft')
 

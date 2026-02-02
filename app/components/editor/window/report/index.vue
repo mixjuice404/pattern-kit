@@ -25,7 +25,7 @@
           <div class="window-badge">{{ items.length }}</div>
         </div>
         <div v-show="windowBodyOpen" class="window-body" style="max-height: 25vw; overflow-y: auto;">
-          <div v-if="!items.length" class="body-empty">No report items</div>
+          <div v-if="!items.length" class="body-empty" style="padding: 10px; text-align: center; font-size: 14px; opacity: 0.5;">No report items</div>
           <div v-else class="body-item" v-for="item in items" :key="item.key">
             <div class="item-title">
               <div class="item-location">

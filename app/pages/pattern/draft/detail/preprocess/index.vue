@@ -251,11 +251,16 @@ const info = computed<any | null>(() => {
 })
 
 const infoReportCount = computed(() => {
-  const report = (info.value as any)?.report
-  return Array.isArray(report) ? report.length : 0
+  const reportList = (draft.value as any)?.report?.list || []
+  return Array.isArray(reportList) ? reportList.length : 0
 })
 
-const isManualReviewDone = computed(() => hasRevisedContent.value)
+const isManualReviewDone = computed(() => {
+  const state = (draft.value as any)?.state
+  const done = state === 3
+  const infoOk = (draft.value as any)?.report != null
+  return done && infoOk
+})
 
 const headerTitle = computed(() => (hasRevisedContent.value ? '标准化' : '图解原文'))
 

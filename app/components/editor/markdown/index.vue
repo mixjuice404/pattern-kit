@@ -174,8 +174,7 @@ const badgeClassBySeverity = (sev: string) => {
 };
 
 const reportItems = computed<ReportViewItem[]>(() => {
-  const report = (info.value as any)?.report;
-  const list = Array.isArray(report) ? report : [];
+  const list = Array.isArray((props as any)?.report) ? (props as any).report : [];
 
   return list.map((r: any, idx: number) => {
     const location =
@@ -437,6 +436,10 @@ const props = defineProps({
   markdown: {
     type: String,
     default: "",
+  },
+  report: {
+    type: Array as any,
+    default: () => [],
   },
 });
 
