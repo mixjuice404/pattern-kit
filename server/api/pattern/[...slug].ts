@@ -1,7 +1,8 @@
 import { createRouter, useBase, readBody, createError, setHeader } from 'h3'
 import { defineApiHandler } from '../../utils/defineApiHandler'
 import { useApiResponse } from '../../utils/apiResponse'
-import { createOrUpdateCrochetPattern, 
+import { flattenForTranslation, applyTranslations } from '../../utils/json.flatten'
+import { createOrUpdateCrochetPattern, patternLocalization, instructionsLocalization,
   getCrochetPatternList, getCrochetPattern, deleteCrochetPattern, 
   createOrUpdatePromptTemplate, getPromptTemplateByAlias, buildPatternPrompt,
   getPatternDraftList, getPatternDraftDetail, updatePatternDraft, 
@@ -48,7 +49,8 @@ router.get('/list', defineApiHandler(async (event) => {
 // 获取Crochet Pattern
 router.get('/:id', defineApiHandler(async (event) => {
   const { id } = getRouterParams(event)
-  const pattern = await getCrochetPattern(Number(id))
+  const { lang } = getQuery(event)
+  const pattern = await getCrochetPattern(Number(id), lang as string)
   return useApiResponse({ pattern })
 }));
 
@@ -56,6 +58,23 @@ router.get('/:id', defineApiHandler(async (event) => {
 router.post('/remove/:id', defineApiHandler(async (event) => {
   const { id } = getRouterParams(event)
   await deleteCrochetPattern(Number(id))
+  return useApiResponse({ status: 'ok', data: {} })
+}));
+
+// Crochet Pattern 国际化
+router.post('/localize/:id', defineApiHandler(async (event) => {
+  const { id } = getRouterParams(event)
+  const { lang } = getQuery(event)
+  await patternLocalization(Number(id), lang as string)
+  return useApiResponse({ status: 'ok', data: {} })
+}));
+
+
+
+router.post('/localize/instructions/:id', defineApiHandler(async (event) => {
+  const { id } = getRouterParams(event)
+  const { lang } = getQuery(event)
+  await instructionsLocalization(Number(id), lang as string)
   return useApiResponse({ status: 'ok', data: {} })
 }));
 
@@ -233,7 +252,7 @@ router.post('/draft/state/update', defineApiHandler(async (event) => {
  * ======================================================================
  */
 
-router.get('/testing', defineApiHandler(async () => {
+router.get('/testing/terms', defineApiHandler(async () => {
   // 查询所有 Patterns
   const patterns = await prisma.crochetPattern.findMany({
     where: { deleted: 0 },
@@ -257,6 +276,33 @@ router.get('/testing', defineApiHandler(async () => {
   const list = Array.from(counter, ([alias, count]) => ({ alias, count }));
 
   return useApiResponse(list)
+}));
+
+
+router.get('/testing/translate/:id', defineApiHandler(async (event) => {
+  // 根据 ID 查询 Pattern
+  const { id } = getRouterParams(event)
+  const pattern = await prisma.crochetPattern.findFirst({
+    where: { deleted: 0, id: Number(id) },
+    select: { id: true, pattern_json: true }
+  });
+
+  // 扁平化 pattern_json 为 JSON 格式
+  const json = pattern?.pattern_json
+
+  let data: any = json;
+  if (typeof data === 'string') {
+    try { data = JSON.parse(data) } catch { data = null }
+  }
+
+  const includePaths = ['title','finishingTips','bonus_tips','materialsDesc']
+  const items = data ? flattenForTranslation(data, { includePaths }) : []
+
+  const titleItem = items.find((it) => it.path === 'title')
+  if (titleItem) titleItem.text = 'testing title'
+
+  const merged = data ? applyTranslations(data, items) : null
+  return useApiResponse({ json: merged })
 }));
 
 

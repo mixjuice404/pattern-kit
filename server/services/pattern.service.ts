@@ -2,6 +2,9 @@
 import { BasicError } from '../utils/errors';
 import prisma from '../utils/prisma';
 import { aiGenerateText } from './ai';
+import { deepCleanJson } from '../utils/json.clean';
+import { applyTranslations, flattenForTranslation, type FlattenedTextItem } from '../utils/json.flatten'
+import { queryStitchLanguage } from './stitch.service';
 // 注意：现在可以不再直接导入 createError，除非在 BasicError 无法覆盖的场景下仍需使用
 
 //  Crochet Pattern 服务 ========================================================================
@@ -10,11 +13,14 @@ import { aiGenerateText } from './ai';
 export async function createOrUpdateCrochetPattern(id: number | null, data: any) {
   try {
 
+    const rawPatternJson = data?.pattern_json ?? null
+    const cleanedPatternJson = deepCleanJson(rawPatternJson)
+
     const patternInfo = {
       title: data.title,
-      cover_image: data.pattern_json.cover_image || '', 
+      cover_image: rawPatternJson?.cover_image || '', 
       description: data.description,
-      pattern_json: data.pattern_json,
+      pattern_json: cleanedPatternJson ?? null,
     };
 
     if (id === null) {
@@ -73,9 +79,9 @@ export async function getCrochetPatternList(page: number, pageSize: number) {
 
 
 // 获取Crochet Pattern
-export async function getCrochetPattern(id: number) {
+export async function getCrochetPattern(id: number, lang?: string) {
   try {
-    const pattern = await prisma.crochetPattern.findFirst({
+    const base = await prisma.crochetPattern.findFirst({
       where: { id, deleted: 0 },
       select: {
         id: true,
@@ -87,10 +93,19 @@ export async function getCrochetPattern(id: number) {
       },
     });
 
-    if (!pattern) {
+    if (!base) {
       throw new BasicError('RESOURCE_NOT_FOUND', { statusCode: 404, message: 'Crochet Pattern 不存在' });
     }
-    return pattern;
+
+    const code = String(lang ?? '').trim().toLowerCase()
+    if (!code || code === 'en') return base
+
+    const loc = await prisma.patternLocalization.findFirst({
+      where: { patternId: id, languageCode: code },
+      select: { pattern_json: true },
+    })
+    const next = { ...base, pattern_json: (loc?.pattern_json ?? null) }
+    return next
   } catch (error) {
     console.error('获取 Crochet Pattern 详情失败:', error);
     throw new BasicError('UNKNOWN_ERROR', { statusCode: 500 });
@@ -111,6 +126,113 @@ export async function deleteCrochetPattern(id: number) {
     throw new BasicError('UNKNOWN_ERROR', { statusCode: 500 });
   }
 }
+
+
+// Crochet Pattern 国际化 STEP 1 - 内容翻译
+export async function patternLocalization(id: number, lang: string) {
+
+  // 检查 lang 是否为空 并且只能等于 'en'、'fr','de','es'
+  const validLangs = ['en','fr','de','es']
+  if (!validLangs.includes(lang)) {
+    throw new BasicError('PARAM_INVALID', { statusCode: 400, message: '语言参数无效' });
+  }
+
+  // 检查 Crochet Pattern 是否存在 & 查询
+  const base = await prisma.crochetPattern.findFirst({
+    where: { id, deleted: 0 },
+    select: {
+      id: true,
+      pattern_json: true
+    },
+  });
+
+  if (!base) {
+    throw new BasicError('RESOURCE_NOT_FOUND', { statusCode: 404, message: 'Crochet Pattern 不存在' });
+  }
+
+  // 扁平化 pattern_json
+  const originalJson = base.pattern_json
+  const includePaths = ['title', 'inspiration', 'finishingTips','bonus_tips','materialsDesc',
+     "estimatedTime", "finishedSize", "bonus_community"]
+  const items = originalJson ? flattenForTranslation(originalJson, { includePaths }) : []
+  // items 为空时，直接返回 base
+  if (!items.length) return base
+  // items 不为空时，继续处理, items 转换为 json 字符串
+  const itemsJson = JSON.stringify(items)
+
+  // 调用 AI 执行翻译（需要根据 lang 设置对应的 prompt 语言描述） 
+  const template = await getPromptTemplateByAlias('pattern_localization');
+  if (!template) {
+    throw new BasicError('RESOURCE_NOT_FOUND', { statusCode: 404, message: '提示词模板不存在' });
+  }
+
+  // 调用 AI 执行翻译（需要根据 lang 设置对应的 prompt 语言描述） 
+  const langDesc = lang === 'en' ? 'English' : lang === 'fr' ? 'Français' : lang === 'de' ? 'Deutsch' : 'Español'
+
+  const prompt = template.template.replace('{{lang}}', langDesc).replace('{{json}}', itemsJson)
+  const textJsonStr = await aiGenerateText({
+      prompt,
+      model: 'gemini-3-flash-preview',
+    });
+
+  // textJsonStr 转为 FlattenedTextItem[]
+  const nextItems = textJsonStr ? JSON.parse(textJsonStr) as FlattenedTextItem[] : []
+  // 回写结果
+  const baseJson = originalJson && typeof originalJson === 'object' ? originalJson : {}
+  const nextJson = applyTranslations(baseJson as any, nextItems) ?? null
+  // 保存
+  if (nextJson) {
+    await prisma.patternLocalization.upsert({
+      where: { patternId_languageCode: { patternId: id, languageCode: lang } },
+      update: { pattern_json: nextJson },
+      create: { patternId: id, languageCode: lang, pattern_json: nextJson },
+    })
+  }
+}
+
+
+// Crochet Pattern 国际化 STEP 2 -  图解主体翻译
+export async function instructionsLocalization(id: number, lang: string) {
+  // 检查 lang 是否为空 并且只能等于 'en'、'fr','de','es'
+  const validLangs = ['en','fr','de','es']
+  if (!validLangs.includes(lang)) {
+    throw new BasicError('PARAM_INVALID', { statusCode: 400, message: '语言参数无效' });
+  }
+  
+  // 查询对应的 pattern_json
+  const base = await prisma.crochetPattern.findFirst({
+    where: { id, deleted: 0 },
+    select: {
+      id: true,
+      pattern_json: true
+    },
+  });
+  if (!base) {
+    throw new BasicError('RESOURCE_NOT_FOUND', { statusCode: 404, message: 'Crochet Pattern 不存在' });
+  }
+  // 解析 & 拆分 & 扁平化 pattern_json
+  const originalJson = base.pattern_json
+  // 提取 instructions 数组
+  const instructions = isRecord(originalJson) && Array.isArray(originalJson.instructions)
+  ? originalJson.instructions : []
+  // 提取 terms 数组
+  const terms: unknown[] = isRecord(originalJson) && Array.isArray(originalJson.terms)
+    ? (originalJson.terms as unknown[])
+    : []
+  // 提取 terms 中的 alias 数组
+  const aliasList = terms
+    .map((term) => {
+      if (!isRecord(term)) return ''
+      const alias = term.alias
+      return typeof alias === 'string' ? alias.trim() : ''
+    })
+    .filter(Boolean)
+  // 查询 stitch dictionary - 组装配对的针法字典
+  const stitchLanguages = await queryStitchLanguage(lang, aliasList)
+
+  return stitchLanguages;
+}
+
 
 
 /*

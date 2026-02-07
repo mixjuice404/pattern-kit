@@ -2,9 +2,9 @@ import { createRouter, useBase, readBody } from 'h3'
 import { defineApiHandler } from '../../utils/defineApiHandler'
 import { useApiResponse } from '../../utils/apiResponse'
 import { addStitchLanguage, 
-  deleteStitchLanguage, queryStitchLanguages, 
+  deleteStitchLanguage, queryStitchLanguages, importStitchLocalizations,
   importStitches, getStitchList, getStitchDetail, createOrUpdateStitch, deleteStitch, 
-  getSimpleStitchSections,
+  getSimpleStitchSections, getStitchesByLanguage,
   getStitchNamesAndAbbrevs} from '~~/server/services/stitch.service'
 
 const router = createRouter()
@@ -23,7 +23,7 @@ router.get('/stitch/language', defineApiHandler(async (event) => {
 }));
 
 /** 移除 StitchLanguage */
-router.get('/stitch/language/:code', defineApiHandler(async (event) => {
+router.delete('/stitch/language/:code', defineApiHandler(async (event) => {
   const { code } = getRouterParams(event)
   const result = await deleteStitchLanguage(code)
   return useApiResponse({ result })
@@ -53,6 +53,13 @@ router.post('/stitch/language', defineApiHandler(async (event) => {
 router.post('/stitch/import', defineApiHandler(async (event) => {
   const body = await readBody(event)
   const result = await importStitches(body)
+  return useApiResponse({ result })
+}));
+
+// importStitchLocalizations
+router.post('/stitch/localize/import', defineApiHandler(async (event) => {
+  const body = await readBody(event)
+  const result = await importStitchLocalizations(body)
   return useApiResponse({ result })
 }));
 
@@ -104,6 +111,14 @@ router.get('/stitch/names', defineApiHandler(async (event) => {
   const query = getQuery(event);
   const languageCode = query.languageCode as string | null
   const result = await getStitchNamesAndAbbrevs(languageCode || '')
+  return useApiResponse({ data: result })
+}));
+
+// 查询所有 Stitch
+router.get('/stitch/localize/list', defineApiHandler(async (event) => {
+  const query = getQuery(event);
+  const languageCode = query.languageCode as string | null
+  const result = await getStitchesByLanguage(languageCode || '')
   return useApiResponse({ data: result })
 }));
 

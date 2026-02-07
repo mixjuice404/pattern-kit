@@ -83,6 +83,24 @@ model CrochetPattern {
   @@map("crochet_pattern")
 }
 
+
+model PatternLocalization {
+  id            Int      @id @default(autoincrement())
+  patternId     Int
+
+  languageCode  String
+  pattern_json  Json?
+
+  version       Int       @default(1)
+  created_at    DateTime  @default(now()) @map("created_at")
+  updated_at    DateTime  @updatedAt      @map("updated_at")
+  deleted       BigInt    @default(0)
+
+  @@unique([patternId, languageCode])
+  @@map("pattern_localizations")
+}
+
+
 // 增加一个 管理 prompt 模板的表
 model PromptTemplate {
   id          Int      @id @default(autoincrement())

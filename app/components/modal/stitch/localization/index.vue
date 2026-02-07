@@ -10,7 +10,7 @@
           <icon name="hugeicons:cancel-01" size="22" />
         </div>
       </div>
-      <div class="modal-body">
+      <div class="modal-body" style="max-height: 90vh;">
         <div class="stitch-standards" style="margin-bottom: 10px;">
           <div class="stitch-standard-group">
             <!-- 动态列表 -->

@@ -13,7 +13,7 @@
         </div>
       </div>
 
-      <div class="modal-body">
+      <div class="modal-body" style="max-height: 90vh;">
         <div class="modal-form">
           <div>
             <div class="modal-form-card card__normal">

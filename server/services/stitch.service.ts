@@ -408,6 +408,79 @@ export async function importStitches(jsonData: any[]) {
 }
 
 
+// 导入指定语言的 Stitch 到数据库
+export async function importStitchLocalizations(input: {
+  code: string
+  list: Array<{
+    stitchId: number
+    name?: string | null
+    alias?: string | null
+    description?: string | null
+  }>
+}) {
+  try {
+    const code = String(input?.code ?? '').trim().toUpperCase()
+    if (!code) {
+      throw new BasicError('UNKNOWN_ERROR', { statusCode: 400, message: 'languageCode 为必填' })
+    }
+
+    const list = Array.isArray(input?.list) ? input.list : []
+    if (!list.length) return 0
+
+    const exists = await prisma.stitchLanguage.findFirst({
+      where: { deleted: 0, code },
+      select: { code: true },
+    })
+    if (!exists) {
+      throw new BasicError('UNKNOWN_ERROR', { statusCode: 400, message: `languageCode 不支持：${code}` })
+    }
+
+    const byId = new Map<number, { stitchId: number; name: string; description: string; abbrev?: string }>()
+    for (const it of list) {
+      const stitchId = Number(it?.stitchId)
+      if (!Number.isFinite(stitchId) || stitchId <= 0) continue
+      const name = String(it?.name ?? '').trim()
+      const description = String(it?.description ?? '').trim()
+      const abbrev = String(it?.alias ?? '').trim() || undefined
+      byId.set(stitchId, { stitchId, name, description, abbrev })
+    }
+
+    const items = Array.from(byId.values())
+    if (!items.length) return 0
+
+    for (let i = 0; i < items.length; i += 50) {
+      const batch = items.slice(i, i + 50)
+      await prisma.$transaction(
+        batch.map((it) =>
+          prisma.stitchLocalization.upsert({
+            where: { stitchId_languageCode: { stitchId: it.stitchId, languageCode: code } },
+            update: {
+              name: it.name,
+              description: it.description,
+              abbrev: it.abbrev ?? undefined,
+              deleted: 0,
+            },
+            create: {
+              stitchId: it.stitchId,
+              languageCode: code,
+              name: it.name,
+              description: it.description,
+              abbrev: it.abbrev ?? undefined,
+            },
+          })
+        )
+      )
+    }
+
+    return items.length
+  } catch (error) {
+    console.error('导入指定语言的 Stitch 失败:', error)
+    if (error instanceof BasicError) throw error
+    throw new BasicError('UNKNOWN_ERROR', { statusCode: 500, message: '导入指定语言的 Stitch 失败' })
+  }
+}
+
+
 /**
  * 查询 所有 simple stitch
  * 入参：languageCode 语言代码
@@ -528,13 +601,56 @@ export async function getStitchNamesAndAbbrevs(languageCode: string) {
       return {
         id: s.id,
         name,
-        abbrev: abbrev || null,
+        abbrev: abbrev || null
       };
     });
   } catch (error) {
     console.error('查询 Stitch name/abbrev 失败:', error);
     if (error instanceof BasicError) throw error;
     throw new BasicError('UNKNOWN_ERROR', { statusCode: 500, message: '查询 Stitch name/abbrev 失败' });
+  }
+}
+
+
+// 根据 languageCode 查询所有 Stitch
+export async function getStitchesByLanguage(languageCode: string) {
+  try {
+    const code = String(languageCode ?? '').trim().toUpperCase();
+    if (!code) {
+      throw new BasicError('UNKNOWN_ERROR', { statusCode: 400, message: 'languageCode 为必填' });
+    }
+
+    const exists = await prisma.stitchLanguage.findFirst({
+      where: { deleted: 0, code },
+      select: { code: true },
+    });
+    if (!exists) {
+      throw new BasicError('UNKNOWN_ERROR', { statusCode: 400, message: `languageCode 不支持：${code}` });
+    }
+
+    const rows = await prisma.stitchLocalization.findMany({
+      where: { deleted: 0, languageCode: code },
+      select: {
+        id: true,
+        stitchId: true,
+        name: true,
+        abbrev: true,
+        description: true,
+      },
+      orderBy: { name: 'asc' },
+    });
+
+    return rows.map((row) => ({
+      id: row.id,
+      stitchId: row.stitchId,
+      name: row.name,
+      alias: row.abbrev ?? null,
+      description: row.description,
+    }));
+  } catch (error) {
+    console.error('查询 Stitch 失败:', error);
+    if (error instanceof BasicError) throw error;
+    throw new BasicError('UNKNOWN_ERROR', { statusCode: 500, message: '查询 Stitch 失败' });
   }
 }
 
@@ -556,14 +672,14 @@ export async function getStitchNamesAndAbbrevs(languageCode: string) {
  */
 export async function addStitchLanguage(languageCode: string, flag: string, name: string) {
   try {
-    const code = languageCode?.trim();
+    const code = languageCode?.trim().toUpperCase();
     const f = flag?.trim();
     const n = name?.trim();
     if (!code || !f || !n) {
       throw new BasicError('UNKNOWN_ERROR', { statusCode: 400, message: 'code、flag、name 为必填' });
     }
 
-    const exists = await prisma.stitchLanguage.findUnique({ where: { code } });
+    const exists = await prisma.stitchLanguage.findUnique({ where: { code: code.toUpperCase() } });
     if (exists) {
       throw new BasicError('UNKNOWN_ERROR', { statusCode: 400, message: `语言已存在：${code}` });
     }
@@ -591,13 +707,13 @@ export async function deleteStitchLanguage(languageCode: string) {
       throw new BasicError('UNKNOWN_ERROR', { statusCode: 400, message: 'languageCode 为必填' });
     }
 
-    const exists = await prisma.stitchLanguage.findUnique({ where: { code } });
+    const exists = await prisma.stitchLanguage.findUnique({ where: { code: code.toUpperCase() } });
     if (!exists) {
       throw new BasicError('UNKNOWN_ERROR', { statusCode: 400, message: `语言不存在：${code}` });
     }
 
     return await prisma.stitchLanguage.update({
-      where: { code },
+      where: { code: code.toUpperCase() },
       data: { deleted: 1 },
       select: { code: true } // 避免返回 BigInt 字段
     });
@@ -619,4 +735,117 @@ export async function queryStitchLanguages() {
     console.error('查询 StitchLanguage 失败:', error);
     throw new BasicError('UNKNOWN_ERROR', { statusCode: 500, message: '查询 StitchLanguage 失败' });
   }
+}
+
+
+// 根据目标语言 和 aliasList 查询 StitchLanguage
+export async function queryStitchLanguage(languageCode: string, aliasList: string[]) {
+  try {
+    const code = String(languageCode ?? '').trim().toUpperCase();
+    if (!code) {
+      throw new BasicError('UNKNOWN_ERROR', { statusCode: 400, message: 'languageCode 为必填' });
+    }
+
+    const exists = await prisma.stitchLanguage.findFirst({
+      where: { deleted: 0, code: code.toUpperCase() },
+      select: { code: true },
+    });
+    if (!exists) {
+      throw new BasicError('UNKNOWN_ERROR', { statusCode: 400, message: `language 不支持：${code}` });
+    }
+
+    const list = Array.isArray(aliasList) ? aliasList : [];
+    const seen = new Set<string>();
+    const aliases: string[] = [];
+    for (const a of list) {
+      const s = String(a ?? '').trim();
+      if (!s) continue;
+      const key = s.toLowerCase();
+      if (seen.has(key)) continue;
+      seen.add(key);
+      aliases.push(s);
+    }
+
+    if (!aliases.length) return [];
+
+    const buildAbbrevOr = (chunk: string[]) =>
+      chunk.map((a) => ({ abbrev: { equals: a, mode: 'insensitive' as const } }));
+
+    const matches: Array<{ stitchId: number; abbrev: string | null }> = [];
+
+    for (let i = 0; i < aliases.length; i += 100) {
+      const chunk = aliases.slice(i, i + 100);
+      const rows = await prisma.stitchLocalization.findMany({
+        where: {
+          deleted: 0,
+          languageCode: 'US',
+          OR: buildAbbrevOr(chunk),
+        },
+        select: { stitchId: true, abbrev: true },
+      });
+      matches.push(...rows);
+    }
+
+
+    const stitchIdSet = new Set<number>();
+    const stitchIdByAlias = new Map<string, number>();
+    const aliasByAlias = new Map<string, string>();
+
+    for (const m of matches) {
+      const ab = String(m?.abbrev ?? '').trim();
+      if (!ab) continue;
+      const key = ab.toLowerCase();
+      if (!stitchIdByAlias.has(key)) {
+        stitchIdByAlias.set(key, m.stitchId);
+        aliasByAlias.set(key, ab);
+      }
+      stitchIdSet.add(m.stitchId);
+    }
+
+    const missing = aliases.filter((a) => !stitchIdByAlias.has(a.toLowerCase()))
+    if (missing.length) {
+      throw new BasicError('PARAM_INVALID', {
+        statusCode: 400,
+        message: `存在未收录的 US abbrev: ${missing.join(', ')}`,
+      })
+    }
+
+    const stitchIds = Array.from(stitchIdSet);
+    const stitches = stitchIds.length
+      ? await prisma.stitch.findMany({
+          where: { deleted: 0, id: { in: stitchIds } },
+          select: {
+            id: true,
+            defaultName: true,
+            description: true,
+            localizations: {
+              where: { deleted: 0, languageCode: { in: [code, 'US'] } },
+              select: { languageCode: true, name: true, description: true, abbrev: true },
+            },
+          },
+        })
+      : [];
+
+    const stitchById = new Map(stitches.map((s) => [s.id, s]));
+
+    return aliases.map((inputAlias) => {
+      const key = inputAlias.toLowerCase();
+      const stitchId = stitchIdByAlias.get(key);
+      const stitch = stitchId != null ? stitchById.get(stitchId) : undefined;
+      const locs = Array.isArray(stitch?.localizations) ? stitch!.localizations : [];
+      const target = locs.find((l) => String(l.languageCode).toUpperCase() === code);
+      const us = locs.find((l) => String(l.languageCode).toUpperCase() === 'US');
+
+      const alias = aliasByAlias.get(key) ?? inputAlias;
+      const full_text = String(target?.name ?? us?.name ?? stitch?.defaultName ?? alias).trim();
+      const description = String(target?.description ?? us?.description ?? stitch?.description ?? '').trim();
+
+      return { inputAlias, alias, full_text, description };
+    });
+  } catch (error) {
+    console.error('根据 aliasList 查询 StitchLanguage 失败:', error);
+    if (error instanceof BasicError) throw error;
+    throw new BasicError('UNKNOWN_ERROR', { statusCode: 500, message: '根据 aliasList 查询 StitchLanguage 失败' });
+  }
+
 }

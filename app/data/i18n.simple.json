@@ -58,7 +58,71 @@
     "thankYouTitle": "📱 THANK YOU!",
     "thankYouLine1": "Thank you for choosing our pattern! We hope you enjoy creating your",
     "happyCrocheting": "Happy Crocheting! 🧶💕",
-    "reviewHint": "If you loved this pattern, please consider leaving a review on Etsy. Your feedback helps us create more amazing patterns!"
+    "reviewHint": "If you loved this pattern, please consider leaving a review on Etsy. Your feedback helps us create more amazing patterns!",
+    "finishingTipsTitle": "✨ CREATIVE NOTES & TIPS"
+  },
+  "fr": {
+    "createdBy": "Créé par : CozyDogOutfits",
+    "contact": "Contact : envoyez-nous un message sur Etsy pour obtenir de l’aide",
+    "websiteShop": "Site web / Boutique",
+    "languageLabel": "📱 LANGUE",
+    "languageValue": "Français",
+    "skillLevelLabel": "✨ NIVEAU DE COMPÉTENCE",
+    "estimatedTimeLabel": "⏱️ TEMPS ESTIMÉ",
+    "finishedSizeLabel": "📏 TAILLE FINALE",
+    "patternTypeLabel": "🎯 TYPE DE MODÈLE",
+    "patternTypeValue": "Téléchargement numérique PDF",
+
+    "abbreviationsTitle": "🔤 ABRÉVIATIONS & TECHNIQUES",
+    "standardAbbrev": "Abréviations standard",
+    "abbreviationHeader": "Abréviation",
+    "fullTermHeader": "Terme complet",
+    "descriptionHeader": "Description",
+    "specialTech": "Techniques spéciales utilisées",
+
+    "materialsTitle": "🧶 MATÉRIAUX & OUTILS",
+    "yarnRequirements": "Exigences en matière de fil",
+    "recommendedYarn": "Fil recommandé :",
+    "suggestedBrands": "Marques suggérées :",
+    "colorPalette": "Palette de couleurs",
+    "toolsNotions": "Outils & fournitures",
+    "optionalSupplies": "Fournitures optionnelles",
+
+    "mainInstructionsTitle": "🎯 INSTRUCTIONS PRINCIPALES DU MODÈLE",
+
+    "licenseTerms": "Conditions de licence",
+    "youMay": "✅ Vous POUVEZ :",
+    "youMayList": [
+      "Utiliser ce modèle pour des projets personnels",
+      "Vendre des articles finis réalisés à partir de ce modèle (en petites quantités)",
+      "Offrir des articles finis à vos amis et à votre famille",
+      "Modifier le modèle pour un usage personnel"
+    ],
+    "youMayNot": "❌ Vous NE POUVEZ PAS :",
+    "youMayNotList": [
+      "Partager, distribuer ou revendre ce modèle PDF",
+      "Revendiquer ce modèle comme votre propre création",
+      "L’utiliser pour une production de masse ou une fabrication commerciale",
+      "Publier le contenu du modèle en ligne ou sur des forums"
+    ],
+    "copyrightTitle": "📜 DROITS D’AUTEUR & CONDITIONS D’UTILISATION",
+    "copyrightNoticeHeader": "Mention de droits d’auteur",
+    "copyrightNoticeText": "© 2025 CozyDogOutfits. Tous droits réservés. Ce modèle est destiné à un usage personnel uniquement.",
+    "supportContactHeader": "Assistance & Contact",
+    "supportContactLine1": "Des questions sur le modèle ? Envoyez-nous un message sur Etsy !",
+    "supportContactLine2": "Nous sommes là pour vous aider à créer quelque chose d’exceptionnel ! 💝",
+
+    "bonusContentTitle": "🎁 CONTENU BONUS",
+    "proTips": "Conseils de pro pour réussir",
+    "variationIdeas": "Idées de variations",
+    "communityFeedback": "Communauté & retours",
+
+    "thankYouTitle": "📱 MERCI !",
+    "thankYouLine1": "Merci d’avoir choisi notre modèle ! Nous espérons que vous apprécierez de créer votre",
+    "happyCrocheting": "Bon crochet ! 🧶💕",
+    "reviewHint": "Si vous avez adoré ce modèle, pensez à laisser un avis sur Etsy. Vos retours nous aident à créer encore plus de modèles exceptionnels !",
+    
+    "finishingTipsTitle": "✨ NOTES CRÉATIVES & CONSEILS"
   },
   "es": {
     "createdBy": "Creado por: CozyDogOutfits",
@@ -119,6 +183,8 @@
     "thankYouTitle": "📱 ¡GRACIAS!",
     "thankYouLine1": "¡Gracias por elegir nuestro patrón! Esperamos que disfrutes creando tu",
     "happyCrocheting": "¡Feliz ganchillo! 🧶💕",
-    "reviewHint": "Si te encantó este patrón, considera dejar una reseña en Etsy. ¡Tus comentarios nos ayudan a crear más patrones increíbles!"
+    "reviewHint": "Si te encantó este patrón, considera dejar una reseña en Etsy. ¡Tus comentarios nos ayudan a crear más patrones increíbles!",
+  
+    "finishingTipsTitle": "✨ NOTAS Y CONSEJOS CREATIVOS"
   }
 }

@@ -180,7 +180,7 @@
 
     <div class="section-block" v-if="patternData.finishingTips.list.length > 0">
         <div class="divider-title">
-            ✨ CREATIVE NOTES & TIPS
+            {{ L.finishingTipsTitle }}
         </div>
         <ul>
             <li v-for="(item, index) in patternData.finishingTips.list" :key="index">
@@ -298,8 +298,8 @@ const props = withDefaults(defineProps<Props>(), {
   paddingY: 40
 })
 const L = computed(() => {
-  const lang = (props.patternData?.lang === 'es') ? 'es' : 'en'
-  return (i18nSimple as any)[lang]
+  const lang = String(props.patternData?.lang ?? 'en').trim().toLowerCase()
+  return (i18nSimple as any)[lang] ?? (i18nSimple as any).en
 })
 </script>
 <style scoped lang="scss">

@@ -2,6 +2,11 @@
   <div class="preview-container">
     <!-- 打印按钮（仅在屏幕显示） -->
     <div class="btn-container">
+      <select class="select" v-model="selectedLang" @change="load">
+        <option v-for="opt in LANG_OPTIONS" :key="opt.value" :value="opt.value">
+          {{ opt.flag }} {{ opt.label }}
+        </option>
+      </select>
       <button class="btn btn-neutral" @click="openPromptBuilderModal"> 
         Prompt Builder
       </button>
@@ -21,18 +26,29 @@
       <span>{{ error }}</span>
     </div>
 
+
     <!-- 预览内容 -->
-    <div id="pdf-content" class="print-content">
-      <component
-        :is="currentTemplate"
-        :key="patternInfo.template"
-        v-if="!loading"
-        style="width: 100%;"
-        :padding-x="90"
-        :padding-y="90"
-        :pattern-data="patternInfo"
-      />
+    <div>
+      <div v-if="hasPatternJson" id="pdf-content" class="print-content">
+        <component
+          :is="currentTemplate"
+          :key="selectedLang + ':' + patternInfo.template"
+          v-if="!loading"
+          style="width: 100%;"
+          :padding-x="90"
+          :padding-y="90"
+          :pattern-data="patternInfo"
+        />
+      </div>
+      <div v-else class="print-content__empty">
+        <div style="display: flex; align-items: center; gap: 4px; margin-bottom: 20px; justify-content: center;font-size: 14px;">
+          <div style="opacity: 0.8;">暂无预览内容</div>
+          <div style="font-weight: 600;">【{{ selectedLang }}】</div>
+        </div>
+        <button class="btn btn-primary" @click="load">AI翻译</button>
+      </div>
     </div>
+
 
     <dialog id="review-json" class="modal">
       <div class="modal-box" style="max-width: 50rem; ">
@@ -88,9 +104,21 @@ useHead({
 })
 
 const route = useRoute()
+const LANG_OPTIONS = [
+  { value: 'en', flag: '🇺🇸', label: 'English' },
+  { value: 'fr', flag: '🇫🇷', label: 'French' },
+  { value: 'de', flag: '🇩🇪', label: 'German' },
+  { value: 'es', flag: '🇪🇸', label: 'Spanish' },
+] as const
+const selectedLang = ref<'en' | 'fr' | 'de' | 'es'>('en')
 const loading = ref(true)
 const error = ref<string | null>(null)
 const patternInfo = reactive(new PatternInfo())
+const hasPatternJson = ref(false)
+
+watch(selectedLang, (v) => {
+  patternInfo.lang = v
+})
 
 const load = async () => {
   loading.value = true
@@ -100,7 +128,7 @@ const load = async () => {
     if (Number.isNaN(id)) {
       throw new Error('无效的 ID')
     }
-    const res = await $fetch<ApiResponse<{ pattern: any }>>(`/api/pattern/${id}`)
+    const res = await $fetch<ApiResponse<{ pattern: any }>>(`/api/pattern/${id}?lang=${selectedLang.value}`)
     const pattern = res?.data?.pattern
     if (!res?.success || !pattern) {
       throw new Error(res?.message || '未获取到 pattern 详情')
@@ -115,10 +143,13 @@ const load = async () => {
     const raw = typeof pattern.pattern_json === 'string'
       ? JSON.parse(pattern.pattern_json)
       : pattern.pattern_json
+    hasPatternJson.value = !!raw
     if (raw) {
       const info = PatternInfo.fromJSON(raw)
       Object.assign(patternInfo, info)
     }
+
+    patternInfo.lang = selectedLang.value
 
     // 等待内容渲染后，计算打印高度
     nextTick(() => {
@@ -282,6 +313,15 @@ const buildPrompt = async () => {
   gap: 10px;
   bottom: 20px;
   right: 20px;
+}
+
+.print-content__empty {
+   width: 210mm; /* A4宽度 */
+   margin: 0 auto;
+   background: white;
+   box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+   padding: 50px;
+   text-align: center;
 }
 
 .print-content {

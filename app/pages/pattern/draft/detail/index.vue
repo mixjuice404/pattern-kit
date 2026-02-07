@@ -32,7 +32,7 @@
         :draft="draft"
         @updated="loadDraft"
       />
-
+  
       <KeepAlive>
         <MarkdownEditor
           v-if="activeStep === 1"

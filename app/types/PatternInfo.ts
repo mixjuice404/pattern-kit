@@ -12,7 +12,7 @@ export interface ListItem {
 export interface TextListData {
   title: string
   extendTitle?: string
-  text: string
+  text?: string | null
   description: string | null | undefined
   end_description: string | null | undefined
   list: string[]
@@ -65,22 +65,22 @@ export class PatternInfo {
   constructor(
     template: string = 'simple',
     title: string = 'Jacket Chickie',
-    subtitle: string = 'Subtitle for Jacket Chickie Crochet Pattern',
+    subtitle: string = '',
     inspiration: string = 'This adorable Jacket Chickie was inspired by the charm of well-dressed farm animals and the joy of creating something both cute and sophisticated. Perfect for gifting or adding character to any space!',
     skillLevel: string = 'Beginner',
     estimatedTime: string = '6-8 hours',
     finishedSize: string = 'Approximately 12cm tall (using 3.5mm hook)',
-    info: TextListData = { title: '', bottom: false, image: [], imageBottom: [], description: null, end_description: null, text: 'A charming amigurumi chicken wearing a dapper jacket', list: ['Detailed body with textured stitching', 'Moveable wings/arms', 'Adorable feet', 'Stylish jacket with pocket details', 'Crown comb and tail feathers', 'Expressive safety eyes and beak'] },
+    info: TextListData = { title: '', bottom: false, image: [], imageBottom: [], description: null, end_description: null, text: null, list: [] },
     note: TextListData = { title: '', bottom: false, image: [], imageBottom: [], description: null, end_description: null, text: 'This pattern requires knowledge of', list: ['Basic amigurumi techniques', 'Color changes', 'Sewing pieces together', 'Basic embroidery for details'] },
     techniques: TextListData = { title: '', bottom: false, image: [], imageBottom: [], description: null, end_description: null, text: 'Special Techniques Used', list: ['Magic Ring: Adjustable starting circle', 'Invisible Decrease: Neat decreasing method', 'Color Changes: Clean color transition technique', 'Mattress Stitch: Invisible seaming method'] },
-    yarn: string = 'Medium weight yarn (4/DK weight)',
-    brands: string = 'YarnArt Jeans, Alize Cotton Gold, Red Heart Super Saver',
+    yarn: string = '',
+    brands: string = '',
     colors: TextListData = { title: '', bottom: false, image: [], imageBottom: [], description: null, end_description: null, text: '', list: ['White (Main): 50g', 'Red: 25g', 'Watermelon Red: 15g', 'Navy Blue: 30g', 'Light Khaki: 20g' ] },
     tools: TextListData = { title: '', bottom: false, image: [], imageBottom: [], description: null, end_description: null, text: '', list: ['Crochet Hook: 3.5mm or 4.0mm (US E/4 or G/6)', 'Safety Eyes: 8mm black (1 pair)','Fiberfill Stuffing: Polyester fill', 'Tapestry Needle: For sewing and embroidery', 'Stitch Markers: For marking rounds', 'Scissors: Sharp fabric scissors', 'Pins: For positioning before sewing'] },
     supplies: TextListData = { title: '', bottom: false, image: [], imageBottom: [], description: null, end_description: null, text: '', list: ['Hot glue gun (alternative to sewing)', 'Scissors (sharp)', 'Pencil (for marking)', 'Stitch markers (optional)'] },
     instructions: InstructionGroup[] = [{ title: '', steps: [{ title: 'Body', bottom: false, image: [], imageBottom: [], end_description: null, description: "Start with making a round base. Work in continuous rounds without slip stitches. you can stuff the chick's body with fiberfill to achieve the desired appearance; there's no need to pack it too tightly—a bit of fluffiness is ideal", text: 'With white yarn', list: ['Rnd 1: 6sc in the MR(6)','Rnd 2: 6inc (12)'] }, { title: 'WINGS/HANDS', bottom: false, image: [], imageBottom: [], end_description: null, description: null, text: 'Make 2 - Using White yarn', list: ['Round 1: Magic ring, 6 sc in ring (6)', "Change to light khaki color", 'Round 2: 6inc (12)'] }] }],
     finishingTips: TextListData = { title: '', bottom: false, image: [], imageBottom: [], end_description: null, description: null, text: '', list: ['Weaving Ends: Always weave in ends securely, going through multiple stitches', 'Shaping: Block pieces if needed for consistent shape', 'Stuffing: Stuff firmly but not overly tight to maintain shape']},
-    troubleshooting: TextListData = { title: '', bottom: false, image: [], imageBottom: [], end_description: null, description: null, text: '', list: ['Uneven Stitches: Maintain consistent tension throughout', 'Loose Parts: Double-check all sewing before final assembly']},
+    troubleshooting: TextListData = { title: '', bottom: false, image: [], imageBottom: [], end_description: null, description: null, text: '', list: []},
     bonus_tips: TextListData = { title: '', bottom: false, image: [], imageBottom: [], end_description: null, description: null, text: '', list: ['Tension Control: Keep consistent tension for even stitches', 'Safety Eye Placement: Mark positions before inserting', 'Color Changing: Carry yarn up inside for clean lines', 'Assembly Order: Complete all pieces before assembly' ]},
     bonus_idea: TextListData = { title: '', bottom: false, image: [], imageBottom: [], end_description: null, description: null, text: '', list: ['Try different color combinations', 'Add embroidered details', 'Create seasonal versions', 'Make mini versions as keychains']},
     bonus_community: TextListData = { title: '', bottom: false, image: [], imageBottom: [], end_description: null, description: null, text: '', list: [
