@@ -192,9 +192,10 @@ const printA4PDF = () => {
   const originalTitle = document.title
 
   // 生成文件名（区分 A4 分页导出）
+  const langCode = selectedLang.value.toUpperCase()
   const fileName = patternInfo.title 
-    ? `${patternInfo.title.replace(/[^\w\s-]/g, '').trim()}_pattern_A4`
-    : 'crochet_pattern_A4'
+    ? `${patternInfo.title.replace(/[^\w\s-]/g, '').trim()}_A4_${langCode}`
+    : `_A4_${langCode}`
 
   // 设置页面标题影响导出文件名
   document.title = fileName

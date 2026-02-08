@@ -74,8 +74,8 @@ router.post('/localize/:id', defineApiHandler(async (event) => {
 router.post('/localize/instructions/:id', defineApiHandler(async (event) => {
   const { id } = getRouterParams(event)
   const { lang } = getQuery(event)
-  await instructionsLocalization(Number(id), lang as string)
-  return useApiResponse({ status: 'ok', data: {} })
+  const result = await instructionsLocalization(Number(id), lang as string)
+  return useApiResponse({ status: 'ok', data: result })
 }));
 
 

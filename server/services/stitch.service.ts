@@ -786,7 +786,6 @@ export async function queryStitchLanguage(languageCode: string, aliasList: strin
       matches.push(...rows);
     }
 
-
     const stitchIdSet = new Set<number>();
     const stitchIdByAlias = new Map<string, number>();
     const aliasByAlias = new Map<string, string>();
@@ -811,36 +810,38 @@ export async function queryStitchLanguage(languageCode: string, aliasList: strin
     }
 
     const stitchIds = Array.from(stitchIdSet);
-    const stitches = stitchIds.length
-      ? await prisma.stitch.findMany({
-          where: { deleted: 0, id: { in: stitchIds } },
-          select: {
-            id: true,
-            defaultName: true,
-            description: true,
-            localizations: {
-              where: { deleted: 0, languageCode: { in: [code, 'US'] } },
-              select: { languageCode: true, name: true, description: true, abbrev: true },
-            },
-          },
+    const targetRows = stitchIds.length
+      ? await prisma.stitchLocalization.findMany({
+          where: { deleted: 0, stitchId: { in: stitchIds }, languageCode: code },
+          select: { stitchId: true, abbrev: true, name: true, description: true },
         })
       : [];
 
-    const stitchById = new Map(stitches.map((s) => [s.id, s]));
+    const usRows = stitchIds.length
+      ? await prisma.stitchLocalization.findMany({
+          where: { deleted: 0, stitchId: { in: stitchIds }, languageCode: 'US' },
+          select: { stitchId: true, abbrev: true, name: true, description: true },
+        })
+      : [];
+
+    const targetById = new Map(targetRows.map((r) => [r.stitchId, r]));
+    const usById = new Map(usRows.map((r) => [r.stitchId, r]));
+
+    console.log('targetById', targetById)
+
 
     return aliases.map((inputAlias) => {
       const key = inputAlias.toLowerCase();
       const stitchId = stitchIdByAlias.get(key);
-      const stitch = stitchId != null ? stitchById.get(stitchId) : undefined;
-      const locs = Array.isArray(stitch?.localizations) ? stitch!.localizations : [];
-      const target = locs.find((l) => String(l.languageCode).toUpperCase() === code);
-      const us = locs.find((l) => String(l.languageCode).toUpperCase() === 'US');
+      const target = stitchId != null ? targetById.get(stitchId) : undefined;
+      const us = stitchId != null ? usById.get(stitchId) : undefined;
 
-      const alias = aliasByAlias.get(key) ?? inputAlias;
-      const full_text = String(target?.name ?? us?.name ?? stitch?.defaultName ?? alias).trim();
-      const description = String(target?.description ?? us?.description ?? stitch?.description ?? '').trim();
+      const alias = target?.abbrev;
+      const inputName = String(us?.name ?? '').trim();
+      const name = String(target?.name ?? us?.name ?? '').trim();
+      const description = String(target?.description ?? us?.description ?? '').trim();
 
-      return { inputAlias, alias, full_text, description };
+      return { inputAlias, inputName, alias, name, description };
     });
   } catch (error) {
     console.error('根据 aliasList 查询 StitchLanguage 失败:', error);

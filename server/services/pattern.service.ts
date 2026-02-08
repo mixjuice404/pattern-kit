@@ -170,6 +170,7 @@ export async function patternLocalization(id: number, lang: string) {
   const langDesc = lang === 'en' ? 'English' : lang === 'fr' ? 'Français' : lang === 'de' ? 'Deutsch' : 'Español'
 
   const prompt = template.template.replace('{{lang}}', langDesc).replace('{{json}}', itemsJson)
+  console.log('prompt', prompt)
   const textJsonStr = await aiGenerateText({
       prompt,
       model: 'gemini-3-flash-preview',
@@ -192,23 +193,25 @@ export async function patternLocalization(id: number, lang: string) {
 
 
 // Crochet Pattern 国际化 STEP 2 -  图解主体翻译
-export async function instructionsLocalization(id: number, lang: string) {
+export async function instructionsLocalization(patternId: number, lang: string) {
   // 检查 lang 是否为空 并且只能等于 'en'、'fr','de','es'
   const validLangs = ['en','fr','de','es']
   if (!validLangs.includes(lang)) {
     throw new BasicError('PARAM_INVALID', { statusCode: 400, message: '语言参数无效' });
   }
-  
+
   // 查询对应的 pattern_json
-  const base = await prisma.crochetPattern.findFirst({
-    where: { id, deleted: 0 },
+  const base = await prisma.patternLocalization.findFirst({
+    where: { patternId, languageCode: lang, deleted: 0 },
     select: {
       id: true,
+      patternId: true,
+      languageCode: true,
       pattern_json: true
     },
   });
   if (!base) {
-    throw new BasicError('RESOURCE_NOT_FOUND', { statusCode: 404, message: 'Crochet Pattern 不存在' });
+    throw new BasicError('RESOURCE_NOT_FOUND', { statusCode: 404, message: 'PatternLocalization 不存在' });
   }
   // 解析 & 拆分 & 扁平化 pattern_json
   const originalJson = base.pattern_json
@@ -227,10 +230,65 @@ export async function instructionsLocalization(id: number, lang: string) {
       return typeof alias === 'string' ? alias.trim() : ''
     })
     .filter(Boolean)
+
+
   // 查询 stitch dictionary - 组装配对的针法字典
   const stitchLanguages = await queryStitchLanguage(lang, aliasList)
+  // 用 stitchLanguages 中的 alias,name,description 组装新的terms
+  const nextTerms = Array.isArray(stitchLanguages)
+    ? stitchLanguages
+        .map((s: any) => {
+          const alias = String(s?.alias ?? '').trim()
+          const full_text = String(s?.name ?? '').trim()
+          const description = String(s?.description ?? '').trim()
+          return { alias, full_text, description }
+        })
+        .filter((t) => t.alias || t.full_text || t.description)
+    : []
 
-  return stitchLanguages;
+  const baseJson = isRecord(originalJson) ? originalJson : {}
+  ;(baseJson as any).terms = nextTerms
+
+  // 提取 stitchLanguages 组装为 inputAlias - Alias - inputName 格式(多行用\n分隔)
+  const stitchLangStr = stitchLanguages.map((s: any) => `${s?.inputAlias ?? ''} - ${s?.alias ?? ''} - ${s?.inputName ?? ''}`).join('\n')
+  
+  // 开始 AI 翻译处理 instructions
+  // instructions 扁平化
+  const flattenedInstructions = flattenForTranslation(instructions)
+  // 去掉 flattenedInstructions 中 path 包含imageBottom，bottom的项
+  const filteredInstructions = flattenedInstructions.filter((item) => !item.path.includes('imageBottom') && !item.path.includes('bottom'))
+
+  // 开始AI 翻译 
+  const template = await getPromptTemplateByAlias('pattern_localization_instructions');
+  if (!template) {
+    throw new BasicError('RESOURCE_NOT_FOUND', { statusCode: 404, message: '提示词模板不存在' });
+  }
+
+  // 调用 AI 执行翻译（需要根据 lang 设置对应的 prompt 语言描述） 
+  const langDesc = lang === 'es' ? 'Spanish(西班牙语标准)' : lang === 'fr' ? 'French(法语标准)' : lang === 'de' ? 'German(德语标准)' : 'US Terms'
+
+  const prompt = template.template.replace('{{target_lang}}', langDesc)
+  .replace('{{dict}}', stitchLangStr)
+  .replace('{{json}}', JSON.stringify(filteredInstructions))
+  const translateJsonStr = await aiGenerateText({
+      prompt,
+      model: 'gemini-3-flash-preview',
+    });
+
+  // translateJsonStr 转为 FlattenedTextItem[]
+  const nextItems = translateJsonStr ? JSON.parse(translateJsonStr) as FlattenedTextItem[] : []
+  // 回写结果
+ 
+  const nextInstructions = applyTranslations(instructions as any, nextItems) ?? null
+   ;(baseJson as any).instructions = nextInstructions
+  // 保存
+  await prisma.patternLocalization.upsert({
+    where: { patternId_languageCode: { patternId: patternId, languageCode: lang.toLowerCase() } },
+    update: { pattern_json: baseJson },
+    create: { patternId: patternId, languageCode: lang.toLowerCase(), pattern_json: baseJson },
+  })
+
+  return baseJson;
 }
 
 
