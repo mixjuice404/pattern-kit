@@ -1,12 +1,23 @@
 <template>
   <div class="preview-container">
-    <!-- 打印按钮（仅在屏幕显示） -->
-    <div class="btn-container">
+
+    <div class="i18n-container">
       <select class="select" v-model="selectedLang" @change="load">
         <option v-for="opt in LANG_OPTIONS" :key="opt.value" :value="opt.value">
           {{ opt.flag }} {{ opt.label }}
         </option>
       </select>
+      <button :disabled="selectedLang === 'en' || loading" class="btn btn-neutral" @click="localizeContent"> 
+        内容本地化
+      </button>
+      <button :disabled="selectedLang === 'en' && hasPatternJson" class="btn btn-neutral"> 
+        图解翻译
+      </button>
+    </div>
+
+    <!-- 打印按钮（仅在屏幕显示） -->
+    <div class="btn-container">
+      
       <button class="btn btn-neutral" @click="openPromptBuilderModal"> 
         Prompt Builder
       </button>
@@ -26,6 +37,12 @@
       <span>{{ error }}</span>
     </div>
 
+    <div v-if="loading" class="loading-overlay">
+      <div class="loading-card">
+        <icon name="line-md:loading-alt-loop" size="48" />
+        <span class="loading-text">加载中...</span>
+      </div>
+    </div>
 
     <!-- 预览内容 -->
     <div>
@@ -43,9 +60,8 @@
       <div v-else class="print-content__empty">
         <div style="display: flex; align-items: center; gap: 4px; margin-bottom: 20px; justify-content: center;font-size: 14px;">
           <div style="opacity: 0.8;">暂无预览内容</div>
-          <div style="font-weight: 600;">【{{ selectedLang }}】</div>
         </div>
-        <button class="btn btn-primary" @click="load">AI翻译</button>
+        <button class="btn btn-primary" @click="load">多语言本地化 [ {{ selectedLang.toUpperCase() }} ]</button>
       </div>
     </div>
 
@@ -158,6 +174,29 @@ const load = async () => {
   } catch (e: any) {
     console.error(e)
     error.value = e?.message || '加载失败'
+  } finally {
+    loading.value = false
+  }
+}
+
+const localizeContent = async () => {
+  loading.value = true
+  error.value = null
+  try {
+    const id = Number(route.params.id)
+    if (Number.isNaN(id)) {
+      throw new Error('无效的 ID')
+    }
+    const res = await $fetch<ApiResponse<{ status: string }>>(`/api/pattern/localize/${id}?lang=${selectedLang.value}`, {
+      method: 'POST',
+    })
+    if (!res?.success) {
+      throw new Error(res?.message || '内容本地化失败')
+    }
+    await load()
+  } catch (e: any) {
+    console.error(e)
+    error.value = e?.message || '内容本地化失败'
   } finally {
     loading.value = false
   }
@@ -307,6 +346,16 @@ const buildPrompt = async () => {
   position: relative;
 }
 
+.i18n-container {
+  position: fixed;
+  top: 20px;
+  left: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  z-index: 10;
+}
+
 .btn-container {
   position: fixed;
   display: flex;
@@ -332,6 +381,58 @@ const buildPrompt = async () => {
   background: white;
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
   padding: 0;
+}
+
+.loading-overlay {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.75);
+  backdrop-filter: blur(2px);
+  z-index: 20;
+  animation: fadeIn 0.2s ease;
+}
+
+.loading-card {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 16px;
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.12);
+  animation: popIn 0.2s ease;
+}
+
+.loading-spinner {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  border: 2px solid #e5e7eb;
+  border-top-color: #9ca3af;
+  animation: spin 0.8s linear infinite;
+}
+
+.loading-text {
+  font-size: 13px;
+  color: #4b5563;
+  letter-spacing: 0.2px;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes popIn {
+  from { opacity: 0; transform: scale(0.98); }
+  to { opacity: 1; transform: scale(1); }
 }
 
 /* 打印样式优化 */
