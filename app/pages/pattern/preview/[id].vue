@@ -10,7 +10,7 @@
       <button :disabled="selectedLang === 'en' || loading" class="btn btn-neutral" @click="localizeContent"> 
         内容本地化
       </button>
-      <button :disabled="selectedLang === 'en' && hasPatternJson" class="btn btn-neutral"> 
+      <button :disabled="(selectedLang === 'en' && hasPatternJson) || loading" class="btn btn-neutral" @click="localizeInstructions"> 
         图解翻译
       </button>
     </div>
@@ -197,6 +197,29 @@ const localizeContent = async () => {
   } catch (e: any) {
     console.error(e)
     error.value = e?.message || '内容本地化失败'
+  } finally {
+    loading.value = false
+  }
+}
+
+const localizeInstructions = async () => {
+  loading.value = true
+  error.value = null
+  try {
+    const id = Number(route.params.id)
+    if (Number.isNaN(id)) {
+      throw new Error('无效的 ID')
+    }
+    const res = await $fetch<ApiResponse<{ status: string }>>(`/api/pattern/localize/instructions/${id}?lang=${selectedLang.value}`, {
+      method: 'POST',
+    })
+    if (!res?.success) {
+      throw new Error(res?.message || '图解翻译失败')
+    }
+    await load()
+  } catch (e: any) {
+    console.error(e)
+    error.value = e?.message || '图解翻译失败'
   } finally {
     loading.value = false
   }
