@@ -32,11 +32,6 @@
       </button>
     </div>
 
-    <!-- 错误提示 -->
-    <div v-if="error" class="alert alert-error m-4">
-      <span>{{ error }}</span>
-    </div>
-
     <div v-if="loading" class="loading-overlay">
       <div class="loading-card">
         <icon name="line-md:loading-alt-loop" size="48" />

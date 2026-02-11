@@ -1302,8 +1302,8 @@ const confirmImportInstruction = () => {
   console.log("currentGroupIndex: ", currentGroupIndex.value);
   console.log("currentStepIndex: ", currentStepIndex.value);
   if (content.trim()) {
-    // 按换行分割成数组，过滤空行
-    const steps = content.split("\n").filter((line) => line.trim() !== "");
+    // 按换行分割成数组，过滤空行, 如果有  这个符号, 则去掉
+    const steps = content.split("\n").filter((line) => line.trim() !== "").map((line) => line.replace("", ""));  
     console.log("steps: ", steps);
     // 直接替换当前 instruction 的 extendList
     const instruction = props.patternInfo.instructions[currentGroupIndex.value]?.steps[currentStepIndex.value];

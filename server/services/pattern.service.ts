@@ -153,12 +153,15 @@ export async function patternLocalization(id: number, lang: string) {
   // 扁平化 pattern_json
   const originalJson = base.pattern_json
   const includePaths = ['title', 'inspiration', 'finishingTips','bonus_tips','materialsDesc',
-     "estimatedTime", "finishedSize", "bonus_community"]
+     "estimatedTime", "finishedSize", "bonus_community", "techniques"]
   const items = originalJson ? flattenForTranslation(originalJson, { includePaths }) : []
+  // 去掉 items 中 包含 bottom 的项
+  const filteredItems = items.filter((item) => !item.path.includes('bottom'))
+
   // items 为空时，直接返回 base
-  if (!items.length) return base
+  if (!filteredItems.length) return base
   // items 不为空时，继续处理, items 转换为 json 字符串
-  const itemsJson = JSON.stringify(items)
+  const itemsJson = JSON.stringify(filteredItems)
 
   // 调用 AI 执行翻译（需要根据 lang 设置对应的 prompt 语言描述） 
   const template = await getPromptTemplateByAlias('pattern_localization');
@@ -1102,6 +1105,7 @@ export async function getPatternDraftList(page: number = 1, pageSize: number = 1
         created_at: true,
         updated_at: true,
       },
+      orderBy: { id: 'desc' },
       skip: (page - 1) * pageSize,
       take: pageSize,
     });
