@@ -783,7 +783,7 @@ export async function translatePatternDraft(draftId: number) {
       throw new BasicError('RESOURCE_NOT_FOUND', { statusCode: 404, message: 'Pattern Draft 不存在' });
     }
 
-    const translateTemplate = await getPromptTemplateByAlias('pattern_draft_translate');
+    const translateTemplate = await getPromptTemplateByAlias('pattern_draft_translate_2.0');
     // stitch_dictionary 组装（兼容 abbrev / 误拼 abbbrev / 字符串 JSON）
     const rawInfo: any = (draft as any).info;
     let infoObj: any = rawInfo;
@@ -967,9 +967,9 @@ export async function assmblyPatternDraft(draftId: number) {
   const base = [
     `## ${title}`,
     description,
-    '## 材料',
+    '## MATERIALS & TOOLS',
     String(supplies ?? ''),
-    '## 针脚',
+    '## Abbreviations',
     stitchesMarkdown,
   ]
     .map((v) => String(v ?? '').trim())

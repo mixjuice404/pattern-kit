@@ -456,6 +456,7 @@ const buildPrompt = async () => {
 /* 打印样式优化 */
 @media print {
   .btn-container { display: none !important; }
+  .i18n-container { display: none !important; }
 
   @page {
     margin: var(--page-margin, 0);

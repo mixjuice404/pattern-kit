@@ -68,7 +68,7 @@
           <icon name="solar:close-square-bold" size="22" />
         </div>
       </div>
-      <div style="padding: 10px; min-height: 260px;">
+      <div style="padding: 10px; min-height: 260px; overflow: auto; max-height: 75vh;">
         <table class="table table-sm">
           <!-- head -->
           <thead>
