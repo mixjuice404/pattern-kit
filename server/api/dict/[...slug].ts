@@ -71,7 +71,7 @@ router.get('/stitch/list', defineApiHandler(async (event) => {
   const result = await getStitchList({
     page: Number(page),
     pageSize: Number(pageSize),
-    defaultName: query.keyword as string | null,
+    keyword: query.keyword as string | null,
     type: query.type as string || ''
   })
   return useApiResponse({ result })

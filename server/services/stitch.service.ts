@@ -183,11 +183,11 @@ export async function getStitchDetail(id: number) {
 
 /**
  * 查询钩织针法List（条件查询）
- * @param query 查询参数对象(包含 defaultName（可选，支持模糊查询）, type（可选）)
+ * @param query 查询参数对象(包含 keyword（可选，支持 abbrev 模糊查询）, type（可选）)
  * @returns 针法详情对象(包含 id, defaultName, description, type, level, localizations(语言代码, 名称, 描述, flag), createdAt, updatedAt)
  */
 export async function getStitchList(query: {
-  defaultName?: string | null;
+  keyword?: string | null;
   type?: string | null;
   page?: number;
   pageSize?: number;
@@ -198,10 +198,18 @@ export async function getStitchList(query: {
       select: { code: true, flag: true },
     });
 
+    const keyword = query.keyword?.trim();
     const where = {
       deleted: 0,
-      ...(query.defaultName?.trim()
-        ? { defaultName: { contains: query.defaultName.trim(), mode: 'insensitive' as const } }
+      ...(keyword
+        ? {
+            localizations: {
+              some: {
+                deleted: 0,
+                abbrev: { contains: keyword, mode: 'insensitive' as const },
+              },
+            },
+          }
         : {}),
       ...(query.type?.trim() ? { type: query.type.trim() } : {}),
     };

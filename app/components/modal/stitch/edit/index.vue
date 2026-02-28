@@ -13,7 +13,7 @@
         </div>
       </div>
 
-      <div class="modal-body" style="max-height: 90vh;">
+      <div class="modal-body" style="max-height: 72vh;">
         <div class="modal-form">
           <div>
             <div class="modal-form-card card__normal">
@@ -130,6 +130,7 @@
                 v-for="term in termItems"
                 :key="term.key"
                 class="stitch-term"
+                style="width: 280px;"
                 @click="startEdit(term.key)"
               >
                 <div class="flex items-center gap-2 justify-between">
@@ -139,8 +140,8 @@
                   <div style="font-size: 16px;">{{ term.flag }}</div>
                 </div>
 
-                <div style="display: flex; align-items: center; justify-content: between;">
-                  <div class="stitch-term-name text-neutral-900" style="flex-grow: 1;">
+                <div style="display: flex; align-items: center; justify-content: between; gap: 4px;">
+                  <div class="stitch-term-name text-neutral-900" style="flex-grow: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
                     <div
                       v-if="isEditing(term.key)"
                       :ref="(el) => setNameRef(term.key, el)"
@@ -194,7 +195,7 @@
               </div>
             </div>
 
-            <div class="stitch-term-tip">
+            <div class="stitch-term-tip" style="width: 280px;">
               <em>
                 Tip: Use the AI Autofill button to attempt to find translations
                 automatically. You can add more languages in the main settings.
@@ -438,7 +439,8 @@ defineExpose({ open, close, setStitch })
     display: flex;
     flex-direction: column;
     gap: 4px;
-    padding: 15px;
+    padding: 15px 0;
+    align-items: center;
     border-radius: 6px;
     margin-bottom: 20px;
     box-shadow: 0px 0px 10px 0px rgba(0, 0, 0, 0.02);
@@ -486,6 +488,7 @@ defineExpose({ open, close, setStitch })
       align-items: center;
       gap: 10px;
       margin-bottom: 20px;
+      width: 280px;
 
       .i18n-icon {
         height: 36px;
