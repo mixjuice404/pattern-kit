@@ -501,13 +501,17 @@ export async function getSimpleStitchSections(languageCode: string) {
       throw new BasicError('UNKNOWN_ERROR', { statusCode: 400, message: 'languageCode 为必填' });
     }
 
-    const exists = await prisma.stitchLanguage.findFirst({
-      where: { deleted: 0, code },
+    const languages = await prisma.stitchLanguage.findMany({
+      where: { deleted: 0 },
       select: { code: true },
     });
-    if (!exists) {
+    const hasCode = languages.some((l) => String(l.code ?? '').toUpperCase() === code);
+    if (!hasCode) {
       throw new BasicError('UNKNOWN_ERROR', { statusCode: 400, message: `languageCode 不支持：${code}` });
     }
+
+    const hasZh = languages.some((l) => String(l.code ?? '').toUpperCase() === 'ZH');
+    const locCodes = hasZh ? [code, 'ZH'] : [code];
 
     const stitches = await prisma.stitch.findMany({
       where: { deleted: 0 },
@@ -517,8 +521,8 @@ export async function getSimpleStitchSections(languageCode: string) {
         description: true,
         level: true,
         localizations: {
-          where: { deleted: 0, languageCode: code },
-          select: { name: true, abbrev: true, description: true },
+          where: { deleted: 0, languageCode: { in: locCodes } },
+          select: { languageCode: true, name: true, abbrev: true, description: true },
         },
       },
       orderBy: [{ level: 'asc' }, { defaultName: 'asc' }],
@@ -536,10 +540,17 @@ export async function getSimpleStitchSections(languageCode: string) {
 
     for (const s of stitches) {
       const level = String(s.level ?? '').trim() || 'unknown';
-      const loc = Array.isArray(s.localizations) ? s.localizations[0] : undefined;
+      const loc = Array.isArray(s.localizations)
+        ? s.localizations.find((l) => String(l.languageCode ?? '').toUpperCase() === code)
+        : undefined;
+      const zhLoc = Array.isArray(s.localizations)
+        ? s.localizations.find((l) => String(l.languageCode ?? '').toUpperCase() === 'ZH')
+        : undefined;
       const name = String((loc as any)?.name ?? s.defaultName ?? '').trim();
       const abbrev = String((loc as any)?.abbrev ?? '').trim();
       const desc = String((loc as any)?.description ?? s.description ?? '').trim();
+      const chinese = String((zhLoc as any)?.name ?? '').trim();
+      const notationCn = String((zhLoc as any)?.abbrev ?? '').trim();
 
       const section = sectionMap.get(level) ?? {
         id: level,
@@ -549,11 +560,9 @@ export async function getSimpleStitchSections(languageCode: string) {
 
       const key = name || String(s.id);
       section.terms[key] = {
-        chinese: '',
-        notation_cn: '',
+        chinese,
+        notation_cn: notationCn,
         us_abbrev: abbrev,
-        us: name,
-        us_description: desc,
         description: desc,
       };
 

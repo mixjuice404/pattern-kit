@@ -876,9 +876,8 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from "vue";
+import { ref, computed, onMounted, watch } from "vue";
 import { PatternInfo } from "~/types/PatternInfo";
-import crochetDictData from "~/data/crochet_dict.json";
 import TextListEditor from "~/components/editor/text-list/index.vue";
 import Upload from "~/components/upload/index.vue";
 import RichTextEditor from "~/components/editor/rich-text/index.vue";
@@ -889,22 +888,28 @@ interface Props {
 
 const props = defineProps<Props>();
 
-// 处理 crochet_dict.json 数据，按 section 分组
-const crochetSections = computed(() => {
-  return crochetDictData.sections.map((section) => ({
-    id: section.section_id,
-    name: section.section_name,
-    terms: section.rows.reduce((acc, row) => {
-      acc[row.us] = {
-        chinese: row.chinese,
-        notation_cn: row.notation_cn,
-        us_abbrev: row.us_abbrev,
-        description: row.us_description || row.description,
-      };
-      return acc;
-    }, {} as Record<string, any>),
-  }));
-});
+const crochetSections = ref<Array<{ id: string; name: string; terms: Record<string, any> }>>([]);
+
+const resolveLanguageCode = () => {
+  const raw = String(props.patternInfo.lang ?? '').trim().toUpperCase();
+  if (!raw || raw === 'EN') return 'US';
+  return raw;
+};
+
+const loadCrochetSections = async () => {
+  try {
+    const code = resolveLanguageCode();
+    const res = await $fetch<any>(`/api/dict/stitch/sections?languageCode=${encodeURIComponent(code)}`);
+    const result = res?.data?.result;
+    crochetSections.value = Array.isArray(result) ? result : [];
+  } catch (e) {
+    console.error('加载 stitch sections 失败:', e);
+    crochetSections.value = [];
+  }
+};
+
+onMounted(loadCrochetSections);
+watch(() => props.patternInfo.lang, loadCrochetSections);
 
 // 重置所有术语选中状态
 const resetAbbreviations = () => {
