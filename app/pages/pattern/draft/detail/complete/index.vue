@@ -7,13 +7,20 @@
       <div v-else class="prose prose-sm max-w-none" v-html="previewHtml" />
     </div>
     <div style="position: absolute; top: 20px; right: 20px;">
-      <div class="header-button">
+      <div class="header-button" style="display: flex; gap: 8px; flex-direction: column;">
         <button
           class="btn btn-sm btn-neutral"
           :disabled="exportingDocx || !markdownText"
           @click="exportDocx"
         >
           {{ exportingDocx ? 'Exporting...' : '导出可编辑文档' }}
+        </button>
+        <button
+          class="btn btn-sm btn-primary"
+          :disabled="exportingGoogleDocs || !markdownText"
+          @click="exportToGoogleDocs"
+        >
+          {{ exportingGoogleDocs ? '处理中...' : '导出至剪切板' }}
         </button>
       </div>
     </div>
@@ -38,6 +45,7 @@ const loading = ref(false)
 const errorText = ref('')
 const markdownText = ref('')
 const exportingDocx = ref(false)
+const exportingGoogleDocs = ref(false)
 
 const md = new MarkdownIt({
   html: true,
@@ -47,6 +55,45 @@ const md = new MarkdownIt({
 })
 
 const previewHtml = computed(() => md.render(String(markdownText.value ?? '')))
+
+const exportToGoogleDocs = async () => {
+  if (exportingGoogleDocs.value) return
+
+  const bodyHtml = String(previewHtml.value ?? '').trim()
+  if (!bodyHtml) {
+    toast.warning('无可导出内容')
+    return
+  }
+
+  exportingGoogleDocs.value = true
+  try {
+    const html = `<!DOCTYPE html><html><head><meta charset="UTF-8" />
+<style>
+  body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,"Noto Sans",sans-serif;line-height:1.6;}
+  img{max-width:100%;height:auto;}
+  table{border-collapse:collapse;width:100%;}
+  th,td{border:1px solid #ddd;padding:6px 8px;vertical-align:top;}
+  pre,code{font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono","Courier New",monospace;}
+</style></head><body>${bodyHtml}</body></html>`
+
+    const blob = new Blob([html], { type: 'text/html' })
+    const textBlob = new Blob([String(markdownText.value || '')], { type: 'text/plain' })
+
+    await navigator.clipboard.write([
+      new ClipboardItem({
+        'text/html': blob,
+        'text/plain': textBlob
+      })
+    ])
+
+    toast.success('已复制！请在 Google Docs 中新建文档并粘贴 (Ctrl+V)')
+  } catch (e: any) {
+    console.error('导出失败:', e)
+    toast.error(e?.message || '导出失败')
+  } finally {
+    exportingGoogleDocs.value = false
+  }
+}
 
 const exportDocx = async () => {
   if (exportingDocx.value) return

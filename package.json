@@ -27,6 +27,7 @@
     "@turbodocx/html-to-docx": "^1.18.1",
     "@vueuse/core": "^14.1.0",
     "bcrypt": "^6.0.0",
+    "googleapis": "^171.4.0",
     "html2canvas": "^1.4.1",
     "imagekit": "^6.0.0",
     "imagekit-javascript": "^4.0.1",
