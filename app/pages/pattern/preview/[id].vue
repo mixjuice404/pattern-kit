@@ -120,8 +120,9 @@ const LANG_OPTIONS = [
   { value: 'fr', flag: '🇫🇷', label: 'French' },
   { value: 'de', flag: '🇩🇪', label: 'German' },
   { value: 'es', flag: '🇪🇸', label: 'Spanish' },
+  { value: 'nl', flag: '🇳🇱', label: 'Dutch' },
 ] as const
-const selectedLang = ref<'en' | 'fr' | 'de' | 'es'>('en')
+const selectedLang = ref<'en' | 'fr' | 'de' | 'es' | 'nl'>('en')
 const loading = ref(true)
 const error = ref<string | null>(null)
 const patternInfo = reactive(new PatternInfo())

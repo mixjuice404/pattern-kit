@@ -203,3 +203,36 @@ model PatternDraft {
   @@map("pattern_drafts")
 }
 
+model MarketingNode {
+  id          Int      @id @default(autoincrement())
+  code        String   @unique
+  name        String
+  description String?
+
+  category    String   @default("campaign") // holiday | campaign | sale | product | content
+  dateType    String   @default("fixed") // fixed | rule | oneoff
+  region      String   @default("GLOBAL")
+  timezone    String?  // e.g. America/New_York
+
+  year        Int?     // oneoff 使用
+  month       Int?     // fixed 或 rule 使用
+  day         Int?     // fixed 使用
+  rule        Json?    // rule 使用，如 nth_weekday_of_month
+
+  impact      String?  // low | medium | high | critical
+  style       Json?    // 前端展示样式，如背景色/文字色
+  tags        Json?    // 标签数组
+  meta        Json?
+
+  is_active   Boolean  @default(true)
+  sort        Int      @default(0)
+  version     Int      @default(1)
+  created_at  DateTime @default(now()) @map("created_at")
+  updated_at  DateTime @updatedAt @map("updated_at")
+  deleted     BigInt   @default(0)
+
+  @@index([region, is_active])
+  @@index([month, day])
+  @@map("marketing_nodes")
+}
+

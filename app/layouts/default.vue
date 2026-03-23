@@ -64,6 +64,12 @@ const menuItems = [
       { label: 'Stitch Dictionary', path: "/dict/stitch", icon: 'hugeicons:command-line' },
       { label: 'Localization', path: null, icon: 'hugeicons:language-square' }
     ]
+  },
+  {
+    summary: 'Apps',
+    children: [
+      { label: 'Marketing', path: '/apps/marketing', icon: 'hugeicons:rocket-01' },
+    ]
   }
 ]
 

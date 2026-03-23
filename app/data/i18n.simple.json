@@ -186,5 +186,67 @@
     "reviewHint": "Si te encantó este patrón, considera dejar una reseña en Etsy. ¡Tus comentarios nos ayudan a crear más patrones increíbles!",
   
     "finishingTipsTitle": "✨ NOTAS Y CONSEJOS CREATIVOS"
+  },
+  "nl": {
+    "createdBy": "Gemaakt door: CozyDogOutfits",
+    "contact": "Contact: Stuur ons een bericht op Etsy voor ondersteuning",
+    "websiteShop": "Website/Shop",
+    "languageLabel": "📱 TAAL",
+    "languageValue": "Nederlands",
+    "skillLevelLabel": "✨ NIVEAU",
+    "estimatedTimeLabel": "⏱️ GESCHATTE TIJD",
+    "finishedSizeLabel": "📏 AFMETING",
+    "patternTypeLabel": "🎯 TYPE PATROON",
+    "patternTypeValue": "Digitale PDF Download",
+
+    "abbreviationsTitle": "🔤 AFKORTINGEN & TECHNIEKEN",
+    "standardAbbrev": "Standaard Afkortingen",
+    "abbreviationHeader": "Afkorting",
+    "fullTermHeader": "Volledige term",
+    "descriptionHeader": "Beschrijving",
+    "specialTech": "Gebruikte Speciale Technieken",
+
+    "materialsTitle": "🧶 MATERIALEN & BENODIGDHEDEN",
+    "yarnRequirements": "Garenvereisten",
+    "recommendedYarn": "Aanbevolen Garen:",
+    "suggestedBrands": "Voorgestelde Merken:",
+    "colorPalette": "Kleurenpalet",
+    "toolsNotions": "Gereedschap & Benodigdheden",
+    "optionalSupplies": "Optionele Extra's",
+
+    "mainInstructionsTitle": "🎯 HOOFDINSTRUCTIES PATROON",
+
+    "licenseTerms": "Licentievoorwaarden",
+    "youMay": "✅ Wat u WEL mag:",
+    "youMayList": [
+      "Dit patroon gebruiken voor persoonlijke projecten",
+      "Eindproducten gemaakt van dit patroon verkopen (kleine hoeveelheden)",
+      "Eindproducten cadeau doen aan vrienden en familie",
+      "Het patroon aanpassen voor persoonlijk gebruik"
+    ],
+    "youMayNot": "❌ Wat u NIET mag:",
+    "youMayNotList": [
+      "Dit PDF-patroon delen, verspreiden of doorverkopen",
+      "Beweren dat dit patroon uw eigen ontwerp is",
+      "Gebruiken voor massaproductie of commerciële fabricage",
+      "De inhoud van het patroon online of op forums plaatsen"
+    ],
+    "copyrightTitle": "📜 AUTEURSRECHT & GEBRUIKSVOORWAARDEN",
+    "copyrightNoticeHeader": "Auteursrechtvermelding",
+    "copyrightNoticeText": "© 2025 CozyDogOutfits. Alle rechten voorbehouden. Dit patroon is uitsluitend voor persoonlijk gebruik.",
+    "supportContactHeader": "Ondersteuning & Contact",
+    "supportContactLine1": "Vragen over het patroon? Stuur ons een bericht op Etsy!",
+    "supportContactLine2": "We zijn er om je te helpen iets geweldigs te maken! 💝",
+
+    "bonusContentTitle": "🎁 BONUSINHOUD",
+    "proTips": "Pro-tips voor Succes",
+    "variationIdeas": "Variatie-ideeën",
+    "communityFeedback": "Community & Feedback",
+
+    "thankYouTitle": "📱 BEDANKT!",
+    "thankYouLine1": "Bedankt dat u voor ons patroon hebt gekozen! We hopen dat u veel plezier beleefd aan het maken van uw",
+    "happyCrocheting": "Veel haakplezier! 🧶💕",
+    "reviewHint": "Als u dit patroon leuk vond, overweeg dan om een beoordeling achter te laten op Etsy. Uw feedback helpt ons om nog meer geweldige patronen te maken!",
+    "finishingTipsTitle": "✨ CREATIEVE NOTITIES & TIPS"
   }
 }

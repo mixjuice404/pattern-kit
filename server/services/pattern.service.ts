@@ -132,7 +132,7 @@ export async function deleteCrochetPattern(id: number) {
 export async function patternLocalization(id: number, lang: string) {
 
   // 检查 lang 是否为空 并且只能等于 'en'、'fr','de','es'
-  const validLangs = ['en','fr','de','es']
+  const validLangs = ['en','fr','de','es', 'nl']
   if (!validLangs.includes(lang)) {
     throw new BasicError('PARAM_INVALID', { statusCode: 400, message: '语言参数无效' });
   }
@@ -170,7 +170,7 @@ export async function patternLocalization(id: number, lang: string) {
   }
 
   // 调用 AI 执行翻译（需要根据 lang 设置对应的 prompt 语言描述） 
-  const langDesc = lang === 'en' ? 'English' : lang === 'fr' ? 'Français' : lang === 'de' ? 'Deutsch' : 'Español'
+  const langDesc = lang === 'en' ? 'English' : lang === 'fr' ? 'Français' : lang === 'de' ? 'Deutsch' : lang === 'nl' ? 'Dutch' : 'Español'
 
   const prompt = template.template.replace('{{lang}}', langDesc).replace('{{json}}', itemsJson)
   console.log('prompt', prompt)
@@ -198,7 +198,7 @@ export async function patternLocalization(id: number, lang: string) {
 // Crochet Pattern 国际化 STEP 2 -  图解主体翻译
 export async function instructionsLocalization(patternId: number, lang: string) {
   // 检查 lang 是否为空 并且只能等于 'en'、'fr','de','es'
-  const validLangs = ['en','fr','de','es']
+  const validLangs = ['en','fr','de','es', 'nl']
   if (!validLangs.includes(lang)) {
     throw new BasicError('PARAM_INVALID', { statusCode: 400, message: '语言参数无效' });
   }
@@ -268,7 +268,7 @@ export async function instructionsLocalization(patternId: number, lang: string) 
   }
 
   // 调用 AI 执行翻译（需要根据 lang 设置对应的 prompt 语言描述） 
-  const langDesc = lang === 'es' ? 'Spanish(西班牙语标准)' : lang === 'fr' ? 'French(法语标准)' : lang === 'de' ? 'German(德语标准)' : 'US Terms'
+  const langDesc = lang === 'es' ? 'Spanish(西班牙语标准)' : lang === 'fr' ? 'French(法语标准)' : lang === 'de' ? 'German(德语标准)' : lang === 'nl' ? 'Dutch(荷兰语标准)' : 'US Terms'
 
   const prompt = template.template.replace('{{target_lang}}', langDesc)
   .replace('{{dict}}', stitchLangStr)

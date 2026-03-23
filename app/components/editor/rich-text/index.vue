@@ -46,6 +46,25 @@
       </div>
       
       <div class="w-px h-6 bg-base-300 mx-2"></div>
+
+      <div class="flex items-center gap-1">
+        <button
+          @click="insertImage"
+          class="btn btn-ghost btn-sm w-8 h-8 p-0 min-h-0"
+          type="button"
+        >
+          <Icon name="heroicons:photo" />
+        </button>
+      </div>
+
+      <div class="w-px h-6 bg-base-300 mx-2"></div>
+
+      <div class="flex items-center gap-2">
+        <input class="input input-xs w-16" type="number" min="8" max="96" v-model.number="fontSize" @change="applyFontSize" />
+        <input class="w-8 h-8 cursor-pointer" type="color" v-model="fontColor" @change="applyFontColor" />
+      </div>
+
+      <div class="w-px h-6 bg-base-300 mx-2"></div>
       
       <div class="flex items-center gap-1">
         <button
@@ -78,8 +97,12 @@
 
 <script setup lang="ts">
 import { useEditor, EditorContent } from '@tiptap/vue-3'
+import { Extension } from '@tiptap/core'
 import StarterKit from '@tiptap/starter-kit'
-import { watch } from 'vue'
+import Image from '@tiptap/extension-image'
+import TextStyle from '@tiptap/extension-text-style'
+import Color from '@tiptap/extension-color'
+import { ref, watch } from 'vue'
 
 interface Props {
   modelValue?: string
@@ -99,6 +122,27 @@ const props = withDefaults(defineProps<Props>(), {
 
 const emit = defineEmits<Emits>()
 
+const FontSize = Extension.create({
+  name: 'fontSize',
+  addGlobalAttributes() {
+    return [
+      {
+        types: ['textStyle'],
+        attributes: {
+          fontSize: {
+            default: null,
+            parseHTML: element => element.style.fontSize || null,
+            renderHTML: attributes => {
+              if (!attributes.fontSize) return {}
+              return { style: `font-size: ${attributes.fontSize}` }
+            }
+          }
+        }
+      }
+    ]
+  }
+})
+
 const editor = useEditor({
   content: props.modelValue,
   extensions: [
@@ -106,7 +150,14 @@ const editor = useEditor({
       heading: {
         levels: [1, 2, 3]
       }
-    })
+    }),
+    Image.configure({
+      inline: false,
+      allowBase64: true
+    }),
+    TextStyle,
+    Color,
+    FontSize
   ],
   editorProps: {
     attributes: {
@@ -119,14 +170,31 @@ const editor = useEditor({
   }
 })
 
-// 监听外部值变化
+const fontSize = ref<number>(14)
+const fontColor = ref('#000000')
+
+const insertImage = () => {
+  const url = window.prompt('请输入图片 URL')
+  if (!url || !editor.value) return
+  editor.value.chain().focus().setImage({ src: url }).run()
+}
+
+const applyFontSize = () => {
+  if (!editor.value || !fontSize.value) return
+  editor.value.chain().focus().setMark('textStyle', { fontSize: `${fontSize.value}px` }).run()
+}
+
+const applyFontColor = () => {
+  if (!editor.value) return
+  editor.value.chain().focus().setColor(fontColor.value).run()
+}
+
 watch(() => props.modelValue, (newValue) => {
   if (editor.value && editor.value.getHTML() !== newValue) {
     editor.value.commands.setContent(newValue, false)
   }
 })
 
-// 组件卸载时销毁编辑器
 onBeforeUnmount(() => {
   if (editor.value) {
     editor.value.destroy()
@@ -181,5 +249,11 @@ onBeforeUnmount(() => {
 
 :deep(.ProseMirror s) {
   text-decoration: line-through;
+}
+
+:deep(.ProseMirror img) {
+  max-width: 100%;
+  height: auto;
+  border-radius: 6px;
 }
 </style>

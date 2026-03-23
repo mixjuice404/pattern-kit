@@ -304,4 +304,11 @@ const L = computed(() => {
 </script>
 <style scoped lang="scss">
 @use '../common.scss';
+
+.rich-text :deep(img) {
+  max-width: 100%;
+  height: auto;
+  border-radius: 6px;
+  margin: 8px 0;
+}
 </style>
