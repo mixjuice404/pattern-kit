@@ -1,6 +1,6 @@
 {
   "en": {
-    "createdBy": "Created by: CozyDogOutfits",
+    "createdBy": "Created by: Embrilly",
     "contact": "Contact: Message us on Etsy for support",
     "websiteShop": "Website/Shop",
     "languageLabel": "📱 LANGUAGE",
@@ -28,6 +28,13 @@
 
     "mainInstructionsTitle": "🎯 MAIN PATTERN INSTRUCTIONS",
 
+    "beforeStartTitle": "✨ Before You Start",
+    "beforeStartLead": "A couple of small notes before we begin:",
+    "beforeStartTip1": "💬 Got stuck or something doesn’t look quite right?<br>Just message us on Etsy — always happy to chat crochet ideas together",
+    "beforeStartTip2": "🧵 You can easily adjust the size by using different yarn or hook sizes.",
+    "beforeStartTip3": "🌍 Need help in another language? Feel free to message us anytime.",
+    "beforeStartTip4": "📸 Made one? We'd genuinely love to see your version. <br>Sharing your piece or leaving a review helps other makers a lot 🧶",
+
     "licenseTerms": "License Terms",
     "youMay": "✅ You MAY:",
     "youMayList": [
@@ -45,7 +52,7 @@
     ],
     "copyrightTitle": "📜 COPYRIGHT & TERMS OF USE",
     "copyrightNoticeHeader": "Copyright Notice",
-    "copyrightNoticeText": "© 2025 CozyDogOutfits. All rights reserved. This pattern is for personal use only.",
+    "copyrightNoticeText": "© 2025 Embrilly. All rights reserved. This pattern is for personal use only.",
     "supportContactHeader": "Support & Contact",
     "supportContactLine1": "Questions about the pattern? Message us on Etsy!",
     "supportContactLine2": "We're here to help you create something amazing! 💝",
@@ -62,7 +69,7 @@
     "finishingTipsTitle": "✨ CREATIVE NOTES & TIPS"
   },
   "fr": {
-    "createdBy": "Créé par : CozyDogOutfits",
+    "createdBy": "Créé par : Embrilly",
     "contact": "Contact : envoyez-nous un message sur Etsy pour obtenir de l’aide",
     "websiteShop": "Site web / Boutique",
     "languageLabel": "📱 LANGUE",
@@ -90,6 +97,13 @@
 
     "mainInstructionsTitle": "🎯 INSTRUCTIONS PRINCIPALES DU MODÈLE",
 
+    "beforeStartTitle": "✨ Avant de commencer",
+    "beforeStartLead": "Quelques petites notes avant de commencer :",
+    "beforeStartTip1": "💬 Bloqué(e) ou quelque chose ne semble pas correct ?<br>Envoyez-nous simplement un message sur Etsy — toujours ravis d’échanger des idées de crochet ensemble",
+    "beforeStartTip2": "🧵 Vous pouvez facilement ajuster la taille en utilisant différents fils ou tailles de crochet.",
+    "beforeStartTip3": "🌍 Besoin d’aide dans une autre langue ? N’hésitez pas à nous envoyer un message à tout moment.",
+    "beforeStartTip4": "📸 Vous en avez réalisé un ? Nous serions ravis de voir votre version. <br>Partager votre création ou laisser un avis aide beaucoup les autres créateurs 🧶",
+
     "licenseTerms": "Conditions de licence",
     "youMay": "✅ Vous POUVEZ :",
     "youMayList": [
@@ -107,7 +121,7 @@
     ],
     "copyrightTitle": "📜 DROITS D’AUTEUR & CONDITIONS D’UTILISATION",
     "copyrightNoticeHeader": "Mention de droits d’auteur",
-    "copyrightNoticeText": "© 2025 CozyDogOutfits. Tous droits réservés. Ce modèle est destiné à un usage personnel uniquement.",
+    "copyrightNoticeText": "© 2025 Embrilly. Tous droits réservés. Ce modèle est destiné à un usage personnel uniquement.",
     "supportContactHeader": "Assistance & Contact",
     "supportContactLine1": "Des questions sur le modèle ? Envoyez-nous un message sur Etsy !",
     "supportContactLine2": "Nous sommes là pour vous aider à créer quelque chose d’exceptionnel ! 💝",
@@ -125,7 +139,7 @@
     "finishingTipsTitle": "✨ NOTES CRÉATIVES & CONSEILS"
   },
   "es": {
-    "createdBy": "Creado por: CozyDogOutfits",
+    "createdBy": "Creado por: Embrilly",
     "contact": "Contacto: Envíanos un mensaje en Etsy para soporte",
     "websiteShop": "Sitio web/Tienda",
     "languageLabel": "📱 IDIOMA",
@@ -153,6 +167,13 @@
 
     "mainInstructionsTitle": "🎯 INSTRUCCIONES PRINCIPALES DEL PATRÓN",
 
+    "beforeStartTitle": "✨ Antes de empezar",
+    "beforeStartLead": "Algunas pequeñas notas antes de comenzar:",
+    "beforeStartTip1": "💬 ¿Te has quedado atascado/a o algo no se ve del todo bien?<br>Envíanos un mensaje en Etsy — siempre encantados de compartir ideas de crochet contigo",
+    "beforeStartTip2": "🧵 Puedes ajustar fácilmente el tamaño usando diferentes hilos o tamaños de aguja.",
+    "beforeStartTip3": "🌍 ¿Necesitas ayuda en otro idioma? No dudes en enviarnos un mensaje en cualquier momento.",
+    "beforeStartTip4": "📸 ¿Has hecho uno? Nos encantaría ver tu versión. <br>Compartir tu creación o dejar una reseña ayuda mucho a otros creadores 🧶",
+
     "licenseTerms": "Términos de licencia",
     "youMay": "✅ Puedes:",
     "youMayList": [
@@ -170,7 +191,7 @@
     ],
     "copyrightTitle": "📜 COPYRIGHT Y TÉRMINOS DE USO",
     "copyrightNoticeHeader": "Aviso de copyright",
-    "copyrightNoticeText": "© 2025 CozyDogOutfits. Todos los derechos reservados. Este patrón es solo para uso personal.",
+    "copyrightNoticeText": "© 2025 Embrilly. Todos los derechos reservados. Este patrón es solo para uso personal.",
     "supportContactHeader": "Soporte y contacto",
     "supportContactLine1": "¿Preguntas sobre el patrón? ¡Envíanos un mensaje en Etsy!",
     "supportContactLine2": "¡Estamos aquí para ayudarte a crear algo increíble! 💝",
@@ -187,8 +208,77 @@
   
     "finishingTipsTitle": "✨ NOTAS Y CONSEJOS CREATIVOS"
   },
+  "de": {
+    "createdBy": "Erstellt von: Embrilly",
+    "contact": "Kontakt: Sende uns eine Nachricht auf Etsy für Unterstützung",
+    "websiteShop": "Website/Shop",
+    "languageLabel": "📱 SPRACHE",
+    "languageValue": "Englisch",
+    "skillLevelLabel": "✨ SCHWIERIGKEITSGRAD",
+    "estimatedTimeLabel": "⏱️ GESCHÄTZTE ZEIT",
+    "finishedSizeLabel": "📏 FERTIGE GRÖSSE",
+    "patternTypeLabel": "🎯 MUSTERTYP",
+    "patternTypeValue": "Digitaler PDF-Download",
+
+    "abbreviationsTitle": "🔤 ABKÜRZUNGEN & TECHNIKEN",
+    "standardAbbrev": "Standardabkürzungen",
+    "abbreviationHeader": "Abkürzung",
+    "fullTermHeader": "Begriff",
+    "descriptionHeader": "Beschreibung",
+    "specialTech": "Verwendete Spezialtechniken",
+
+    "materialsTitle": "🧶 MATERIALIEN & WERKZEUGE",
+    "yarnRequirements": "Garnanforderungen",
+    "recommendedYarn": "Empfohlenes Garn:",
+    "suggestedBrands": "Empfohlene Marken:",
+    "colorPalette": "Farbpalette",
+    "toolsNotions": "Werkzeuge & Zubehör",
+    "optionalSupplies": "Optionale Materialien",
+
+    "mainInstructionsTitle": "🎯 HAUPTANLEITUNG",
+
+    "beforeStartTitle": "✨ Bevor du beginnst",
+    "beforeStartLead": "Ein paar kleine Hinweise, bevor wir anfangen:",
+    "beforeStartTip1": "💬 Kommst du nicht weiter oder sieht etwas nicht ganz richtig aus?<br>Schreib uns einfach eine Nachricht auf Etsy — wir tauschen uns immer gern über Häkelideen aus",
+    "beforeStartTip2": "🧵 Du kannst die Größe ganz einfach anpassen, indem du anderes Garn oder eine andere Häkelnadel verwendest.",
+    "beforeStartTip3": "🌍 Brauchst du Hilfe in einer anderen Sprache? Schreib uns jederzeit gerne eine Nachricht.",
+    "beforeStartTip4": "📸 Schon fertig? Wir würden deine Version wirklich gern sehen. <br>Dein Werk zu teilen oder eine Bewertung zu hinterlassen hilft anderen sehr 🧶",
+
+    "licenseTerms": "Lizenzbedingungen",
+    "youMay": "✅ Du DARFST:",
+    "youMayList": [
+      "Dieses Muster für persönliche Projekte verwenden",
+      "Fertige Produkte aus diesem Muster verkaufen (in kleinen Mengen)",
+      "Fertige Produkte an Freunde und Familie verschenken",
+      "Das Muster für den persönlichen Gebrauch anpassen"
+    ],
+    "youMayNot": "❌ Du DARFST NICHT:",
+    "youMayNotList": [
+      "Dieses PDF-Muster teilen, verbreiten oder weiterverkaufen",
+      "Dieses Muster als dein eigenes Design ausgeben",
+      "Für Massenproduktion oder kommerzielle Fertigung verwenden",
+      "Den Inhalt des Musters online oder in Foren veröffentlichen"
+    ],
+    "copyrightTitle": "📜 URHEBERRECHT & NUTZUNGSBEDINGUNGEN",
+    "copyrightNoticeHeader": "Urheberrechtshinweis",
+    "copyrightNoticeText": "© 2025 Embrilly. Alle Rechte vorbehalten. Dieses Muster ist nur für den persönlichen Gebrauch bestimmt.",
+    "supportContactHeader": "Support & Kontakt",
+    "supportContactLine1": "Fragen zum Muster? Schreib uns auf Etsy!",
+    "supportContactLine2": "Wir helfen dir gerne dabei, etwas Großartiges zu erschaffen! 💝",
+
+    "bonusContentTitle": "🎁 BONUSINHALTE",
+    "proTips": "Profi-Tipps für den Erfolg",
+    "variationIdeas": "Variationsideen",
+    "communityFeedback": "Community & Feedback",
+
+    "thankYouTitle": "📱 DANKE!",
+    "thankYouLine1": "Danke, dass du unser Muster gewählt hast! Wir hoffen, du hast Freude daran, dein Projekt zu erstellen",
+    "happyCrocheting": "Viel Spaß beim Häkeln! 🧶💕",
+    "reviewHint": "Wenn dir dieses Muster gefallen hat, hinterlasse bitte eine Bewertung auf Etsy. Dein Feedback hilft uns, noch mehr tolle Muster zu erstellen!",
+    "finishingTipsTitle": "✨ KREATIVE HINWEISE & TIPPS"
+  },
   "nl": {
-    "createdBy": "Gemaakt door: CozyDogOutfits",
+    "createdBy": "Gemaakt door: Embrilly",
     "contact": "Contact: Stuur ons een bericht op Etsy voor ondersteuning",
     "websiteShop": "Website/Shop",
     "languageLabel": "📱 TAAL",
@@ -216,6 +306,13 @@
 
     "mainInstructionsTitle": "🎯 HOOFDINSTRUCTIES PATROON",
 
+    "beforeStartTitle": "✨ Voordat je begint",
+    "beforeStartLead": "Een paar kleine opmerkingen voordat we beginnen:",
+    "beforeStartTip1": "💬 Vastgelopen of ziet iets er niet helemaal goed uit?<br>Stuur ons gerust een bericht op Etsy — we praten altijd graag samen over haakideeën",
+    "beforeStartTip2": "🧵 Je kunt de maat eenvoudig aanpassen door ander garen of een andere haaknaald te gebruiken.",
+    "beforeStartTip3": "🌍 Hulp nodig in een andere taal? Stuur ons gerust op elk moment een bericht.",
+    "beforeStartTip4": "📸 Iets gemaakt? We zouden je versie graag zien. <br>Je werk delen of een review achterlaten helpt andere makers enorm 🧶",
+
     "licenseTerms": "Licentievoorwaarden",
     "youMay": "✅ Wat u WEL mag:",
     "youMayList": [
@@ -233,7 +330,7 @@
     ],
     "copyrightTitle": "📜 AUTEURSRECHT & GEBRUIKSVOORWAARDEN",
     "copyrightNoticeHeader": "Auteursrechtvermelding",
-    "copyrightNoticeText": "© 2025 CozyDogOutfits. Alle rechten voorbehouden. Dit patroon is uitsluitend voor persoonlijk gebruik.",
+    "copyrightNoticeText": "© 2025 Embrilly. Alle rechten voorbehouden. Dit patroon is uitsluitend voor persoonlijk gebruik.",
     "supportContactHeader": "Ondersteuning & Contact",
     "supportContactLine1": "Vragen over het patroon? Stuur ons een bericht op Etsy!",
     "supportContactLine2": "We zijn er om je te helpen iets geweldigs te maken! 💝",

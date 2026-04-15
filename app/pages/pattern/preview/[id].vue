@@ -102,6 +102,7 @@
 <script setup lang="ts">
 import BaseTemplate from '~/components/template/base/index.vue'
 import SimpleTemplate from '~/components/template/simple/index.vue'
+import EmbrillyTemplate from '~/components/template/embrilly/index.vue'
 import { PatternInfo } from '~/types/PatternInfo'
 import type { ApiResponse } from "~/types/ApiResponse"
 
@@ -284,7 +285,7 @@ const updatePageHeight = () => {
 
 // 动态组件计算
 const currentTemplate = computed(() => {
-  return patternInfo.template === 'simple' ? SimpleTemplate : BaseTemplate
+  return patternInfo.template === 'simple' ? EmbrillyTemplate : BaseTemplate
 })
 
 

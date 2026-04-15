@@ -4,10 +4,19 @@ import tailwindcss from "@tailwindcss/vite";
 export default defineNuxtConfig({
   compatibilityDate: '2025-07-15',
   devtools: { enabled: true },
-  modules: [
-    '@nuxt/icon',
-    '@nuxt/image'
-  ],
+  modules: ['@nuxt/icon', '@nuxt/image'],
+  app: {
+    head: {
+      link: [
+        { rel: 'preconnect', href: 'https://fonts.googleapis.com' },
+        { rel: 'preconnect', href: 'https://fonts.gstatic.com', crossorigin: '' },
+        {
+          rel: 'stylesheet',
+          href: 'https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap'
+        }
+      ]
+    }
+  },
   build: {
     transpile: ['vue-toastification']
   },
@@ -45,5 +54,6 @@ export default defineNuxtConfig({
       imagekitPublicKey: process.env.IMAGEKIT_PUBLIC_KEY,
       imagekitUrlEndpoint: process.env.IMAGEKIT_URL_ENDPOINT,
     }
-  }
+  },
+
 })
