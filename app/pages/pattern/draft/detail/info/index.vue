@@ -53,7 +53,13 @@
           <div class="font-bold mb-4 flex items-center justify-between">
             <div style="font-size: 14px;font-weight: 500;">图解配件与材料</div>
             <div style="display: flex; gap: 5px; align-items: center;">
-              <button class="btn btn-sm btn-neutral btn-soft">保存</button>
+              <button
+                class="btn btn-sm btn-neutral btn-soft"
+                :disabled="!draftId || savingSupplies || !suppliesText.trim()"
+                @click="saveSupplies"
+              >
+                {{ savingSupplies ? 'Saving...' : '保存' }}
+              </button>
               <button
                 class="btn btn-sm btn-neutral"
                 :disabled="!draftId || normalizingSupplies"
@@ -132,6 +138,7 @@ const generatedInfo = ref<{ title: string; description: string } | null>(null)
 const dirtySupplies = ref(false)
 const suppliesText = ref('')
 const normalizingSupplies = ref(false)
+const savingSupplies = ref(false)
 
 watch(
   () => props.supplies,
@@ -264,6 +271,34 @@ const runGenText = async () => {
     toast.error(e?.message || '生成失败')
   } finally {
     generatingText.value = false
+  }
+}
+
+const saveSupplies = async () => {
+  if (!draftId.value || savingSupplies.value) return
+
+  const supplies = String(suppliesText.value ?? '').trim()
+  if (!supplies) {
+    toast.warning('请输入图解配件与材料原文')
+    return
+  }
+
+  savingSupplies.value = true
+  try {
+    const res = await $fetch<ApiResponse<{ id: any }>>('/api/pattern/draft/update', {
+      method: 'POST',
+      body: { id: draftId.value, supplies },
+    })
+
+    if (!res?.success) throw new Error(res?.message || '更新失败')
+
+    dirtySupplies.value = false
+    toast.success('更新成功')
+  } catch (e: any) {
+    console.error('更新 supplies 失败:', e)
+    toast.error(e?.message || '更新失败')
+  } finally {
+    savingSupplies.value = false
   }
 }
 

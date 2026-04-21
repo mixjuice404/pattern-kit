@@ -522,7 +522,7 @@ export async function getPromptTemplateList(page: number = 1, pageSize: number =
 export async function buildPatternPrompt(patternInfo: any) {
   try {
     const normalizeTemplate = await getPromptTemplateByAlias('normalize');
-    const patternTemplate = await getPromptTemplateByAlias('pattern');
+    const patternTemplate = await getPromptTemplateByAlias('listing_description');
 
     const content = JSON.stringify(patternInfo ?? {}, null, 2);
     const normalizePrompt = String(normalizeTemplate.template ?? '').replace(/\{\{content\}\}/g, content);
@@ -1162,6 +1162,7 @@ export async function updatePatternDraft(
     raw_content?: string | null;
     revised_content?: string | null;
     result_content?: string | null;
+    supplies?: string | null;
     meta?: any | null;
     stitches?: any | null;
     info?: any | null;
@@ -1184,6 +1185,9 @@ export async function updatePatternDraft(
 
     const result = typeof draftData?.result_content === 'string' ? draftData.result_content : null;
     if (result != null && result.trim()) data.result_content = result;
+
+    const supplies = typeof draftData?.supplies === 'string' ? draftData.supplies : null;
+    if (supplies != null && supplies.trim()) data.supplies = supplies;
 
     if (draftData?.info != null) data.info = draftData.info;
 
@@ -1213,6 +1217,7 @@ export async function updatePatternDraft(
         raw_content: true,
         revised_content: true,
         result_content: true,
+        supplies: true,
         meta: true,
         info: true,
         stitches: true,

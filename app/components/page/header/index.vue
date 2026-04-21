@@ -5,10 +5,14 @@
       <div class="breadcrumbs text-sm">
         <ul>
           <li v-for="(bc, idx) in breadcrumbs" :key="idx">
-            <component :is="bc.to ? 'NuxtLink' : 'span'" v-bind="bc.to ? { to: bc.to } : {}">
+            <NuxtLink v-if="bc.to" :to="bc.to">
               <icon v-if="bc.icon" :name="bc.icon" size="16" class="mr-1" />
               {{ bc.label }}
-            </component>
+            </NuxtLink>
+            <span v-else>
+              <icon v-if="bc.icon" :name="bc.icon" size="16" class="mr-1" />
+              {{ bc.label }}
+            </span>
           </li>
         </ul>
       </div>

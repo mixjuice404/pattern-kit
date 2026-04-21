@@ -8,6 +8,7 @@
     <div>
 
        <div class="grid grid-cols-3 2xl:grid-cols-4 gap-4">
+        <!-- Marketing Calendar -->
          <div class="app-card" @click="$router.push('/apps/marketing/calendar')">
            <div class="card-title">
               <div class="card-title__icon">
@@ -19,6 +20,20 @@
              <div class="card-content__text">Plan and schedule your social media posts, email campaigns, and product launches.</div>
            </div>
          </div>
+
+         <!-- Profit Calculator -->
+         <div class="app-card" @click="$router.push('/apps/marketing/calculator')">
+           <div class="card-title">
+              <div class="card-title__icon">
+                <Icon name="hugeicons:calculator"></Icon>
+              </div>
+              <div class="card-title__text">Pricing & Margin Simulator</div>
+             </div>
+           <div class="card-content">
+             <div class="card-content__text">    Unit Economics Model. Calculate your profit margin, revenue, and cost of goods sold.</div>
+           </div>
+         </div>
+
        </div>
 
     </div>
