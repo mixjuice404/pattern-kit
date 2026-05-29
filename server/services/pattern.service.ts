@@ -176,7 +176,7 @@ export async function patternLocalization(id: number, lang: string) {
   console.log('prompt', prompt)
   const textJsonStr = await aiGenerateText({
       prompt,
-      model: 'gemini-3-flash-preview',
+      model: 'gemini-2.5-flash',
     });
 
   // textJsonStr 转为 FlattenedTextItem[]
@@ -275,7 +275,7 @@ export async function instructionsLocalization(patternId: number, lang: string) 
   .replace('{{json}}', JSON.stringify(filteredInstructions))
   const translateJsonStr = await aiGenerateText({
       prompt,
-      model: 'gemini-3-flash-preview',
+      model: 'gemini-2.5-flash',
     });
 
   // translateJsonStr 转为 FlattenedTextItem[]
@@ -532,7 +532,7 @@ export async function buildPatternPrompt(patternInfo: any) {
 
     const text = await aiGenerateText({
       prompt: normalizePrompt,
-      model: 'gemini-3-flash-preview',
+      model: 'gemini-2.5-flash',
     });
 
     return String(patternTemplate.template ?? '').replace(/\{\{json\}\}/g, text);
@@ -624,7 +624,7 @@ export async function normalizeContent(draftId: number) {
     }
     const text = await aiGenerateText({
       prompt: normalizePrompt,
-      model: 'gemini-3-flash-preview',
+      model: 'gemini-2.5-flash',
     });
     // todo 解析 text & 保存内容到 patternDraft 表
     // 更新 patternDraft 中status - 流转到下一阶段 normalized
@@ -663,7 +663,7 @@ export async function analyzePatternDraft(draftId: number) {
     }
     const text = await aiGenerateText({
       prompt: analyzePrompt, 
-      model: 'gemini-3-flash-preview',
+      model: 'gemini-2.5-flash',
     });
 
     let parsed: any
@@ -713,7 +713,7 @@ export async function getStitchMeta(draftId: number) {
     }
     const text = await aiGenerateText({
       prompt: stitchesPrompt,
-      model: 'gemini-3-flash-preview',
+      model: 'gemini-2.5-flash',
     });
     // text 解析 JSON 格式
     let parsed: any
@@ -826,7 +826,7 @@ export async function translatePatternDraft(draftId: number) {
 
     const text = await aiGenerateText({
       prompt,
-      model: 'gemini-3-flash-preview',
+      model: 'gemini-2.5-flash',
     });
 
     await prisma.patternDraft.update({
@@ -861,7 +861,7 @@ export async function genPatternDraftContent(draftId: number, title: string , de
 
     const text = await aiGenerateText({
       prompt,
-      model: 'gemini-3-flash-preview',
+      model: 'gemini-2.5-flash',
     });
 
     // text 格式：{ "title": "英文标题", "description": "英文描述" } 转换为 json 对象
@@ -901,7 +901,7 @@ export async function normalizeSuppliesInfo(draftId: number, supplies: string) {
 
     const text = await aiGenerateText({
       prompt,
-      model: 'gemini-3-flash-preview',
+      model: 'gemini-2.5-flash',
     });
     
     // 保存标准化后的 supplies 信息到 patternDraft 表

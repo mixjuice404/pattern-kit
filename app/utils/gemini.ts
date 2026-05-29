@@ -28,7 +28,8 @@ export async function generateWithGemini(
     });
 
     const response = await ai.models.generateContent({
-      model: "gemini-3-flash-preview",
+      model: "gemini-2.5-flash",
+      // 做了稳定版本的主动降级 原版本 gemini-3-flash-preview
       contents: prompt,
       config: {
         temperature: options?.temperature ?? 0.7,
