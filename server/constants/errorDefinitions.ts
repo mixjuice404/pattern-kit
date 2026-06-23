@@ -42,8 +42,10 @@ export const ERROR_DEFINITIONS = {
   INVALID_TASK_TYPE:        { code: 6006, info: '无效的任务类型' },
   BUSINESS_EXCEPTION:       { code: 6007, info: '业务异常' },
   PARAM_INVALID:            { code: 6008, info: '参数无效' },
+  AI_SERVICE_ERROR:         { code: 6009, info: 'AI 服务错误' },
 
   // ... 在这里根据需要添加更多错误定义 ...
+  
 
 } as const;
 

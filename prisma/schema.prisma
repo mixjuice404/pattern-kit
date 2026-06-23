@@ -1,6 +1,6 @@
 generator client {
-  provider = "prisma-client-js"
-  output   = "../node_modules/.prisma/client"
+  provider        = "prisma-client-js"
+  output          = "../node_modules/.prisma/client"
 }
 
 datasource db {
@@ -67,6 +67,18 @@ model Permission {
   version     Int      @default(1)
 
   @@map("permissions")
+}
+
+model RolePermissionRelation {
+  id           Int      @id @default(autoincrement())
+  roleId       Int      @map("role_id")
+  permissionId Int      @map("permission_id")
+  created_at   DateTime @default(now()) @map("created_at")
+  updated_at   DateTime @updatedAt @map("updated_at")
+  deleted      BigInt   @default(0)
+  version      Int      @default(1)
+
+  @@map("role_permission_relation")
 }
 
 model CrochetPattern {

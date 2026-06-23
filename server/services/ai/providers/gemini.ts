@@ -88,11 +88,13 @@ export function createGeminiProvider(opts: { apiKey: string }) {
           ...(Object.keys(config).length ? { config } : {}),
         })
 
+        console.log(`[AI] 成功通过官方 SDK 调用 Gemini 模型: ${model}`)
+
         return response.text ?? ''
       } catch (error) {
         const detail = serializeError(error)
         const pickedMessage = pickGeminiErrorMessage(detail)
-        console.error('Gemini 调用失败(0):', pickedMessage)
+        console.error(`[AI] Gemini 官方调用失败:`, pickedMessage)
         if (error instanceof BasicError) throw error
         
         const message = pickedMessage ? `Gemini 调用失败: ${pickedMessage}` : 'Gemini 调用失败'

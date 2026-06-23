@@ -735,6 +735,11 @@
     "@emnapi/runtime" "^1.4.5"
     "@tybys/wasm-util" "^0.10.0"
 
+"@neondatabase/serverless@>0.6.0 <2", "@neondatabase/serverless@^1.1.0":
+  version "1.1.0"
+  resolved "https://registry.npmjs.org/@neondatabase/serverless/-/serverless-1.1.0.tgz#35046d1125932153dd306bd3d7c269306914e005"
+  integrity sha512-r3ZZhRjEcfEdKIZnoB1RusNgvHuaBRqfCzV4Gi+5A9yUX0S4HTws/ASWqt13wL4y4I+0rqsWGdA2w7EQXHi3+Q==
+
 "@netlify/binary-info@^1.0.0":
   version "1.0.0"
   resolved "https://registry.npmjs.org/@netlify/binary-info/-/binary-info-1.0.0.tgz"
@@ -1539,6 +1544,15 @@
   resolved "https://registry.npmjs.org/@poppinss/exception/-/exception-1.2.2.tgz"
   integrity sha512-m7bpKCD4QMlFCjA/nKTs23fuvoVFoA83brRKmObCUNmi/9tVu8Ve3w4YQAnJu4q3Tjf5fr685HYIC/IA2zHRSg==
 
+"@prisma/adapter-neon@^7.8.0":
+  version "7.8.0"
+  resolved "https://registry.npmjs.org/@prisma/adapter-neon/-/adapter-neon-7.8.0.tgz#f1d8df4adf5b51d24e5811fc6bb89ca897bff3ff"
+  integrity sha512-9MoOjRuY53sQNyji87u1NivsK0tIacoUE3PqTxdG95b7ORn1pzwribH2z83j4Vh3eb9nQ/UC+MTfVW7jCFnXlA==
+  dependencies:
+    "@neondatabase/serverless" ">0.6.0 <2"
+    "@prisma/driver-adapter-utils" "7.8.0"
+    postgres-array "3.0.4"
+
 "@prisma/client@^6.15.0":
   version "6.15.0"
   resolved "https://registry.npmjs.org/@prisma/client/-/client-6.15.0.tgz"
@@ -1558,6 +1572,18 @@
   version "6.15.0"
   resolved "https://registry.npmjs.org/@prisma/debug/-/debug-6.15.0.tgz"
   integrity sha512-y7cSeLuQmyt+A3hstAs6tsuAiVXSnw9T55ra77z0nbNkA8Lcq9rNcQg6PI00by/+WnE/aMRJ/W7sZWn2cgIy1g==
+
+"@prisma/debug@7.8.0":
+  version "7.8.0"
+  resolved "https://registry.npmjs.org/@prisma/debug/-/debug-7.8.0.tgz#8e2f70d284b3091c2d713aa093a0f5898487e431"
+  integrity sha512-p+QZReysDUqXC+mk17q9a+Y/qzh4c2KYliDK30buYUyfrGeTGSyfmc0AIrJRhZJrLHhRiJa9Au/J72h3C+szvA==
+
+"@prisma/driver-adapter-utils@7.8.0":
+  version "7.8.0"
+  resolved "https://registry.npmjs.org/@prisma/driver-adapter-utils/-/driver-adapter-utils-7.8.0.tgz#60f42a5bfb257d01185c27d8022a2a500d71d56b"
+  integrity sha512-/Q13o0ZT0rjc1Xk0Q9KhZYwuq2EW/vSbWUBKfgEKkaCuB/Sg6bqnjmTZqC5cD4d6y1vfFAEwBRzfzoSMIVJ55A==
+  dependencies:
+    "@prisma/debug" "7.8.0"
 
 "@prisma/engines-version@6.15.0-5.85179d7826409ee107a6ba334b5e305ae3fba9fb":
   version "6.15.0-5.85179d7826409ee107a6ba334b5e305ae3fba9fb"
@@ -2615,6 +2641,13 @@ acorn@^8.14.0, acorn@^8.15.0, acorn@^8.6.0:
   resolved "https://registry.npmjs.org/acorn/-/acorn-8.15.0.tgz"
   integrity sha512-NZyJarBfL7nWwIq+FDL6Zp/yHEhePMNnnJ0y3qfieCrmNvYct8uvtiV41UvlSe6apAfk0fY1FbWx+NwfmpvtTg==
 
+agent-base@6:
+  version "6.0.2"
+  resolved "https://registry.npmjs.org/agent-base/-/agent-base-6.0.2.tgz#49fff58577cfee3f37176feab4c22e00f86d7f77"
+  integrity sha512-RZNwNclF7+MS/8bDg70amg32dyeZGZxiDuQmZxKLAlQjr3jGyLx+4Kkk58UO7D2QdgFIQCovuSuZESne6RG6XQ==
+  dependencies:
+    debug "4"
+
 agent-base@^7.1.0, agent-base@^7.1.2:
   version "7.1.4"
   resolved "https://registry.npmjs.org/agent-base/-/agent-base-7.1.4.tgz"
@@ -2754,6 +2787,16 @@ axios@^1.12.2:
     follow-redirects "^1.15.6"
     form-data "^4.0.4"
     proxy-from-env "^1.1.0"
+
+axios@^1.18.1:
+  version "1.18.1"
+  resolved "https://registry.npmjs.org/axios/-/axios-1.18.1.tgz#d63f9863bcd8938815c86f9e2abd380189d96dfe"
+  integrity sha512-3nTvFlvpn9Zu/RkHUqtc7/+al4UpRW5az71ap5zccp6e8RAYEzhMTecX8Dz1wWDYrPpUoB1HAQEGEAEvUr7S9g==
+  dependencies:
+    follow-redirects "^1.16.0"
+    form-data "^4.0.5"
+    https-proxy-agent "^5.0.1"
+    proxy-from-env "^2.1.0"
 
 axios@^1.6.5:
   version "1.11.0"
@@ -4210,6 +4253,11 @@ follow-redirects@^1.15.6:
   resolved "https://registry.npmjs.org/follow-redirects/-/follow-redirects-1.15.11.tgz"
   integrity sha512-deG2P0JfjrTxl50XGCDyfI97ZGVCxIpfKYmfyrQ54n5FO/0gfIES8C/Psl6kWVDolizcaaxZJnTS0QSMxvnsBQ==
 
+follow-redirects@^1.16.0:
+  version "1.16.0"
+  resolved "https://registry.npmjs.org/follow-redirects/-/follow-redirects-1.16.0.tgz#28474a159d3b9d11ef62050a14ed60e4df6d61bc"
+  integrity sha512-y5rN/uOsadFT/JfYwhxRS5R7Qce+g3zG97+JrtFZlC9klX/W5hD7iiLzScI4nZqUS7DNUdhPgw4xI8W2LuXlUw==
+
 foreground-child@^3.1.0:
   version "3.3.1"
   resolved "https://registry.npmjs.org/foreground-child/-/foreground-child-3.3.1.tgz"
@@ -4228,6 +4276,17 @@ form-data@^4.0.0, form-data@^4.0.4:
     es-set-tostringtag "^2.1.0"
     hasown "^2.0.2"
     mime-types "^2.1.12"
+
+form-data@^4.0.5:
+  version "4.0.6"
+  resolved "https://registry.npmjs.org/form-data/-/form-data-4.0.6.tgz#28e864e1b786dbebb68db1f452f9635278665827"
+  integrity sha512-vKatAh4SlVfgbv+YtmhiRjhEMJsYpsG1Y2rMQtR+SVSbytsSD1YGzDIcrAJmdFec88u/+VoGmxnl+80gL1tRCQ==
+  dependencies:
+    asynckit "^0.4.0"
+    combined-stream "^1.0.8"
+    es-set-tostringtag "^2.1.0"
+    hasown "^2.0.4"
+    mime-types "^2.1.35"
 
 formdata-polyfill@^4.0.10:
   version "4.0.10"
@@ -4593,6 +4652,13 @@ hasown@^2.0.2:
   dependencies:
     function-bind "^1.1.2"
 
+hasown@^2.0.4:
+  version "2.0.4"
+  resolved "https://registry.npmjs.org/hasown/-/hasown-2.0.4.tgz#8c62d8cb90beb2aad5d0a5b67581ad9854c3f003"
+  integrity sha512-T2UbfbBEF32wiepXIsMlTW9+dDYC6wMh/t/vYA4tuOMKqWz/n3vr1NFSxQiyP+zk2mXsoMA/i/7qV6LKut1t1A==
+  dependencies:
+    function-bind "^1.1.2"
+
 he@^1.2.0:
   version "1.2.0"
   resolved "https://registry.npmjs.org/he/-/he-1.2.0.tgz"
@@ -4669,6 +4735,14 @@ http-shutdown@^1.2.2:
   version "1.2.2"
   resolved "https://registry.npmjs.org/http-shutdown/-/http-shutdown-1.2.2.tgz"
   integrity sha512-S9wWkJ/VSY9/k4qcjG318bqJNruzE4HySUhFYknwmu6LBP97KLLfwNf+n4V1BHurvFNkSKLFnK/RsuUnRTf9Vw==
+
+https-proxy-agent@^5.0.1:
+  version "5.0.1"
+  resolved "https://registry.npmjs.org/https-proxy-agent/-/https-proxy-agent-5.0.1.tgz#c59ef224a04fe8b754f3db0063a25ea30d0005d6"
+  integrity sha512-dFcAjpTQFgoLMzC2VwU+C/CbS7uRL0lWmxDITmqm7C+7F0Odmj6s9l6alZc6AELXhrnggM2CeWSXHGOdX2YtwA==
+  dependencies:
+    agent-base "6"
+    debug "4"
 
 https-proxy-agent@^7.0.1, https-proxy-agent@^7.0.5, https-proxy-agent@^7.0.6:
   version "7.0.6"
@@ -6664,6 +6738,11 @@ postcss@^8.5.1, postcss@^8.5.6:
     picocolors "^1.1.1"
     source-map-js "^1.2.1"
 
+postgres-array@3.0.4:
+  version "3.0.4"
+  resolved "https://registry.npmjs.org/postgres-array/-/postgres-array-3.0.4.tgz#4efcaf4d2c688d8bcaa8620ed13f35f299f7528c"
+  integrity sha512-nAUSGfSDGOaOAEGwqsRY27GPOea7CNipJPOA7lPbdEpx5Kg3qzdP0AaWC5MlhTWV9s4hFX39nomVZ+C4tnGOJQ==
+
 prebuild-install@^7.1.1:
   version "7.1.3"
   resolved "https://registry.npmjs.org/prebuild-install/-/prebuild-install-7.1.3.tgz"
@@ -6916,6 +6995,11 @@ proxy-from-env@^1.1.0:
   version "1.1.0"
   resolved "https://registry.npmjs.org/proxy-from-env/-/proxy-from-env-1.1.0.tgz"
   integrity sha512-D+zkORCbA9f1tdWRK0RaCR3GPv50cMxcrz4X8k5LTSUD1Dkw47mKJEZQNunItRTkWwgtaUSo1RVFRIG9ZXiFYg==
+
+proxy-from-env@^2.1.0:
+  version "2.1.0"
+  resolved "https://registry.npmjs.org/proxy-from-env/-/proxy-from-env-2.1.0.tgz#a7487568adad577cfaaa7e88c49cab3ab3081aba"
+  integrity sha512-cJ+oHTW1VAEa8cJslgmUZrc+sjRKgAKl3Zyse6+PV38hZe/V6Z14TbCuXcan9F9ghlz4QrFr2c92TNF82UkYHA==
 
 pump@^3.0.0:
   version "3.0.3"
@@ -8423,6 +8507,11 @@ ws@^8.18.0, ws@^8.18.3:
   version "8.18.3"
   resolved "https://registry.npmjs.org/ws/-/ws-8.18.3.tgz"
   integrity sha512-PEIGCY5tSlUt50cqyMXfCzX+oOPqN0vuGqWzbcJ2xvnkzkq46oOpz7dQaTDBdfICb4N14+GARUDw2XV2N4tvzg==
+
+ws@^8.21.0:
+  version "8.21.0"
+  resolved "https://registry.npmjs.org/ws/-/ws-8.21.0.tgz#012e413fc07429945121b0c153158c4343086951"
+  integrity sha512-Vsp28b7DRcimFQvrqu2Wek3z1iYxDCWqHYB8Qsnk/S4RfaCQzPGPyBNuVjJV3cd6UiKtUtp6sNM77gWvzcCH+g==
 
 wsl-utils@^0.1.0:
   version "0.1.0"

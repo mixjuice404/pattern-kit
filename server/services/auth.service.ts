@@ -38,6 +38,36 @@ export async function loginUser(email: string, password: string) {
     }
 
     // 5. 登录成功，准备用户信息 (排除密码)
+    const userRoles = await prisma.userRoleRelation.findMany({
+      where: { userId: user.id, deleted: 0 },
+      select: { roleId: true }
+    });
+    const roleIds = userRoles.map(r => r.roleId);
+
+    let roles: string[] = [];
+    let permissions: string[] = [];
+
+    if (roleIds.length > 0) {
+      const rolesData = await prisma.role.findMany({
+        where: { id: { in: roleIds }, deleted: 0 },
+        select: { name: true }
+      });
+      roles = rolesData.map(r => r.name);
+
+      const rolePerms = await prisma.rolePermissionRelation.findMany({
+        where: { roleId: { in: roleIds }, deleted: 0 },
+        select: { permissionId: true }
+      });
+      const permIds = rolePerms.map(rp => rp.permissionId);
+
+      if (permIds.length > 0) {
+        const permsData = await prisma.permission.findMany({
+          where: { id: { in: permIds }, deleted: 0 },
+          select: { name: true }
+        });
+        permissions = permsData.map(p => p.name);
+      }
+    }
 
     // 6. 生成 JWT
     let token: string;
@@ -56,7 +86,10 @@ export async function loginUser(email: string, password: string) {
         userId: user.user_id,
         email: user.email,
         name: user.name, 
-        avatarUrl: user.avatar_url
+        avatarUrl: user.avatar_url,
+        isRoot: user.is_root,
+        roles: roles,
+        permissions: permissions
       },
       token: token,
       refreshToken: user.refresh_token
@@ -131,6 +164,103 @@ export async function initUserInfo(userData: { email: string; password: string; 
     // 例如： if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2002') ...
     throw new BasicError('RESOURCE_CREATION_FAILED', { statusCode: 500 });
   }
+}
+
+/**
+ * ======================================================================
+ * 用户与角色管理 (主要供 ROOT 面板使用)
+ * ======================================================================
+ */
+
+// 获取用户列表
+export async function getUserList(page = 1, pageSize = 20) {
+  const skip = (page - 1) * pageSize;
+  
+  const [total, users] = await Promise.all([
+    prisma.user.count({ where: { deleted: 0 } }),
+    prisma.user.findMany({
+      where: { deleted: 0 },
+      skip,
+      take: pageSize,
+      select: {
+        id: true,
+        email: true,
+        name: true,
+        status: true,
+        is_root: true,
+        created_at: true,
+        last_login_at: true
+      },
+      orderBy: { created_at: 'desc' }
+    })
+  ]);
+
+  // 附带查询用户的角色
+  const userIds = users.map(u => u.id);
+  const userRoles = await prisma.userRoleRelation.findMany({
+    where: { userId: { in: userIds }, deleted: 0 },
+    select: { userId: true, roleId: true }
+  });
+
+  const roleIds = [...new Set(userRoles.map(ur => ur.roleId))];
+  let rolesData: { id: number, name: string }[] = [];
+  if (roleIds.length > 0) {
+    rolesData = await prisma.role.findMany({
+      where: { id: { in: roleIds }, deleted: 0 },
+      select: { id: true, name: true }
+    });
+  }
+
+  const formattedUsers = users.map(u => {
+    const userRoleIds = userRoles.filter(ur => ur.userId === u.id).map(ur => ur.roleId);
+    const roles = rolesData
+      .filter(r => userRoleIds.includes(r.id))
+      .map(r => r.name);
+    return { ...u, roles };
+  });
+
+  return { total, page, pageSize, list: formattedUsers };
+}
+
+// 切换用户状态 (启用/禁用)
+export async function toggleUserStatus(userId: number, status: number) {
+  const user = await prisma.user.findUnique({ where: { id: userId, deleted: 0 } });
+  if (!user) throw new BasicError('USER_NOT_FOUND', { statusCode: 404 });
+  if (user.is_root) throw new BasicError('AUTH_PERMISSION_DENIED', { statusCode: 403, message: '不能修改 ROOT 用户状态' });
+
+  await prisma.user.update({
+    where: { id: userId },
+    data: { status }
+  });
+  return { id: userId, status };
+}
+
+// 为用户分配角色 (全量替换)
+export async function assignUserRoles(userId: number, roleNames: string[]) {
+  const user = await prisma.user.findUnique({ where: { id: userId, deleted: 0 } });
+  if (!user) throw new BasicError('USER_NOT_FOUND', { statusCode: 404 });
+
+  // 查找对应的 role ID
+  const roles = await prisma.role.findMany({
+    where: { name: { in: roleNames }, deleted: 0 }
+  });
+  const roleIds = roles.map(r => r.id);
+
+  // 事务：先删除旧关系，再插入新关系
+  await prisma.$transaction([
+    prisma.userRoleRelation.updateMany({
+      where: { userId: userId, deleted: 0 },
+      data: { deleted: Date.now() }
+    }),
+    prisma.userRoleRelation.createMany({
+      data: roleIds.map(roleId => ({
+        userId,
+        roleId
+      }))
+    })
+  ]);
+
+  return { userId, roles: roleNames };
 }
  
 

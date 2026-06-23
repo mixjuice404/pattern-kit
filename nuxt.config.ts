@@ -48,6 +48,8 @@ export default defineNuxtConfig({
     // 不要在这里 inline @prisma/client 或 prisma，也不要 alias .prisma
   },
   runtimeConfig: {
+    aiProvider: process.env.AI_PROVIDER,
+    openrouterApiKey: process.env.OPENROUTER_API_KEY,
     imagekitPrivateKey: process.env.IMAGEKIT_PRIVATE_KEY,
     geminiApiKey: process.env.GEMINI_API_KEY,
     public: {
