@@ -29,8 +29,19 @@ async function initData(): Promise<void> {
                 is_root: true,
             },
         });
-        // 2. 如果 root 用户已存在，则跳过
+        // 2. 如果 root 用户已存在，检查并初始化角色后跳过
         if (rootUserExists) {
+            const rolesCount = await prisma.role.count();
+            if (rolesCount === 0) {
+              console.log('Nitro plugin: Initializing default roles...');
+              await prisma.role.createMany({
+                data: [
+                  { name: 'ADMIN', description: '系统管理员，拥有大部分系统管理权限' },
+                  { name: 'CREATOR', description: '内容创作者，可创建和管理 Pattern' },
+                  { name: 'USER', description: '普通登录用户，拥有基础浏览权限' }
+                ]
+              });
+            }
             return;
         }
         // 3. 如果 root 用户不存在，则初始化
@@ -47,7 +58,22 @@ async function initData(): Promise<void> {
             status: 1, // 假设 1 代表激活状态
         });
 
-        // 4. 在控制台打印重要提示和生成的密码
+        // 4. 初始化系统默认角色 (如果 roles 表为空)
+        // 这一步即使 root 用户已存在，也可以用来修复缺失的默认角色
+        const rolesCount = await prisma.role.count();
+        if (rolesCount === 0) {
+          console.log('Nitro plugin: Initializing default roles...');
+          await prisma.role.createMany({
+            data: [
+              { name: 'ADMIN', description: '系统管理员，拥有大部分系统管理权限' },
+              { name: 'CREATOR', description: '内容创作者，可创建和管理 Pattern' },
+              { name: 'USER', description: '普通登录用户，拥有基础浏览权限' }
+            ]
+          });
+          console.log('Nitro plugin: Default roles created.');
+        }
+
+        // 5. 在控制台打印重要提示和生成的密码
         console.log('============================================================');
         console.log('IMPORTANT: Root user initialized!');
         console.log(`Email: ${rootEmail}`);

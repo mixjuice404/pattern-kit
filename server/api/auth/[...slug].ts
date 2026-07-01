@@ -21,11 +21,11 @@ const router = createRouter()
 // 用户登录 (使用 defineApiHandler)
 router.post('/login', defineApiHandler(async (event) => {
   const body = await readBody(event)
-  const { email, password } = body
+  const { email, password } = body // 这里的 email 实际上是账号 (邮箱或用户名)
   // 验证输入参数
   if (!email || !password) {
     // 使用 H3 的 createError 来抛出带有状态码和消息的错误
-    throw new BasicError('INPUT_EMAIL_PASSWORD_REQUIRED');
+    throw new BasicError('INPUT_EMAIL_PASSWORD_REQUIRED', { message: '账号和密码必填' });
   }
   // 调用登录服务
   return useApiResponse(await authService.loginUser(email, password), '登录成功')
@@ -40,10 +40,14 @@ router.get('/me', defineApiHandler(async (event) => {
     throw new BasicError('AUTH_INVALID_TOKEN', { statusCode: 401, message: '请先登录' });
   }
   
-  // 返回最新的用户信息（包含角色和权限）
-  // 为了确保刷新页面时拿到最新权限，我们再调一次 authService 获取（如果需要的话，这里简单起见直接用 token 里的信息，或复用 getUserAuthInfo）
-  // 这里演示直接返回 token 中解析出的基础信息，如果你希望每次刷新都查库更新权限，可以调用相关的 service
-  return useApiResponse({ user: userToken })
+  // 查询数据库获取最新的用户信息、角色和权限
+  const userAuthInfo = await authService.getUserAuthInfo(userToken.id);
+  
+  if (!userAuthInfo) {
+      throw new BasicError('USER_NOT_FOUND', { statusCode: 404, message: '用户不存在' });
+  }
+
+  return useApiResponse({ user: userAuthInfo })
 }, { roles: [] })) // 配置空数组，代表“需要登录，但不限制特定角色”
 
 // 用户登出
@@ -58,7 +62,21 @@ router.post('/logout', defineApiHandler(async () => {
  * ======================================================================
  */
 
-// 获取用户列表 (仅限 ROOT)
+// 创建用户 (限 ROOT, ADMIN)
+router.post('/admin/users', defineApiHandler(async (event) => {
+  const body = await readBody(event)
+  
+  // 对于没有提供 email 的用户，我们可以生成一个假的内部邮箱来满足数据库的 unique 约束
+  if (!body.email && body.name) {
+    body.email = `${body.name.toLowerCase().replace(/\s+/g, '_')}_${Date.now()}@internal.local`
+  }
+  
+  const result = await authService.initUserInfo(body)
+  
+  return useApiResponse(result, '用户创建成功')
+}, { roles: ['ROOT', 'ADMIN'] }))
+
+// 获取用户列表 (限 ROOT, ADMIN)
 router.get('/admin/users', defineApiHandler(async (event) => {
   const query = getQuery(event)
   const page = Number(query.page) || 1
@@ -66,9 +84,15 @@ router.get('/admin/users', defineApiHandler(async (event) => {
   
   const result = await authService.getUserList(page, pageSize)
   return useApiResponse(result)
-}, { roles: ['ROOT'] })) // 这里使用 'ROOT' 作为显式标识，配合 defineApiHandler 的 isRoot 放行机制
+}, { roles: ['ROOT', 'ADMIN'] }))
 
-// 切换用户状态 (仅限 ROOT)
+// 获取角色列表 (限 ROOT, ADMIN)
+router.get('/admin/roles', defineApiHandler(async () => {
+  const result = await authService.getRoleList()
+  return useApiResponse(result)
+}, { roles: ['ROOT', 'ADMIN'] }))
+
+// 切换用户状态 (限 ROOT, ADMIN)
 router.post('/admin/users/:id/status', defineApiHandler(async (event) => {
   const id = Number(event.context.params?.id)
   const { status } = await readBody(event)
@@ -77,9 +101,16 @@ router.post('/admin/users/:id/status', defineApiHandler(async (event) => {
   
   const result = await authService.toggleUserStatus(id, status)
   return useApiResponse(result, '用户状态更新成功')
-}, { roles: ['ROOT'] }))
+}, { roles: ['ROOT', 'ADMIN'] }))
 
-// 为用户分配角色 (仅限 ROOT)
+// 删除用户 (限 ROOT, ADMIN)
+router.delete('/admin/users/:id', defineApiHandler(async (event) => {
+  const id = Number(event.context.params?.id)
+  const result = await authService.deleteUser(id)
+  return useApiResponse(result, '用户删除成功')
+}, { roles: ['ROOT', 'ADMIN'] }))
+
+// 为用户分配角色 (限 ROOT, ADMIN)
 router.post('/admin/users/:id/roles', defineApiHandler(async (event) => {
   const id = Number(event.context.params?.id)
   const { roles } = await readBody(event)
@@ -88,7 +119,7 @@ router.post('/admin/users/:id/roles', defineApiHandler(async (event) => {
   
   const result = await authService.assignUserRoles(id, roles)
   return useApiResponse(result, '用户角色分配成功')
-}, { roles: ['ROOT'] }))
+}, { roles: ['ROOT', 'ADMIN'] }))
 
 /**
  * ======================================================================

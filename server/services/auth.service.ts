@@ -13,11 +13,18 @@ import { signToken } from '../utils/jwt.util';
  */
 export async function loginUser(email: string, password: string) {
   try {
-    // 1. 根据邮箱查找用户
-    const user = await prisma.user.findUnique({
-      where: { email: email },
+    // 1. 根据邮箱或用户名查找用户
+    const user = await prisma.user.findFirst({
+      where: { 
+        deleted: 0,
+        OR: [
+          { email: email },
+          { name: email }
+        ]
+      },
     });
-
+    
+    
     // 2. 如果找不到用户
     if (!user) {
       // 使用错误名称抛出 BasicError，默认 statusCode 为 200
@@ -94,7 +101,6 @@ export async function loginUser(email: string, password: string) {
       token: token,
       refreshToken: user.refresh_token
     };
-
   } catch (error) {
     // 如果错误已经是 BasicError，直接重新抛出，让 defineApiHandler 处理
     if (error instanceof BasicError) {
@@ -115,8 +121,8 @@ export async function loginUser(email: string, password: string) {
  * @returns 创建成功返回用户对象 (不含密码)，失败则抛出错误
  * @throws BasicError 如果邮箱已存在或发生数据库错误
  */
-export async function initUserInfo(userData: { email: string; password: string; name?: string; is_root?: boolean; status?: number }) {
-  const { email, password, name, is_root = false, status = 1 } = userData;
+export async function initUserInfo(userData: { email: string; password: string; name?: string; roles?: string[]; is_root?: boolean; status?: number }) {
+  const { email, password, name, roles, is_root = false, status = 1 } = userData;
 
   // 1. 检查邮箱是否已存在
   const existingUser = await prisma.user.findUnique({
@@ -150,13 +156,24 @@ export async function initUserInfo(userData: { email: string; password: string; 
         status: status,
         mobile: null,
       },
+      select: {
+        id: true,
+        email: true,
+        name: true,
+        is_root: true,
+        status: true,
+        created_at: true
+      }
     });
 
-    // 4. 返回新创建的用户信息 (排除密码)
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const { password: _, ...userWithoutPassword } = newUser;
+    // 4. 分配角色 (如果有的话)
+    if (roles && roles.length > 0) {
+      await assignUserRoles(newUser.id, roles);
+    }
+
+    // 5. 返回新创建的用户信息（通过 select 已排除密码和 BigInt 字段如 deleted）
     console.log(`新用户 ${email} 初始化成功`);
-    return userWithoutPassword;
+    return newUser;
 
   } catch (error) {
     console.error(`初始化用户 ${email} 时发生错误:`, error);
@@ -171,6 +188,65 @@ export async function initUserInfo(userData: { email: string; password: string; 
  * 用户与角色管理 (主要供 ROOT 面板使用)
  * ======================================================================
  */
+
+// 获取完整的用户信息、角色和权限
+export async function getUserAuthInfo(userId: number) {
+  const user = await prisma.user.findUnique({
+    where: { id: userId, deleted: 0 },
+    select: {
+      id: true,
+      user_id: true,
+      email: true,
+      name: true,
+      avatar_url: true,
+      is_root: true,
+    }
+  });
+
+  if (!user) return null;
+
+  const userRoles = await prisma.userRoleRelation.findMany({
+    where: { userId: user.id, deleted: 0 },
+    select: { roleId: true }
+  });
+  const roleIds = userRoles.map(r => r.roleId);
+
+  let roles: string[] = [];
+  let permissions: string[] = [];
+
+  if (roleIds.length > 0) {
+    const rolesData = await prisma.role.findMany({
+      where: { id: { in: roleIds }, deleted: 0 },
+      select: { name: true }
+    });
+    roles = rolesData.map(r => r.name);
+
+    const rolePerms = await prisma.rolePermissionRelation.findMany({
+      where: { roleId: { in: roleIds }, deleted: 0 },
+      select: { permissionId: true }
+    });
+    const permIds = rolePerms.map(rp => rp.permissionId);
+
+    if (permIds.length > 0) {
+      const permsData = await prisma.permission.findMany({
+        where: { id: { in: permIds }, deleted: 0 },
+        select: { name: true }
+      });
+      permissions = permsData.map(p => p.name);
+    }
+  }
+
+  return {
+    id: user.id,
+    userId: user.user_id,
+    email: user.email,
+    name: user.name,
+    avatarUrl: user.avatar_url,
+    isRoot: user.is_root,
+    roles,
+    permissions
+  };
+}
 
 // 获取用户列表
 export async function getUserList(page = 1, pageSize = 20) {
@@ -222,6 +298,15 @@ export async function getUserList(page = 1, pageSize = 20) {
   return { total, page, pageSize, list: formattedUsers };
 }
 
+// 获取可用角色列表
+export async function getRoleList() {
+  const roles = await prisma.role.findMany({
+    where: { deleted: 0 },
+    select: { id: true, name: true, description: true }
+  });
+  return roles;
+}
+
 // 切换用户状态 (启用/禁用)
 export async function toggleUserStatus(userId: number, status: number) {
   const user = await prisma.user.findUnique({ where: { id: userId, deleted: 0 } });
@@ -233,6 +318,19 @@ export async function toggleUserStatus(userId: number, status: number) {
     data: { status }
   });
   return { id: userId, status };
+}
+
+// 删除用户 (软删除)
+export async function deleteUser(userId: number) {
+  const user = await prisma.user.findUnique({ where: { id: userId, deleted: 0 } });
+  if (!user) throw new BasicError('USER_NOT_FOUND', { statusCode: 404 });
+  if (user.is_root) throw new BasicError('AUTH_PERMISSION_DENIED', { statusCode: 403, message: '不能删除 ROOT 用户' });
+
+  await prisma.user.update({
+    where: { id: userId },
+    data: { deleted: Date.now() } // 使用当前时间戳标记为已删除
+  });
+  return { id: userId };
 }
 
 // 为用户分配角色 (全量替换)

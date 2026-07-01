@@ -4,10 +4,6 @@ import ms from 'ms'; // 引入 ms 库
 
 // 从环境变量读取 JWT 配置
 const JWT_SECRET = process.env.NUXT_JWT_SECRET as string;
-const JWT_EXPIRES_IN_STRING = process.env.NUXT_JWT_EXPIRES_IN as string;
-
-// 默认过期时间（秒）
-const DEFAULT_JWT_EXPIRES_IN_STRING = '15d'; // 15 days
 
 // 启动时检查 JWT_SECRET 是否已设置
 if (!JWT_SECRET) {
@@ -17,8 +13,7 @@ if (!JWT_SECRET) {
   throw new Error(errorMessage);
 }
 
-// 解析过期时间
-let expiresIn: string = JWT_EXPIRES_IN_STRING || DEFAULT_JWT_EXPIRES_IN_STRING;
+
 
 /**
  * 生成 JWT Token
@@ -28,9 +23,11 @@ let expiresIn: string = JWT_EXPIRES_IN_STRING || DEFAULT_JWT_EXPIRES_IN_STRING;
  */
 export function signToken(payload: object): string {
   try {
+    const config = useRuntimeConfig();
+    const expiresInSeconds = config.public.authCookieMaxAge as number;
     // 显式声明 secretKey 类型为 string
     const secretKey: string = JWT_SECRET!;
-    return jwt.sign(payload, secretKey, { expiresIn: timeStringToSeconds(expiresIn) });
+    return jwt.sign(payload, secretKey, { expiresIn: expiresInSeconds });
   } catch (error) {
     console.error("JWT 签名失败:", error);
     // 可以抛出更具体的错误或包装原始错误

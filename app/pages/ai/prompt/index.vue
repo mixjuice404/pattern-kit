@@ -82,12 +82,12 @@
 </div>
 </template>
 <script setup lang="ts">
-import Pagination from "@/components/common/pagination/index.vue";
 import PromptTemplateModal from "@/components/modal/prompt/template/index.vue";
 import type { ApiResponse } from "~/types/ApiResponse";
 
 definePageMeta({
-  layout: 'default'
+  layout: 'default',
+  roles: ['ROOT', 'ADMIN']
 })
 
 const breadcrumbs = [

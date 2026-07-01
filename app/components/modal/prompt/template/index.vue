@@ -45,7 +45,6 @@
                   @input="autoResizeTemplate"
                 ></textarea>
               </div>
-              
             </div>
           </div>
         </div>

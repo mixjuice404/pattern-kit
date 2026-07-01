@@ -17,14 +17,14 @@ export const useAuth = () => {
   
   // 检查是否拥有特定角色
   const hasRole = (role: string): boolean => {
-    if (!user.value) return false
+    if (!user.value || !user.value.roles) return false
     if (user.value.isRoot) return true // ROOT 用户拥有一切角色
     return user.value.roles.includes(role)
   }
 
   // 检查是否拥有特定权限
   const hasPermission = (permission: string): boolean => {
-    if (!user.value) return false
+    if (!user.value || !user.value.permissions) return false
     if (user.value.isRoot) return true // ROOT 用户拥有一切权限
     return user.value.permissions.includes(permission)
   }
@@ -41,7 +41,7 @@ export const useAuth = () => {
     token.value = null
     const refreshToken = useCookie('refreshToken')
     refreshToken.value = null
-    navigateTo('/login') // 这里的路径请根据你的实际登录页调整
+    navigateTo('/user/login') // 这里的路径请根据你的实际登录页调整
   }
 
   return {

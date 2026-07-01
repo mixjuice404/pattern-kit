@@ -86,6 +86,11 @@ export default defineEventHandler(async (event: H3Event) => {
     token = authHeader.substring(7) // 提取 'Bearer ' 后面的部分
   }
 
+  // 如果 Header 中没有 token，尝试从 Cookie 中获取 (支持 SSR 和页面刷新)
+  if (!token) {
+    token = getCookie(event, 'token') || null
+  }
+
   if (!token) {
     console.log('Auth middleware: No token provided for', event.path)
     // 如果没有 token，则抛出未授权错误 & 注意：直接抛出错误会中断请求处理

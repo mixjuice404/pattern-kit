@@ -55,6 +55,7 @@ export default defineNuxtConfig({
     public: {
       imagekitPublicKey: process.env.IMAGEKIT_PUBLIC_KEY,
       imagekitUrlEndpoint: process.env.IMAGEKIT_URL_ENDPOINT,
+      authCookieMaxAge: 60 * 60 * 24 * 30, // Token 统一过期时间（30天，单位秒）
     }
   },
 

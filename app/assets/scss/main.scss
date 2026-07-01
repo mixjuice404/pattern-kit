@@ -251,3 +251,69 @@ body {
   }
 
 }
+
+// modal form card style
+.modal-form-card {
+  background-color: #fff;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 15px;
+  border-radius: 6px;
+  margin-bottom: 20px;
+  box-shadow: 0px 0px 10px 0px rgba(0, 0, 0, 0.02);
+
+  .modal-form-card__title {
+    font-weight: 500;
+    color: #666;
+    margin-bottom: 5px;
+    font-size: 14px;
+  }
+
+  .modal-form {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+
+    .modal-form__item {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+
+      .modal-form__item__label {
+        font-weight: 600;
+        color: var(--color-neutral-500);
+        font-size: 14px;
+      }
+    }
+
+    .modal-form__textarea {
+      width: 100%;
+      min-height: 240px;
+      height: auto;
+      outline: none;
+      overflow: hidden;
+      resize: none;
+    }
+  }
+}
+
+.modal-result-card {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 15px;
+  border-radius: 6px;
+  box-shadow: 0px 0px 10px 0px rgba(0, 0, 0, 0.02);
+  margin-top: 20px;
+}
+
+.modal-success-card {
+  background-color: oklch(95% 0.052 163.051 / 0.3);
+  border: 1px solid oklch(69.6% 0.17 162.48 / 0.3);
+}
+
+.modal-error-card {
+  background-color: oklch(88.5% 0.062 18.334 / 0.3);
+  border: 1px solid oklch(57.7% 0.245 27.325 / 0.4);
+}
